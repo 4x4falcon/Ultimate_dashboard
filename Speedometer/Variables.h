@@ -7,10 +7,6 @@ volatile unsigned long lastTrigger = 0;
 // Rotations per second, set by the ISR
 volatile float rps = 0.0;
 
-// Pulses per km or mile, set by the calibration function and stored in EEPROM
-// use a float as this is a calculated number
-volatile float ppd = 0.0;
-
 // Odometer value, set by the ISR
 volatile float totalOdometer = 0.0;
 
@@ -52,12 +48,13 @@ volatile int eepromCalibrateAddress = 0;
 volatile float pulseDistance = 0;
 
 
-// Below is probably not needed
+// The soft serial for the odometer/tripmeter display
+// pin 2 = TX, pin 3 = RX (notused)
 
-// Used to control the LED display
-Adafruit_AlphaNum4 alpha = Adafruit_AlphaNum4();
+SoftwareSerial odoSerial(pinSerialRX,pinOdoSerialTX);
 
-
+// The soft serial for the speedometer display
+SoftwareSerial speedoSerial(pinSerialRX, pinSpeedoSerialTX);
 
 
 

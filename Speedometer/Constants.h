@@ -21,13 +21,24 @@ static const int FUNC_CAL = 2;
 // RKS
 // the trip button pin
 
-static const int pinTripButton = 3;
+static const int pinTripButton = 4;
 
 // RKS
 // the mode button pin
-static const int pinModeButton = 4;
+static const int pinModeButton = 5;
 
+// rx pin for all serial displays
+static const int pinSerialRX = 7;
+
+// the odometer lcd serial pins
+static const int pinOdoSerialTX = 6;
+
+// the speedo led serial pins
+static const int pinSpeedoSerialTX = 8;
+
+// timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;
+
 
 // EEPROM has a limited life span; be careful how often we write to it
 static const int odometerWriteFrequency = 5000;
@@ -37,32 +48,9 @@ static const int numSpeedoDigits = 3;
 // The SPEEDO LED arc has 15 leds
 static const int numSpeedoLeds = 15;
 
-// The ODOMETER LCD screen has 8 digits
-static const int numOdoDigits = 8;
-
-// The TRIPMETER LCD screen has 4 digits
-static const int numTripDigits = 4;
 
 
 
 
-// Below this is probably not needed
 
-// 14-segment display characters
-static const uint16_t segmentValues[] = {
-  0b0000000000111111, // 0
-  0b0000000000000110, // 1
-  0b0000000011011011, // 2
-  0b0000000010001111, // 3
-  0b0000000011100110, // 4
-  0b0000000011101101, // 5
-  0b0000000011111101, // 6
-  0b0000000000000111, // 7
-  0b0000000011111111, // 8
-  0b0000000011101111, // 9
-  0b0000000000000000, // blank
-  0b0100000000000000  // decimal
-};
 
-static const int BLANK  = 10;
-static const int DECIMAL = 11;

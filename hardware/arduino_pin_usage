@@ -1,0 +1,37 @@
+// arduino pin usage
+
+Digital pins
+
+0	
+1	
+2	int.0 = Vehicle Speed sensor
+3	int.1
+4	pinTripButton		Trip Button
+5	pinModeButton		Mode Button
+6	pinOdoSerialTX		Odo LCD soft serial tx
+7	pinSerialRX		soft serial rx (not actually used or wired)
+8	pinSpeedoSerialTX	Speedo LED soft serial tx
+9	pinVoltSerialTX		Voltmeter display serial tx
+10	pinOilSerialTX		Oil pressure display serial tx
+11	pinTempTX		Water Temperature display  serial tx
+12	pinFuelTX		Fuel Level display serial tx
+13	pinLightsOn		Headlights on so dim the displays
+
+
+
+
+Analogue pins
+
+
+A0	Voltmeter
+A1	Oil Pressure
+A2	Water Temperature
+A3	Fuel Level
+A4	
+A5	
+
+
+
+
+
+

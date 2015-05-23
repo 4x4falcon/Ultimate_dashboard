@@ -20,9 +20,9 @@ void writeOdometer() {
    {
     if (rps != 0.0)
      {
-      if (totalMiles > EEPROM.readFloat(eepromOdoAddress))
+      if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
        {
-        EEPROM.writeFloat(eepromOdoAddress, totalMiles);
+        EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
         lastOdometerWrite = loopTime;
        }
      }
@@ -58,14 +58,12 @@ int speed = (int)((rps / pulseDistance) * 3600.0);
   displaySpeed(speed);
 
 //update odometer
-  displayOdometer(totalOdometer);
+  displayOdometer();
 
-//update tripmeter 1
+//update tripmeters
 
-  displayTripmeter(1, totalTrip_1);
+  displayTripmeter();
 
-//update tripmeter 2
-  displayTripmeter(1, totalTrip_1);
 
 						// TODO add functions to update rpm, volt, oil, fuel, temp
 
@@ -146,6 +144,10 @@ void sensorTriggered() {
 
 void goToSleep() {
 
+
+
 }
+
+
 
 

@@ -24,8 +24,8 @@
 #include "Timer.h"
 #include "Constants.h"
 #include "Variables.h"
-#include "Speedo_Functions.h"
 #include "Display_Functions.h"
+#include "Speedo_Functions.h"
 
 
 /*
@@ -46,7 +46,7 @@ void setup() {
   attachInterrupt(0, sensorTriggered, RISING);
 
   // Read odometer value from flash memory
-  totalMiles = EEPROM.readFloat(eepromOdoAddress);
+  totalOdometer = EEPROM.readFloat(eepromOdoAddress);
 
   // Read tripmeter 1 value from flash memory
   totalTrip_1 = EEPROM.readFloat(eepromTrip1Address);
@@ -63,12 +63,9 @@ void setup() {
   pulseDistance = 1 / (EEPROM.readFloat(eepromCalibrateAddress));
 
   // Intialize SPEEDO display
-  alpha.begin(0x70);
-  alpha.writeDisplay();
 
-  // TODO Initialize ODOMETER display
-
-  // TODO Initialize TRIP displays
+  // TODO Initialize ODOMETER and TRIPMETER(s) display
+  setupOdometerDisplay();
 
 
   // Update the display every 100ms
@@ -81,6 +78,13 @@ void setup() {
   // Set up mode button handlers
   buttonMode.setPressHandler(buttonModePressed);
   buttonMode.setLongPressHandler(buttonModeLongPressed);
+
+  //setup speedo and odo software serial baud
+
+  speedoSerial.begin(9600);
+  odoSerial.begin(9600);
+
+  speedoSerial.write(0x76);
 
 }
 

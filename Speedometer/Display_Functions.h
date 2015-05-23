@@ -5,35 +5,80 @@
  *
  */
 
-displaySpeed (int speed) {
-
+void displaySpeed (int speed) {
 						// TODO need function to show speed
 
+  char tempstring[6];
 
-}
+  sprintf(tempstring, "%4d", speed);
 
-/*
- * Displays current odometer distance on top row of 16x2 white on black LCD
- *
- */
-
-displayOdometer (float distance) {
-
-						// TODO need function to show odometer
+  speedoSerial.write(tempstring);
 
 }
 
 
 /*
- * Displays tripmeter 1 on first (left most) four lower row digits of 16x2 white on black LCD
- * Displays tripmeter 2 on last (right most) four lower row digits of 16x2 white on black LCD
+ * Sets KPH,MPH and CAL display
+ * Displays current odometer distance at eight character of top row of 16x2 white on black LCD
  *
  */
 
-displayTripmeter (int num, float distance) {
+void displayOdometer () {
 
-						// TODO need function to show tripmeter 1
+  odoSerial.write(254);
+  odoSerial.write(128);
 
+  if (modeFunc == FUNC_KPH)
+   {
+    odoSerial.write("KPH");
+   }
+  else if (modeFunc == FUNC_MPH)
+   {
+    odoSerial.write("MPH");
+   }
+  else if (modeFunc == FUNC_CAL)
+   {
+    odoSerial.write("CAL");
+   }
+
+// cursor to eighth character of top line
+
+  odoSerial.write(254);
+  odoSerial.write(135);
+
+  char buffer[9];
+
+  dtostrf(totalOdometer,9,1,buffer);
+  odoSerial.write(buffer);
+
+}
+
+
+/*
+ * Displays tripmeter 1 at third digit of lower row of 16x2 white on black LCD
+ * Displays tripmeter 2 at twelth digit of lower row of 16x2 white on black LCD
+ *
+ */
+
+void displayTripmeter () {
+
+  char buffer[6];
+
+// cursor to third character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(194);
+
+  dtostrf(totalTrip_1,5,1,buffer);
+  odoSerial.write(buffer);
+
+// cursor to twelth character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(203);
+
+  dtostrf(totalTrip_2,5,1,buffer);
+  odoSerial.write(buffer);
 
 }
 
@@ -43,7 +88,7 @@ displayTripmeter (int num, float distance) {
  *
  */
 
-displayCalibrateCount (int count) {
+void displayCalibrateCount (int count) {
 						// TODO need function to show calibrate count
 
 
@@ -53,43 +98,99 @@ displayCalibrateCount (int count) {
 
 
 
-
-// Below may not be needed
-
-
 /*
-* Writes each digit of a number to the LED screen with decimal point
-* and minimum number of digits.
-*/
-void displayNumber(int value, int decimalPos, int minDigits) {
-/*
-int divisor = pow(10, numDigits-1);
-  for(int i = 0; i < numDigits; i++) {
-    int digit = (value / divisor) % 10;
-    if (value < divisor && i < numDigits-minDigits) {
-      alpha.writeDigitRaw(i, segmentValues[BLANK]);
-    }
-    else {
-      uint16_t segments = segmentValues[digit];
-      if (decimalPos > 0 && i == decimalPos) {
-        segments |= segmentValues[DECIMAL];
-      }
-      alpha.writeDigitRaw(i, segments);
-    }
-    divisor /= 10;
-  }
-  alpha.writeDisplay();
-*/
+ * Display voltmeter reading
+ *
+ */
+
+void displayVoltmeter() {
+
+
 }
 
+
 /*
-* Converts a floating point number to an integer for display on the LED screen
-*/
-int floatToInt(float value, int decimalPlaces) {
-  int shift = pow(10, decimalPlaces);
-  int whole = (int)value;
-  int fraction = (value - (float)whole) * shift;
-  return (whole * shift) + fraction;
+ * Display oil pressure reading
+ *
+ */
+
+void displayOilPressure() {
+
+
 }
+
+
+/*
+ * Display water temperature reading
+ *
+ */
+
+void displayWaterTemperature() {
+
+
+}
+
+
+/*
+ * Display fuel level reading
+ *
+ */
+
+void displayFuelLevel() {
+
+
+}
+
+
+/*
+ * Display tachometer
+ *
+ */
+
+void displayTachometer() {
+
+
+}
+
+
+/*
+ * setup the odometer Display
+ *
+ */
+
+
+void setupOdometerDisplay() {
+
+  odoSerial.begin(9600);
+  delay(500);
+
+// top line shows current function mode setting (KPH, MPH or CAL)
+// cursor to the first character of the top line
+
+  odoSerial.write(254);
+  odoSerial.write(128);
+
+  odoSerial.write("KPH    0000000.0");
+
+// display current Odometer reading  
+  displayOdometer();
+
+// bottom line shows tripmeters with current one highlighted by Upper case T
+// cursor to first character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(192);
+  
+  odoSerial.write("1 000.0  2 000.0");
+
+  displayTripmeter();
+
+}
+
+
+
+
+
+
 
 
