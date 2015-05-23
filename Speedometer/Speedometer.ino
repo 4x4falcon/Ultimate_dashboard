@@ -1,22 +1,31 @@
+/*
+* Ultimate Dashboard
+* This is the speedo section of the programming
+* It will hold all parts of the programming eventually
+* there should only be setup and loop functions in this file
+*
+* all other functions should be in the included .h files below
+*
+*
+* 2015-05-23
+*/
+
+//generic include files
+
 #include <Wire.h>
-#include <Adafruit_LEDBackpack.h>
-#include <Adafruit_GFX.h>
+#include <SoftwareSerial.h>
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
+
+
+//program specific include files
+
 #include "Button.h"
 #include "Timer.h"
 #include "Constants.h"
 #include "Variables.h"
 #include "Speedo_Functions.h"
-
-/*
-* Ultimate Dashboard
-* This is the speedo section of the programming
-* It will hold all parts of the programming eventually
-*
-*
-* 2015-05-23
-*/
+#include "Display_Functions.h"
 
 
 /*

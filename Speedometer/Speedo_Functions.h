@@ -54,22 +54,18 @@ void writeTripmeter(int trip) {
 void updateDisplay() {
 
 //update speedo
-//float fps = wheelCircumference * rps;
-
-//int speed = (int)((fps / speedDivisor) * 3600.0);	// RKS this is feet in a mile for km needs to be 1000 metres in a km
-						// TODO rewrite this to calculate speed based on calibration number of pulses per km/mile
-
-
-						// TODO need function to show speed
+int speed = (int)((rps / pulseDistance) * 3600.0);
+  displaySpeed(speed);
 
 //update odometer
-						// TODO need function to show odometer
+  displayOdometer(totalOdometer);
 
 //update tripmeter 1
-						// TODO need function to show tripmeter 1
+
+  displayTripmeter(1, totalTrip_1);
 
 //update tripmeter 2
-						// TODO need function to show tripmeter 2
+  displayTripmeter(1, totalTrip_1);
 
 						// TODO add functions to update rpm, volt, oil, fuel, temp
 
@@ -121,40 +117,6 @@ void buttonModeLongPressed() {
 }
 
 
-/*
-* Writes each digit of a number to the LED screen with decimal point
-* and minimum number of digits.
-*/
-void displayNumber(int value, int decimalPos, int minDigits) {
-/*
-int divisor = pow(10, numDigits-1);
-  for(int i = 0; i < numDigits; i++) {
-    int digit = (value / divisor) % 10;
-    if (value < divisor && i < numDigits-minDigits) {
-      alpha.writeDigitRaw(i, segmentValues[BLANK]);
-    }
-    else {
-      uint16_t segments = segmentValues[digit];
-      if (decimalPos > 0 && i == decimalPos) {
-        segments |= segmentValues[DECIMAL];
-      }
-      alpha.writeDigitRaw(i, segments);
-    }
-    divisor /= 10;
-  }
-  alpha.writeDisplay();
-*/
-}
-
-/*
-* Converts a floating point number to an integer for display on the LED screen
-*/
-int floatToInt(float value, int decimalPlaces) {
-  int shift = pow(10, decimalPlaces);
-  int whole = (int)value;
-  int fraction = (value - (float)whole) * shift;
-  return (whole * shift) + fraction;
-}
 
 /*
 * ISR attached to the hall effect sensor; triggered each time the magnet
@@ -166,7 +128,7 @@ void sensorTriggered() {
     rps = 1000.0 / duration;				// Update pulses per second
 
 
-    totalMiles += pulseDistance;			// Increment odometer
+    totalOdometer += pulseDistance;			// Increment odometer
     totalTrip_1 += pulseDistance;
     totalTrip_2 += pulseDistance;
   }

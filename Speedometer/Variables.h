@@ -12,7 +12,7 @@ volatile float rps = 0.0;
 volatile float ppd = 0.0;
 
 // Odometer value, set by the ISR
-volatile float totalMiles = 0.0;
+volatile float totalOdometer = 0.0;
 
 // TripMeter 1 value
 volatile float totalTrip_1 = 0.0;
@@ -29,8 +29,6 @@ int modeFunc = FUNC_KPH;
 // The last time the odometer value was written to memory
 unsigned long lastOdometerWrite = 0;
 
-// Used to control the LED display
-Adafruit_AlphaNum4 alpha = Adafruit_AlphaNum4();
 
 // Helper class for handling TRIP button presses
 Button buttonTrip = Button(pinTripButton, LOW, 3000);
@@ -50,6 +48,16 @@ volatile int eepromCalibrateAddress = 0;
 
 
 // The distance travelled in one pulse from the vehicle speed sensor
+// for 
 volatile float pulseDistance = 0;
+
+
+// Below is probably not needed
+
+// Used to control the LED display
+Adafruit_AlphaNum4 alpha = Adafruit_AlphaNum4();
+
+
+
 
 
