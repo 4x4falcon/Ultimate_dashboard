@@ -51,7 +51,7 @@ void setup() {
   // this gives distance travelled in one pulse from the sensor
   // as fraction of kilometer or mile
 
-  pulseDistance = 1 / (EEPROM.readFloat(eepromCalibrateAddress);
+  pulseDistance = 1 / (EEPROM.readFloat(eepromCalibrateAddress));
 
   // Intialize SPEEDO display
   alpha.begin(0x70);

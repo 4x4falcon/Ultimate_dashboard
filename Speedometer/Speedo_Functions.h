@@ -54,9 +54,9 @@ void writeTripmeter(int trip) {
 void updateDisplay() {
 
 //update speedo
-float fps = wheelCircumference * rps;
+//float fps = wheelCircumference * rps;
 
-int speed = (int)((fps / speedDivisor) * 3600.0);	// RKS this is feet in a mile for km needs to be 1000 metres in a km
+//int speed = (int)((fps / speedDivisor) * 3600.0);	// RKS this is feet in a mile for km needs to be 1000 metres in a km
 						// TODO rewrite this to calculate speed based on calibration number of pulses per km/mile
 
 
@@ -88,10 +88,10 @@ void buttonTripPressed() {
 */
 void buttonTripLongPressed() {
 
-  if (mode == MODE_TRIPMETER_1) {
+  if (modeTrip == MODE_TRIPMETER_1) {
 //    EEPROM.writeFloat(0, totalMiles = 0.0);
   }
-  if (mode == MODE_TRIPMETER_2) {
+  if (modeTrip == MODE_TRIPMETER_2) {
 //    EEPROM.writeFloat(10, totalMiles = 0.0);
   }
 }
@@ -126,7 +126,8 @@ void buttonModeLongPressed() {
 * and minimum number of digits.
 */
 void displayNumber(int value, int decimalPos, int minDigits) {
-  int divisor = pow(10, numDigits-1);
+/*
+int divisor = pow(10, numDigits-1);
   for(int i = 0; i < numDigits; i++) {
     int digit = (value / divisor) % 10;
     if (value < divisor && i < numDigits-minDigits) {
@@ -142,6 +143,7 @@ void displayNumber(int value, int decimalPos, int minDigits) {
     divisor /= 10;
   }
   alpha.writeDisplay();
+*/
 }
 
 /*

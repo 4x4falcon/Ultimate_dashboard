@@ -54,22 +54,22 @@ void setup () {
   Serial.print("Odometer address = ");
   Serial.print(eepromOdoAddress);
   Serial.print(" \t\t ");
-  Serial.print("value = ")
+  Serial.print("value = ");
   Serial.println(EEPROM.readFloat(eepromOdoAddress));    
   Serial.print("Tripmeter 1 address = ");
   Serial.print(eepromTrip1Address);
   Serial.print(" \t\t ");
-  Serial.print("value = ")
+  Serial.print("value = ");
   Serial.println(EEPROM.readFloat(eepromTrip1Address));    
   Serial.print("Tripmeter 2 address = ");
   Serial.print(eepromTrip2Address);
   Serial.print(" \t\t ");
-  Serial.print("value = ")
+  Serial.print("value = ");
   Serial.println(EEPROM.readFloat(eepromTrip2Address));    
   Serial.print("Calibration address = ");
   Serial.print(eepromCalibrateAddress);
   Serial.print(" \t\t ");
-  Serial.print("value = ")
+  Serial.print("value = ");
   Serial.println(EEPROM.readFloat(eepromCalibrateAddress));    
 }
 
