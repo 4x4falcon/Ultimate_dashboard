@@ -2,10 +2,10 @@
 
 Digital pins
 
-0	
+0	Lights on input
 1	
 2	int.0 = Vehicle Speed sensor
-3	int.1
+3	int.1 = Tachometer sensor
 4	pinTripButton		Trip Button
 5	pinModeButton		Mode Button
 6	pinOdoSerialTX		Odo LCD soft serial tx
@@ -13,9 +13,9 @@ Digital pins
 8	pinSpeedoSerialTX	Speedo LED soft serial tx
 9	pinVoltSerialTX		Voltmeter display serial tx
 10	pinOilSerialTX		Oil pressure display serial tx
-11	pinTempTX		Water Temperature display  serial tx
-12	pinFuelTX		Fuel Level display serial tx
-13	pinLightsOn		Headlights on so dim the displays
+11	pinTempSerialTX		Water Temperature display  serial tx
+12	pinFuelSerialTX		Fuel Level display serial tx
+13	pinTachoSerialTX	Tachometer display serial tx
 
 
 
@@ -23,15 +23,12 @@ Digital pins
 Analogue pins
 
 
-A0	Voltmeter
-A1	Oil Pressure
-A2	Water Temperature
-A3	Fuel Level
+A0	pinVoltAnalog		Voltmeter
+A1	pinOilAnalog		Oil Pressure
+A2	pinTempAnalog		Water Temperature
+A3	pinFuelAnalog		Fuel Level
 A4	
 A5	
-
-
-
 
 
 
