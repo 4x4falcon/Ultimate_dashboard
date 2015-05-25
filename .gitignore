@@ -35,3 +35,8 @@
 # Backup files
 *~
 
+# Version files in Intialize directories
+
+Initialize*/Version.h
+
+

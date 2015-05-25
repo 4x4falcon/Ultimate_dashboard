@@ -1,170 +1,25 @@
 //Display_Functions.h
 
 /*
- * Displays current speed on 3 DIGIT LED
+ * Displays current rpm on 4 DIGIT LED
  * TODO display on 15 led 1/4 neo ring
  */
 
-void displaySpeed (int speed) {
+void displayRpm (int rpm) {
 
   char tempstring[6];
 
-  sprintf(tempstring, "%4d", speed);
-
-  speedoSerial.write(tempstring);
-
-}
-
-
-/*
- * Sets KPH,MPH and CAL display
- * Displays current odometer distance at eighth character of top row of 16x2 white on black LCD
- *
- */
-
-void displayOdometer () {
-
-  odoSerial.write(254);
-  odoSerial.write(128);
-
-  if (modeFunc == FUNC_KPH)
-   {
-    odoSerial.write("KPH");
-   }
-  else if (modeFunc == FUNC_MPH)
-   {
-    odoSerial.write("MPH");
-   }
-  else if (modeFunc == FUNC_CAL)
-   {
-    odoSerial.write("CAL");
-   }
-
-// cursor to eighth character of top line
-
-  odoSerial.write(254);
-  odoSerial.write(135);
-
-  char buffer[9];
-
-  dtostrf(totalOdometer,9,1,buffer);
-  odoSerial.write(buffer);
-
-}
-
-
-/*
- * Displays tripmeter 1 at third digit of lower row of 16x2 white on black LCD
- * Displays tripmeter 2 at twelth digit of lower row of 16x2 white on black LCD
- *
- */
-
-void displayTripmeter () {
-
-  char buffer[6];
-
-// cursor to third character of bottom line
-
-  odoSerial.write(254);
-  odoSerial.write(194);
-
-  dtostrf(totalTrip_1,5,1,buffer);
-  odoSerial.write(buffer);
-
-// cursor to twelth character of bottom line
-
-  odoSerial.write(254);
-  odoSerial.write(203);
-
-  dtostrf(totalTrip_2,5,1,buffer);
-  odoSerial.write(buffer);
-
-}
-
-
-/*
- * Displays count on first row of 16x2 white on black LCD
- *
- */
-
-void displayCalibrateCount (int count) {
-						// TODO need function to show calibrate count
-
-
-
-}
-
-
-
-
-/*
- * Display meter reading
- *
- */
-
-void displayMeter(SoftwareSerial serial, int val) {
-  char tempstring[6];
-  sprintf(tempstring, "%4d", val);
-  serial.write(tempstring);
-}
-
-
-
-
-/*
- * Display tachometer
- *
- */
-
-void displayTachometer() {
-
-  char tempstring[6];
-
-  sprintf(tempstring, "%4d", int((rpm/tachoCalibrate)/10)*10);        // this will always display the last digit as 0 to stop jittering.
+  sprintf(tempstring, "%4d", int(rpm/10)*10);		// always display last digit as 0 stops jitter
 
   tachoSerial.write(tempstring);
 
 }
 
-
 /*
- * setup the odometer Display
- *
+ *  Setup the tacho display
+ *  
  */
 
-
-void setupOdometerDisplay() {
-
-  odoSerial.begin(9600);
-  delay(500);
-
-// top line shows current function mode setting (KPH, MPH or CAL)
-// cursor to the first character of the top line
-
-  odoSerial.write(254);
-  odoSerial.write(128);
-
-  odoSerial.write("KPH    0000000.0");
-
-// display current Odometer reading  
-  displayOdometer();
-
-// bottom line shows tripmeters with current one highlighted
-// cursor to first character of bottom line
-
-  odoSerial.write(254);
-  odoSerial.write(192);
+void setupTachoDisplay() {
   
-  odoSerial.write("1 000.0  2 000.0");
-
-  displayTripmeter();
-
 }
-
-
-
-
-
-
-
-

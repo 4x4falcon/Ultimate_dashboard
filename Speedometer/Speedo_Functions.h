@@ -75,22 +75,10 @@ void sensorTriggered() {
 
 
 /*
-* ISR attached to the tachometer
-*/
-void tachoTriggered() {
-  unsigned long duration = millis() - lastTachoTrigger;
-  rpm = 60000/duration;
-}
-
-
-/*
 * Updates the speedo, odometer and tachometer screen depending on the current mode
 *
 */
 void updateDisplay() {
-
-// no tacho interrupts while updating. VSS interrupt must continue otherwise we miss odo reading
-  detachInterrupt(1);
 
   int speed = (int)((rps * pulseDistance) * 3600.0);
   displaySpeed(speed);
@@ -100,50 +88,7 @@ void updateDisplay() {
 
 //update tripmeters
   displayTripmeter();
-
-//update tachometer
-  displayTachometer();
-
-//restart the tacho interrupts
-  attachInterrupt(1, tachoTriggered, RISING);
 }
-
-/*
- * update the volt, oil pressure, water temp and fuel level meters
- *
- */
-
-void updateMeters() {
-// no tacho interrupts while updating.  VSS interrupt must continue otherwise we miss odo reading
-  detachInterrupt(1);
-  int val;
-
-// Voltmeter
-// TODO setup calibration this should be fixed as no need to recalibrate depending on vehicle
-  val = analogRead(pinVoltAnalog);
-  val = voltMax * (val / (voltUpper - voltLower));
-  displayMeter(voltSerial, val);
-
-// Oil pressure
-// TODO setup calibration
-  val = analogRead(pinVoltAnalog);
-  displayMeter(voltSerial, val);
-
-// Water Temperature
-// TODO setup calibration
-  val = analogRead(pinVoltAnalog);
-  displayMeter(voltSerial, val);
-
-// Fuel Level
-// TODO setup calibration
-  val = analogRead(pinVoltAnalog);
-  displayMeter(voltSerial, val);
-
-
-//restart the tacho interrupts
-  attachInterrupt(1, tachoTriggered, RISING);
- }
-
 
 
 /*
@@ -170,7 +115,7 @@ void buttonTripPressed() {
 }
 
 /*
-* RKS reset (current) trip meter only when trip button is long pressed
+* reset (current) trip meter only when trip button is long pressed
 * odometer needs to be unchangeable
 */
 void buttonTripLongPressed() {
@@ -200,13 +145,8 @@ void buttonModePressed() {
    }
   else
    {
-    modeCalibrate++;
-    if (modeCalibrate > FUNC_CAL_FUEL)
-     {
-      modeCalibrate = FUNC_CAL_SPD;
-     }
+    modeCalibrate = FUNC_CAL_SPD;
     updateCalibrateDisplay();
-
    }
 }
 
@@ -216,14 +156,11 @@ void buttonModePressed() {
 */
 
 void buttonModeLongPressed() {
-  if ((rps < 0.0001) && (rpm < 10))              // only enter calibration if stationary and engine off
+  if (rps < 0.0001)                              // only enter calibration if stationary
    {
     byte tempMode = modeFunc;                    // so can restore to original function mode
     modeCalibrate = FUNC_CAL_SPD;
-    if (modeFunc == FUNC_CAL)
-     {
-      doCalibrate();
-     }
+    doCalibrate();
 
   // last must be to return to previous mode
     modeFunc = tempMode;
@@ -234,6 +171,8 @@ void buttonModeLongPressed() {
 
 
 /*
+* TODO
+*
 * This is the sleep function
 * It will be activated when the ignition is turned off.
 * It needs to write odo and trip values to the eeprom

@@ -1,7 +1,7 @@
 //Display_Functions.h
 
 /*
- * Displays current speed on 3 DIGIT LED
+ * Displays current speed on 4 DIGIT LED
  * TODO display on 15 led 1/4 neo ring
  */
 
@@ -83,7 +83,7 @@ void displayTripmeter () {
 
 
 /*
- * Displays count on first row of 16x2 white on black LCD
+ * Displays count on first row of 16x2 LCD
  *
  */
 
@@ -91,38 +91,6 @@ void displayCalibrateCount (int count) {
 						// TODO need function to show calibrate count
 
 
-
-}
-
-
-
-
-/*
- * Display meter reading
- *
- */
-
-void displayMeter(SoftwareSerial serial, int val) {
-  char tempstring[6];
-  sprintf(tempstring, "%4d", val);
-  serial.write(tempstring);
-}
-
-
-
-
-/*
- * Display tachometer
- *
- */
-
-void displayTachometer() {
-
-  char tempstring[6];
-
-  sprintf(tempstring, "%4d", int((rpm/tachoCalibrate)/10)*10);        // this will always display the last digit as 0 to stop jittering.
-
-  tachoSerial.write(tempstring);
 
 }
 
@@ -160,11 +128,6 @@ void setupOdometerDisplay() {
   displayTripmeter();
 
 }
-
-
-
-
-
 
 
 

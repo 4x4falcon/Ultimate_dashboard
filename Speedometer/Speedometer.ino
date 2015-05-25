@@ -1,70 +1,52 @@
+//Speedometer.ino
+
 /*
-* Ultimate Dashboard
-* This is the speedo section of the programming
-* It will hold all parts of the programming eventually
-* there should only be setup and loop functions in this file
+*	Speedometer
 *
-* all other functions should be in the included .h files below
+*	Reads from vss and display
 *
+*	speed (kph or mph)
 *
-* 2015-05-23
+*	odometer (can not be reset by user)
+*
+*	tripmeters (individually resetable)
+*
+*	
 */
 
-//generic include files
-
-#include <Wire.h>
+//library includes
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
-#include <EEPROMVar.h>
 
 
-//program specific include files
-
+//local includes for helpers
 #include "Button.h"
 #include "Timer.h"
+
+//local includes for global constants and variables
 #include "Constants.h"
 #include "Variables.h"
-#include "Calibrate.h"
+
+//local includes for functions
+#include "Calibrate_Functions.h"
 #include "Display_Functions.h"
 #include "Speedo_Functions.h"
+#include "Version.h"
 
-
-/*
-* Initialization
-*/
 void setup() {
   Serial.begin(9600);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
+  
+  eepromTitleAddress = EEPROM.getAddress(sizeof(title));
+  eepromVersionHighAddress = EEPROM.getAddress(sizeof(byte));
+  eepromVersionLowAddress = EEPROM.getAddress(sizeof(byte));
 
   eepromOdoAddress = EEPROM.getAddress(sizeof(float));
   eepromTrip1Address = EEPROM.getAddress(sizeof(float));
   eepromTrip2Address = EEPROM.getAddress(sizeof(float));
-  eepromCalibrateAddress = EEPROM.getAddress(sizeof(float));
-  eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(byte));
-  eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
+  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
   eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
-
-  eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
-  eepromVoltUpperAddress = EEPROM.getAddress(sizeof(int));
-  eepromVoltMaxAddress = EEPROM.getAddress(sizeof(int));
-  eepromVoltWarnAddress = EEPROM.getAddress(sizeof(int));
-
-  eepromOilLowerAddress = EEPROM.getAddress(sizeof(int));
-  eepromOilUpperAddress = EEPROM.getAddress(sizeof(int));
-  eepromOilMaxAddress = EEPROM.getAddress(sizeof(int));
-  eepromOilWarnAddress = EEPROM.getAddress(sizeof(int));
-  
-  eepromTempLowerAddress = EEPROM.getAddress(sizeof(int));
-  eepromTempUpperAddress = EEPROM.getAddress(sizeof(int));
-  eepromTempMaxAddress = EEPROM.getAddress(sizeof(int));
-  eepromTempWarnAddress = EEPROM.getAddress(sizeof(int));
-  
-  eepromFuelLowerAddress = EEPROM.getAddress(sizeof(int));
-  eepromFuelUpperAddress = EEPROM.getAddress(sizeof(int));
-  eepromFuelMaxAddress = EEPROM.getAddress(sizeof(int));
-  eepromFuelWarnAddress = EEPROM.getAddress(sizeof(int));
-
 
   // Read odometer value from flash memory
   totalOdometer = EEPROM.readFloat(eepromOdoAddress);
@@ -81,17 +63,7 @@ void setup() {
   // this gives distance travelled in one pulse from the sensor
   // as fraction of kilometer or mile
 
-  pulseDistance = 1 / (EEPROM.readFloat(eepromCalibrateAddress));
-
-  // calibration for tachometer
-  if (EEPROM.readByte(eepromTachoTypeAddress) == TACHO_PETROL)
-   {
-    tachoCalibrate = int(EEPROM.readByte(eepromTachoCalibrateAddress)/2);
-   }
-  else
-   {
-    tachoCalibrate = EEPROM.readByte(eepromTachoCalibrateAddress);
-   }
+  pulseDistance = 1 / (EEPROM.readFloat(eepromSpeedoCalibrateAddress));
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH
@@ -101,33 +73,8 @@ void setup() {
     modeFunc = FUNC_KPH;
    }
 
-  // get constants for gauges
-  
-  voltLower = EEPROM.readInt(eepromVoltLowerAddress);
-  voltUpper = EEPROM.readInt(eepromVoltUpperAddress);
-  voltMax = EEPROM.readInt(eepromVoltMaxAddress);
-  voltWarn = EEPROM.readInt(eepromVoltWarnAddress);
-
-  oilLower = EEPROM.readInt(eepromOilLowerAddress);
-  oilUpper = EEPROM.readInt(eepromOilUpperAddress);
-  oilMax = EEPROM.readInt(eepromOilMaxAddress);
-  oilWarn = EEPROM.readInt(eepromOilWarnAddress);
-
-  tempLower = EEPROM.readInt(eepromTempLowerAddress);
-  tempUpper = EEPROM.readInt(eepromTempUpperAddress);
-  tempMax = EEPROM.readInt(eepromTempMaxAddress);
-  tempWarn = EEPROM.readInt(eepromTempWarnAddress);
-
-  fuelLower = EEPROM.readInt(eepromFuelLowerAddress);
-  fuelUpper = EEPROM.readInt(eepromFuelUpperAddress);
-  fuelWarn = EEPROM.readInt(eepromFuelWarnAddress);
-
-
-  // Update the speedo and odometer display every 100ms
+  // timer to update the speedo and odometer display every 100ms
   timer.every(100, updateDisplay);
-
-  // update the meters every second (1000ms)
-  timer2.every(1000, updateMeters);
 
   // Set up trip button handlers
   buttonTrip.setPressHandler(buttonTripPressed);
@@ -148,17 +95,10 @@ void setup() {
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(0, sensorTriggered, RISING);
 
-  // attach interrupt for the tachometer
-  attachInterrupt(1, tachoTriggered, RISING);
-
-
-
 
 }
 
-/*
-* Main loop
-*/
+
 void loop() {
   loopTime = millis();
 
@@ -173,6 +113,7 @@ void loop() {
 
     checkForTimeout();
    }
-}
 
+
+}
 
