@@ -1,4 +1,4 @@
-# Ultimate Dashboard - Gauges
+# Ultimate Dashboard - Gauges - hardware
 
 Arduino powered vehicle dashboard
 
