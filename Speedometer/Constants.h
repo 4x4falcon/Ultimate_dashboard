@@ -1,5 +1,7 @@
 // Constant values
 
+// vss sensor interrupt
+static const byte speedoInterrupt = 0;
 
 // these are the trip button constants
 
@@ -14,6 +16,11 @@ static const byte FUNC_CAL = 2;
 // these are the calibrate constants
 static const byte FUNC_CAL_SPD = 0;
 
+// the arduino led pin
+static const byte pinLed = 13;
+
+// the vss pin
+static const byte pinVss = 2;
 
 // the trip button pin
 static const byte pinTripButton = 4;
@@ -35,7 +42,7 @@ static const byte pinSpeedoSerialTX = 8;
 static const int timeoutValue = 1500;
 
 // EEPROM has a limited life span; be careful how often we write to it
-static const int odometerWriteFrequency = 5000;
+static const int odometerWriteFrequency = 60000;
 
 // active tripmeter indicator
 // this is a small square in the centre of the lcd character

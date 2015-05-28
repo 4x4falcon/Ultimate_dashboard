@@ -5,9 +5,20 @@
 * duration, we assume the engine has stopped.
 */
 void checkForTimeout() {
-  if (loopTime - lastTachoTrigger > timeoutValue) {
-    rpm = 0.0;
+  if ((loopTime - lastTachoTrigger) > timeoutValue) {
+    pps = 0.0;
   }
+
+#ifdef ECHO_SERIAL
+
+  Serial.print("loopTime    ");
+  Serial.print(loopTime);
+  
+  Serial.print("    lastTachoTrigger    ");
+  Serial.println(lastTachoTrigger);
+
+#endif
+
 }
 
 
@@ -20,9 +31,17 @@ void sensorTriggered() {
     unsigned long duration = millis() - lastTachoTrigger;
     if (duration > 0)
      {
+       pps = float(1000.0/duration);
      }
    }
   lastTachoTrigger = millis();
+
+
+  // blink the led on pin 13 for debugging purposes
+
+  arduinoLed = !arduinoLed;
+  digitalWrite(13, arduinoLed);
+
 }
 
 
@@ -33,6 +52,8 @@ void sensorTriggered() {
 void updateDisplay() {
 
   int rpm = 1101;
+
+  rpm = (pps * 60) / tachoPPR;
 
   displayRpm(rpm);
 

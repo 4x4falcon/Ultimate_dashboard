@@ -2,28 +2,72 @@
 
 /*
 * Checks the last time the sensor was trigerred. If it's over a given
-* duration, we assume the wheel has stopped spinning.
+* duration, we assume the vehicle has stopped moving.
+*
+* save tripmeters and odometer to EEPROM here as well
 */
 void checkForTimeout() {
-  if (loopTime - lastVssTrigger > timeoutValue) {
-    rps = 0.0;
+  if ((rps > 0.00001) && (loopTime > lastVssTrigger))
+   {
+    if ((loopTime - lastVssTrigger) > timeoutValue) {
+      rps = 0.0;
+
+#ifdef ECHO_SERIAL
+      Serial.print("timeout looptime    ");
+      Serial.println(loopTime);
+      Serial.print("timeout lastVssTrigger    ");
+      Serial.println(lastVssTrigger);
+      Serial.print("timeout timeoutValue    ");
+      Serial.println(timeoutValue);   
+#endif
+
+      if (odoNotSaved)
+       {
+#ifdef ECHO_SERIAL
+        Serial.print("Timeout Saving odometer to EEPROM    ");
+        Serial.println(totalOdometer);
+#else
+        EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+#endif
+        odoNotSaved = !odoNotSaved;
+       }
+      if (tripNotSaved)
+       {
+#ifdef ECHO_SERIAL
+        Serial.print("Timeout Saving Trip_1 to EEPROM    ");
+        Serial.println(totalTrip_1);
+        Serial.print("Timeout Saving Trip_2 to EEPROM    ");
+        Serial.println(totalTrip_2);
+#else
+        EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
+        EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
+#endif
+       tripNotSaved = !tripNotSaved;
+      }
+    }
   }
 }
 
 /*
 * Writes total miles to EEPROM
-* only if it's been longer than write frequency and moving and totalMiles is greater than what is currently stored
+* only if it's been longer than write frequency and totalMiles is greater than what is currently stored
+* maybe if vehicle is only moving to
 * this helps protect EEPROM from excessive writes
 */
 void writeOdometer() {
 
-  if (loopTime - lastOdometerWrite > odometerWriteFrequency)
+  if ((loopTime - lastOdometerWrite) > odometerWriteFrequency)
    {
-    if (rps != 0.0)
+//    if (rps > 0.01)
      {
       if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
        {
+#ifdef ECHO_SERIAL
+        Serial.print("Saving odometer to EEPROM    ");
+        Serial.println(totalOdometer);
+#else
         EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+#endif
         lastOdometerWrite = loopTime;
        }
      }
@@ -42,8 +86,25 @@ void writeOdometer() {
 */
 
 void writeTripmeter() {
-  EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
-  EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
+
+  if ((rps < 0.00001) && (tripNotSaved))
+   {
+#ifdef ECHO_SERIAL
+        Serial.print("Saving Trip_1 to EEPROM    ");
+        Serial.println(totalTrip_1);
+        Serial.print("Saving Trip_2 to EEPROM    ");
+        Serial.println(totalTrip_2);
+#else
+    EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
+    EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
+#endif
+
+    tripNotSaved = !tripNotSaved;
+   }
+  else
+   {
+    tripNotSaved = 1;
+   }
 }
 
 
@@ -63,6 +124,8 @@ void sensorTriggered() {
         totalOdometer += pulseDistance;			// Increment odometer
         totalTrip_1 += pulseDistance;                     // Increment tripmeter 1
         totalTrip_2 += pulseDistance;                     // Increment tripmeter 2
+        tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
+        odoNotSaved = 1;                                  // odometer can be saved to EEPROM
        }
      }
    }
@@ -71,17 +134,27 @@ void sensorTriggered() {
     calibrateCounter++;
    }
   lastVssTrigger = millis();
+  
+  // toggle pin 13 led for  debugging
+  arduinoLed = !arduinoLed;
+  digitalWrite(13, arduinoLed);
 }
 
 
 /*
-* Updates the speedo, odometer and tachometer screen depending on the current mode
+* Updates the speedo and odometer screen depending on the current mode
 *
 */
 void updateDisplay() {
 
   int speed = (int)((rps * pulseDistance) * 3600.0);
   displaySpeed(speed);
+
+#ifdef ECHO_SERIAL
+  Serial.print("rps   ");
+  Serial.println(rps);
+#endif
+
 
 //update odometer
   displayOdometer();
@@ -141,7 +214,12 @@ void buttonModePressed() {
   if (modeFunc != FUNC_CAL)
    {
     modeFunc = !modeFunc;
+#ifdef ECHO_SERIAL
+    Serial.print("Saving modeFunc to EEPROM     ");
+    Serial.println(modeFunc);
+#else
     EEPROM.writeByte(eepromModeFuncAddress, modeFunc);
+#endif
    }
   else
    {
@@ -186,7 +264,12 @@ void goToSleep() {
 
   if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
    {
+#ifdef ECHO_SERIAL
+    Serial.print ("Saving odometer to EEPROM    ");
+    Serial.println (totalOdometer);
+#else
     EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+#endif
    }
 
 // write the tripmeters to EEPROM

@@ -1,0 +1,37 @@
+// arduino pin usage
+
+Digital pins
+
+	Variable/Constant	Description
+0	
+1	
+2	
+3	
+4
+5	pinModeButton		Mode Button
+
+6	voltSerialTX		voltmeter display serial TX
+7	oilSerialTX		oil pressure meter display serial TX
+8	tempSerialTX		water temperature display serial TX
+9	fuelSerialTX		fuel level display serial TX
+	
+10	
+11	
+12	serial RX		all displays serial RX
+13	pinLed			led on arduino pin 13 toggled by vss irs value held in arduinoLed
+
+
+
+
+Analogue pins
+
+
+A0	voltAnalogPin
+A1	oilAnalogPin
+A2	tempAnalogPin
+A3	fuelAnalogPin
+A4	
+A5	
+
+
+

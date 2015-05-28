@@ -12,10 +12,12 @@
 *	
 */
 
+// echo to serial for debugging
+//#define ECHO_SERIAL 1
+
 //library includes
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
-
 
 //local includes for helpers
 #include "Button.h"
@@ -64,6 +66,13 @@ void setup() {
 
   // Initialize tacho display
   setupTachoDisplay();
+
+  pinMode(tachoInterrupt, INPUT_PULLUP);
+  
+  // turn the led on pin 13 off
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
+
 
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(tachoInterrupt, sensorTriggered, RISING);

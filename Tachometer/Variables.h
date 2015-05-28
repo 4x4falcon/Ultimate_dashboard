@@ -4,7 +4,10 @@ unsigned long loopTime = 0;
 // The last time the tacho sensor was triggered
 volatile unsigned long lastTachoTrigger = 0;
 
-// Revolutions (rpm) per second, set by the tacho ISR
+// Pulses per second set by the tacho ISR
+volatile float pps = 0.0;
+
+// Revolutions (rpm) per second
 volatile float rpm = 0.0;
 
 // current mode
@@ -54,5 +57,7 @@ volatile int eepromTachoShiftAddress;
 // The soft serial for the speedometer display
 SoftwareSerial tachoSerial(pinSerialRX, pinTachoSerialTX);
 
+// the led on pin 13
+volatile byte arduinoLed = LOW;
 
 

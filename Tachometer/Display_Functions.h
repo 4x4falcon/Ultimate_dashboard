@@ -7,11 +7,18 @@
 
 void displayRpm (int rpm) {
 
-  char tempstring[6];
+  char buffer[6];
 
-  sprintf(tempstring, "%4d", int(rpm/10)*10);		// always display last digit as 0 stops jitter
+  sprintf(buffer, "%4d", int(rpm/10)*10);		// always display last digit as 0 stops jitter
 
-  tachoSerial.write(tempstring);
+  tachoSerial.write(buffer);
+
+#ifdef ECHO_SERIAL
+
+  Serial.print("RPM      ");
+  Serial.println(buffer);
+
+#endif
 
 }
 

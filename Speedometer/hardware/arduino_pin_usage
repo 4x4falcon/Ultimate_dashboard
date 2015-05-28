@@ -1,0 +1,35 @@
+// arduino pin usage
+
+Digital pins
+
+	Variable/Constant	Description
+0	
+1	
+2	speedoInterrupt		int.0 Vehicle Speed sensor
+3	
+4	pinTripButton		Trip Button
+5	pinModeButton		Mode Button
+6	pinOdoSerialTX		Odo LCD soft serial tx
+7	pinSerialRX		soft serial rx (not actually used or wired)
+8	pinSpeedoSerialTX	Speedo LED soft serial tx
+9	
+10	
+11	
+12	
+13	pinLed			led on arduino pin 13 toggled by vss irs value held in arduinoLed
+
+
+
+
+Analogue pins
+
+
+A0	
+A1	
+A2	
+A3	
+A4	
+A5	
+
+
+

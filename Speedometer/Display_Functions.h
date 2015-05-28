@@ -7,11 +7,19 @@
 
 void displaySpeed (int speed) {
 
-  char tempstring[6];
+  char buffer[6];
 
-  sprintf(tempstring, "%4d", speed);
+  sprintf(buffer, "%4d", speed);
 
-  speedoSerial.write(tempstring);
+  speedoSerial.write(buffer);
+
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Speed    ");
+  Serial.println (speed);
+  Serial.print ("Speed buffer    ");
+  Serial.println(buffer);
+#endif
 
 }
 
@@ -50,6 +58,15 @@ void displayOdometer () {
   dtostrf(totalOdometer,9,1,buffer);
   odoSerial.write(buffer);
 
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Odo    ");
+  Serial.println (buffer);
+
+#endif
+
+
+
 }
 
 
@@ -71,6 +88,13 @@ void displayTripmeter () {
   dtostrf(totalTrip_1,5,1,buffer);
   odoSerial.write(buffer);
 
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Trip_1    ");
+  Serial.println (buffer);
+
+#endif
+
 // cursor to twelth character of bottom line
 
   odoSerial.write(254);
@@ -78,6 +102,14 @@ void displayTripmeter () {
 
   dtostrf(totalTrip_2,5,1,buffer);
   odoSerial.write(buffer);
+
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Trip_2    ");
+  Serial.println (buffer);
+
+#endif
+
 
 }
 

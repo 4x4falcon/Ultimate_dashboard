@@ -17,17 +17,17 @@ volatile float totalTrip_1 = 0.0;
 volatile float totalTrip_2 = 0.0;
 
 // Current trip mode
-byte modeTrip = MODE_TRIPMETER_1;
+volatile byte modeTrip = MODE_TRIPMETER_1;
 
 // Current function mode
-byte modeFunc = FUNC_KPH;
+volatile byte modeFunc = FUNC_KPH;
 
 // Current calibrate function mode
-byte modeCalibrate = FUNC_CAL_SPD;
+volatile byte modeCalibrate = FUNC_CAL_SPD;
 
-byte startCalibrateSpeed;
+volatile byte startCalibrateSpeed;
 
-byte calibrateCounter;
+volatile byte calibrateCounter;
 
 // The last time the odometer value was written to memory
 unsigned long lastOdometerWrite = 0;
@@ -67,7 +67,7 @@ volatile int eepromSpeedoCalibrateAddress;
 
 
 // The distance travelled in one pulse from the vehicle speed sensor
-volatile float pulseDistance = 0;
+volatile float pulseDistance = 0.0;
 
 
 // The soft serial for the speedometer display
@@ -76,4 +76,13 @@ SoftwareSerial speedoSerial(pinSerialRX, pinSpeedoSerialTX);
 // The soft serial for the odometer/tripmeter display
 SoftwareSerial odoSerial(pinSerialRX,pinOdoSerialTX);
 
+
+// the led on pin 13 state
+volatile byte arduinoLed = LOW;
+
+
+// whether or not to save the tripmeters and odometer
+
+volatile byte tripNotSaved = 1;
+volatile byte odoNotSaved = 1;
 

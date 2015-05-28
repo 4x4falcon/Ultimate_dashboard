@@ -14,6 +14,10 @@
 *	
 */
 
+// echo to serial for debugging
+#define ECHO_SERIAL 1
+
+
 //library includes
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
@@ -62,8 +66,17 @@ void setup() {
   // formula is 1 / (calibration value in eeprom)
   // this gives distance travelled in one pulse from the sensor
   // as fraction of kilometer or mile
+  pulseDistance = 1.0 / EEPROM.readFloat(eepromSpeedoCalibrateAddress);
 
-  pulseDistance = 1 / (EEPROM.readFloat(eepromSpeedoCalibrateAddress));
+//#ifdef ECHO_SERIAL
+//  char setupBuffer[25];
+//  dtostrf(pulseDistance, 20, 12, setupBuffer);
+//  Serial.print("setup pulseDistance =   ");
+//  Serial.println(setupBuffer);
+//  Serial.print("speedo calibration number     ");
+//  Serial.println(EEPROM.readFloat(eepromSpeedoCalibrateAddress));
+//#endif
+
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH
@@ -91,9 +104,20 @@ void setup() {
 
   // Initialize ODOMETER and TRIPMETER(s) display
   setupOdometerDisplay();
+  
+  // set the led on pin 13 to off
+  pinMode(pinLed, OUTPUT);
+  digitalWrite(pinLed, arduinoLed);
+
+  // set the button and vss pins to be INPUT_PULLUP
+  
+  pinMode(pinTripButton, INPUT_PULLUP);
+  pinMode(pinModeButton, INPUT_PULLUP);
+
+  pinMode(pinVss, INPUT_PULLUP);
 
   // Attach interrupt for the vehicle speed sensor
-  attachInterrupt(0, sensorTriggered, RISING);
+  attachInterrupt(speedoInterrupt, sensorTriggered, RISING);
 
 
 }
