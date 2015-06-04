@@ -1,5 +1,56 @@
 //Display_Functions.h
 
+// set the display brightness depending on headlight state
+
+void setBrightness()
+ {
+  if (digitalRead(pinLightsOn) == LOW)      // confirm that this is low when completing circuit
+   {
+    if (!lightsOn)
+     {
+// set brightness to mid range when headlights are on
+      lightsOn = 1;
+      odoSerial.write(0x7C);
+      odoSerial.write(byte(133));
+
+      speedoSerial.write(0x7A);
+      speedoSerial.write(byte(10));
+
+     }
+   }
+  else
+   {
+// set brightness to full on when headlights are off
+    lightsOn = 0;
+    odoSerial.write(0x7C);
+    odoSerial.write(byte(157));
+
+    speedoSerial.write(0x7A);
+    speedoSerial.write(byte(255));
+
+   }
+ }
+
+
+void odoDisplay(byte on)
+ {
+  odoSerial.begin(9600);
+  delay(500);
+
+  if (!on)
+   {
+    odoSerial.write(0x7C);
+    odoSerial.write(128);
+   }
+  else
+   {
+    setBrightness();
+   }
+ }
+
+
+
+
 /*
  * Displays current speed on 4 DIGIT LED
  * TODO display on 15 led 1/4 neo ring
@@ -11,7 +62,7 @@ void displaySpeed (int speed) {
 
   sprintf(buffer, "%4d", speed);
 
-  speedoSerial.write(buffer);
+  speedoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
 
@@ -32,31 +83,33 @@ void displaySpeed (int speed) {
 
 void displayOdometer () {
 
-  odoSerial.write(254);
+  char buffer[17] = "";
+  
+  odoSerial.write(254);    // cursor to the first character of top row
   odoSerial.write(128);
 
   if (modeFunc == FUNC_KPH)
    {
-    odoSerial.write("KPH");
+    odoSerial.print("KPH");
    }
   else if (modeFunc == FUNC_MPH)
    {
-    odoSerial.write("MPH");
+    odoSerial.print("MPH");
    }
   else if (modeFunc == FUNC_CAL)
    {
-    odoSerial.write("CAL");
+    odoSerial.print("CAL");
    }
 
-// cursor to eighth character of top line
 
+
+// cursor to eighth character of top line
   odoSerial.write(254);
   odoSerial.write(135);
 
-  char buffer[9];
-
   dtostrf(totalOdometer,9,1,buffer);
-  odoSerial.write(buffer);
+
+  odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
 
@@ -78,7 +131,14 @@ void displayOdometer () {
 
 void displayTripmeter () {
 
-  char buffer[6];
+  char buffer[6] = "";
+
+// cursor to the first character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(192);
+
+  odoSerial.print("1        2      ");
 
 // cursor to third character of bottom line
 
@@ -86,7 +146,7 @@ void displayTripmeter () {
   odoSerial.write(194);
 
   dtostrf(totalTrip_1,5,1,buffer);
-  odoSerial.write(buffer);
+  odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
 
@@ -101,7 +161,7 @@ void displayTripmeter () {
   odoSerial.write(203);
 
   dtostrf(totalTrip_2,5,1,buffer);
-  odoSerial.write(buffer);
+  odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
 
@@ -110,6 +170,18 @@ void displayTripmeter () {
 
 #endif
 
+  if (!modeTrip)
+   {
+    odoSerial.write(254);
+    odoSerial.write(193);        // second character of bottom row
+    odoSerial.print(tripActive);
+   }
+  else
+   {
+    odoSerial.write(254);
+    odoSerial.write(202);        // eleventh character of bottom row
+    odoSerial.print(tripActive);
+   }
 
 }
 
@@ -134,9 +206,6 @@ void displayCalibrateCount (int count) {
 
 
 void setupOdometerDisplay() {
-
-  odoSerial.begin(9600);
-  delay(500);
 
 // top line shows current function mode setting (KPH, MPH or CAL)
 // cursor to the first character of the top line

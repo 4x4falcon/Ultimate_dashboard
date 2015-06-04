@@ -1,5 +1,8 @@
 // Constant values
 
+// update the display every number of milliseconds
+static const long updateTime = 500;
+
 // vss sensor interrupt
 static const byte speedoInterrupt = 0;
 
@@ -29,10 +32,10 @@ static const byte pinTripButton = 4;
 static const byte pinModeButton = 5;
 
 // rx pin for all serial displays
-static const byte pinSerialRX = 7;
+static const byte pinSerialRX = 6;
 
 // the odometer lcd serial pin
-static const byte pinOdoSerialTX = 6;
+static const byte pinOdoSerialTX = 7;
 
 // the speedo led serial pin
 static const byte pinSpeedoSerialTX = 8;
@@ -49,6 +52,11 @@ static const int odometerWriteFrequency = 60000;
 // from datasheet
 static const char tripActive = B10100101;
 
+// lights on digital input
+static const byte pinLightsOn = 3;
+
+// ignition on digital input
+static const byte pinIgnOn = 3;
 
 // The SPEEDO LED screen has 4 digits
 static const byte numSpeedoDigits = 4;
@@ -59,6 +67,7 @@ static const byte numSpeedoLeds = 15;
 // The Odometer LCD screen has 16 digits by 2 lines
 static const byte numOdoDigits = 16;
 static const byte numOdoLines = 2;
+
 
 
 

@@ -15,7 +15,7 @@
 */
 
 // echo to serial for debugging
-#define ECHO_SERIAL 1
+//#define ECHO_SERIAL 1
 
 
 //library includes
@@ -87,7 +87,7 @@ void setup() {
    }
 
   // timer to update the speedo and odometer display every 100ms
-  timer.every(100, updateDisplay);
+  timer.every(updateTime, updateDisplay);
 
   // Set up trip button handlers
   buttonTrip.setPressHandler(buttonTripPressed);
@@ -100,10 +100,16 @@ void setup() {
   //setup speedo and odo software serial baud
 
   speedoSerial.begin(9600);
+  delay(500);
   speedoSerial.write(0x76);
+
+
+  odoSerial.begin(9600);
+  delay(500);
 
   // Initialize ODOMETER and TRIPMETER(s) display
   setupOdometerDisplay();
+  displayOdometer();
   
   // set the led on pin 13 to off
   pinMode(pinLed, OUTPUT);
@@ -116,9 +122,15 @@ void setup() {
 
   pinMode(pinVss, INPUT_PULLUP);
 
+  pinMode(pinLightsOn, INPUT_PULLUP);    // need to confirm this when completing circuit
+
+
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(speedoInterrupt, sensorTriggered, RISING);
 
+  lightsOn = 0;
+
+  setBrightness();
 
 }
 
@@ -134,6 +146,8 @@ void loop() {
     buttonMode.check();
 
     writeOdometer();
+
+
 
     checkForTimeout();
    }

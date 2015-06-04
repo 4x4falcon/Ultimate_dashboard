@@ -80,9 +80,11 @@ SoftwareSerial odoSerial(pinSerialRX,pinOdoSerialTX);
 // the led on pin 13 state
 volatile byte arduinoLed = LOW;
 
-
 // whether or not to save the tripmeters and odometer
 
 volatile byte tripNotSaved = 1;
 volatile byte odoNotSaved = 1;
+
+// headlights on
+volatile byte lightsOn = 0;
 

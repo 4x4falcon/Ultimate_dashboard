@@ -161,6 +161,8 @@ void updateDisplay() {
 
 //update tripmeters
   displayTripmeter();
+  
+  setBrightness();
 }
 
 

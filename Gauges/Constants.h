@@ -7,15 +7,13 @@ static const byte FUNC_CAL = 1;
 
 // this is the serial pin for all displays
 
-static const byte serialRX = 2;
+static const byte serialRX = 12;
 
 // Voltmeter
 
 static const byte voltAnalogPin = 0;
 static const byte voltSerialTX = 6;
-static const byte voltDisplayType = 0;
-
-
+static const byte voltDisplayType = 1;
 // values of resistors in divider network on voltAnalogPin
 static const float r1 = 100000.0;
 static const float r2 = 10000.0;
@@ -51,5 +49,9 @@ static const byte pinLed = 13;
 
 // times in ms
 
-static const unsigned long timeUpdate = 5000;
+static const unsigned long timeUpdate = 1000;
+
+
+static const byte pinLightsOn = 5;
+
 

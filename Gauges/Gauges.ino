@@ -16,7 +16,7 @@
 #include <EEPROMVar.h>
 
 // my library includes
-#include "gauge.h"
+//#include "gauge.h"
 
 // local includes
 #include "Button.h"
@@ -35,9 +35,15 @@ int val;
 // storage to format the value in
 char tempstring[10];
 
+
+// These are the Arduino pins required to create a software seiral
+//  instance. We'll actually only use the TX pin.
+//const int softwareTx = 6;
+//const int softwareRx = 7;
+//SoftwareSerial s7s(softwareRx, softwareTx);
+
 void setup() {
   Serial.begin(9600);
-
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
   eepromGaugesTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
@@ -110,13 +116,33 @@ void setup() {
   // set the button and vss pins to be INPUT_PULLUP
   pinMode(pinModeButton, INPUT_PULLUP);
 
+  // set the lights on button to INPUT_PULLUP
+  pinMode(pinLightsOn, INPUT_PULLUP);
 
-  pinMode(voltSerialTX, OUTPUT);
-  digitalWrite(voltSerialTX, LOW);
-  pinMode(oilSerialTX, OUTPUT);
-  pinMode(tempSerialTX, OUTPUT);
-  pinMode(fuelSerialTX, OUTPUT);
+//  pinMode(voltSerialTX, OUTPUT);
+//  digitalWrite(voltSerialTX, LOW);
+//  pinMode(oilSerialTX, OUTPUT);
+//  pinMode(tempSerialTX, OUTPUT);
+//  pinMode(fuelSerialTX, OUTPUT);
 
+
+/*
+ *
+ * Setup the volt meter
+ *
+ */
+
+
+  volt_serial.begin(9600);
+  delay(1);
+  volt_serial.write(0x76);    // clear the display
+  delay(1);
+  volt_serial.print("UOLT");  // Displays -HI- on all digits
+  delay(1);
+  volt_serial.write(0x77);
+  volt_serial.write(0b00000100);  // sets digit 3 decimal on
+
+  setBrightness();
 
 }
 

@@ -7,7 +7,7 @@ Digital pins
 1	
 2	
 3	
-4
+4	pinLightsOn		Headlights on input
 5	pinModeButton		Mode Button
 
 6	voltSerialTX		voltmeter display serial TX
