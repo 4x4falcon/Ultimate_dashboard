@@ -112,32 +112,33 @@ void writeTripmeter() {
 * ISR attached to the vehicle speed sensor, triggered on every pulse from vss
 */
 void sensorTriggered() {
-  if (modeFunc != FUNC_CAL)
-   {
-    if (millis() > lastVssTrigger)				// check to see if millis() has rolled over occurs approximately every 50 days.
+//  if (modeFunc != FUNC_CAL)
+//   {
+    if (millis() > (lastVssTrigger/10))				// check to see if millis() has rolled over occurs approximately every 50 days.
      {
-      unsigned long duration = millis() - lastVssTrigger;
-      if (duration > 0)
-       {
-        rps = 1000.0 / duration;				// Update pulses per second
+      duration = (millis() - lastVssTrigger) * 10;
+//      unsigned long duration = millis() - lastVssTrigger;
+//      if (duration > 0)
+//       {
+//        rps = 1000.0 / duration;				// Update pulses per second
 
-        totalOdometer += pulseDistance;			// Increment odometer
-        totalTrip_1 += pulseDistance;                     // Increment tripmeter 1
-        totalTrip_2 += pulseDistance;                     // Increment tripmeter 2
-        tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
-        odoNotSaved = 1;                                  // odometer can be saved to EEPROM
-       }
+//        totalOdometer += pulseDistance;			// Increment odometer
+//        totalTrip_1 += pulseDistance;                     // Increment tripmeter 1
+//        totalTrip_2 += pulseDistance;                     // Increment tripmeter 2
+//        tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
+//        odoNotSaved = 1;                                  // odometer can be saved to EEPROM
+//       }
      }
-   }
-  else
-   {
-    calibrateCounter++;
-   }
+//   }
+//  else
+//   {
+//    calibrateCounter++;
+//   }
   lastVssTrigger = millis();
   
   // toggle pin 13 led for  debugging
-  arduinoLed = !arduinoLed;
-  digitalWrite(13, arduinoLed);
+//  arduinoLed = !arduinoLed;
+//  digitalWrite(13, arduinoLed);
 }
 
 
@@ -147,10 +148,19 @@ void sensorTriggered() {
 */
 void updateDisplay() {
 
-  int speed = (int)((rps * pulseDistance) * 3600.0);
-  displaySpeed(speed);
+//  rps = 1000.0 / duration;
+
+  if (duration > 500) return;  
+  int speed = (int)(((1000.0 / duration) * pulseDistance) * 3600.0);
+//  if ((((speed * 10) < (lastSpeed * 11)) && ((speed * 10) > (lastSpeed * 9))) || (lastSpeed == 0))
+//   {
+    displaySpeed(speed);
+    lastSpeed = byte(speed);
+//   }
 
 #ifdef ECHO_SERIAL
+  Serial.print("duration   ");
+  Serial.println(duration);
   Serial.print("rps   ");
   Serial.println(rps);
 #endif

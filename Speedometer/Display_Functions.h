@@ -26,7 +26,7 @@ void setBrightness()
     odoSerial.write(byte(157));
 
     speedoSerial.write(0x7A);
-    speedoSerial.write(byte(255));
+    speedoSerial.write(byte(20));
 
    }
  }

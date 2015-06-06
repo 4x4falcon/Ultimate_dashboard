@@ -1,6 +1,12 @@
 // Current millis updated on each loop
 unsigned long loopTime = 0;
 
+// time between pulses
+unsigned long duration = 0;
+
+// last speed displayed
+byte lastSpeed = 0;
+
 // The last time the vss sensor was triggered
 volatile unsigned long lastVssTrigger = 0;
 

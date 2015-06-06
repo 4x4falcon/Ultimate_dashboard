@@ -11,7 +11,7 @@
 *
 *	tripmeters (individually resetable)
 *
-*	
+*
 */
 
 // echo to serial for debugging

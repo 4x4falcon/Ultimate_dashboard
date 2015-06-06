@@ -1,7 +1,10 @@
 // Constant values
 
 // update the display every number of milliseconds
-static const long updateTime = 500;
+static const long updateTime = 1000;
+
+// decimal points to use 100 = 2, 1000 = 3, etc
+static const long decimals = 100;
 
 // vss sensor interrupt
 static const byte speedoInterrupt = 0;

@@ -40,6 +40,7 @@ void setup () {
   // wheel/tyre combination is 33x12.5R15 or (318/72R5)
   //
   // pulses per revolution of vehicle speed sensor = ppr =	10
+  // this needs to have hardware /10 circuit
   // circumference of wheel/tyre in meters = cir =		2.63144
   // final drive ratio of diff = ratio =			3.5
   // formula is
@@ -56,7 +57,7 @@ void setup () {
 
   // NOTE if you are using a sensor that is on the wheel/tyre the final drive ratio is 1
 
-  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, 13300.7);  
+  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, 1329.305);  
 
 
 
