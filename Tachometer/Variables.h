@@ -5,10 +5,22 @@ unsigned long loopTime = 0;
 volatile unsigned long lastTachoTrigger = 0;
 
 // Pulses per second set by the tacho ISR
-volatile float pps = 0.0;
+//volatile float pps = 0.0;
+
+// duration for pulseMaxCount pulses
+volatile int duration = 0;
+
+// pulse counter
+volatile int pulseCount = 0;
+
+// last time (millis()) that the isr was triggered
+volatile unsigned long lastTrigger = 0;
+
+// do the tacho output
+volatile byte doTacho = 0;
 
 // Revolutions (rpm) per second
-volatile float rpm = 0.0;
+volatile int rpm = 0;
 
 // current mode
 volatile byte modeFunc = 0;
@@ -57,7 +69,9 @@ volatile int eepromTachoShiftAddress;
 // The soft serial for the speedometer display
 SoftwareSerial tachoSerial(pinSerialRX, pinTachoSerialTX);
 
+// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
+Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
+
 // the led on pin 13
 volatile byte arduinoLed = LOW;
-
 

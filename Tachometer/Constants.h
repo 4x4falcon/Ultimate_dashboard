@@ -18,11 +18,18 @@ static const byte pinSerialRX = 7;
 // the tachometer lcd serial pin
 static const byte pinTachoSerialTX = 9;
 
+
+// the tachometer neopixel led
+static const byte pinTachoNeopixel = 10;
+
 // timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;
 
 // EEPROM has a limited life span; be careful how often we write to it
 static const int eepromWriteFrequency = 5000;
+
+// maximum pulses counted
+static int pulseMaxCount = 100;
 
 // The TACHO LED screen has 4 digits
 static const byte numTachoDigits = 4;

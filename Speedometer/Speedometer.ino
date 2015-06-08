@@ -3,7 +3,7 @@
 /*
 *	Speedometer
 *
-*	Reads from vss and display
+*	Reads from vss and displays
 *
 *	speed (kph or mph)
 *
@@ -16,11 +16,13 @@
 
 // echo to serial for debugging
 //#define ECHO_SERIAL 1
-
+//#define ECHO_SERIAL_2 1
+//#define ECHO_SERIAL_3 1
 
 //library includes
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
+#include <Adafruit_NeoPixel.h>
 
 
 //local includes for helpers
@@ -46,36 +48,37 @@ void setup() {
   eepromVersionHighAddress = EEPROM.getAddress(sizeof(byte));
   eepromVersionLowAddress = EEPROM.getAddress(sizeof(byte));
 
-  eepromOdoAddress = EEPROM.getAddress(sizeof(float));
-  eepromTrip1Address = EEPROM.getAddress(sizeof(float));
-  eepromTrip2Address = EEPROM.getAddress(sizeof(float));
+  eepromOdoAddress = EEPROM.getAddress(sizeof(long));
+  eepromTrip1Address = EEPROM.getAddress(sizeof(long));
+  eepromTrip2Address = EEPROM.getAddress(sizeof(long));
+
   eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
+
   eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
+
+
   // Read odometer value from flash memory
-  totalOdometer = EEPROM.readFloat(eepromOdoAddress);
+  totalOdometer = EEPROM.readLong(eepromOdoAddress);
 
   // Read tripmeter 1 value from flash memory
-  totalTrip_1 = EEPROM.readFloat(eepromTrip1Address);
+  totalTrip_1 = EEPROM.readLong(eepromTrip1Address);
 
   // Read tripmeter 2 value from flash memory
-  totalTrip_2 = EEPROM.readFloat(eepromTrip2Address);
+  totalTrip_2 = EEPROM.readLong(eepromTrip2Address);
 
-  // calculate pulse distance
+  // pulse distance
   // calibration is over 2 kilometers or miles but is stored as for 1 kilometer or mile
-  // formula is 1 / (calibration value in eeprom)
-  // this gives distance travelled in one pulse from the sensor
-  // as fraction of kilometer or mile
-  pulseDistance = 1.0 / EEPROM.readFloat(eepromSpeedoCalibrateAddress);
+  // this gives distance travelled in one pulse
 
-//#ifdef ECHO_SERIAL
-//  char setupBuffer[25];
-//  dtostrf(pulseDistance, 20, 12, setupBuffer);
-//  Serial.print("setup pulseDistance =   ");
-//  Serial.println(setupBuffer);
-//  Serial.print("speedo calibration number     ");
-//  Serial.println(EEPROM.readFloat(eepromSpeedoCalibrateAddress));
-//#endif
+  pulseDistance = EEPROM.readFloat(eepromSpeedoCalibrateAddress);
+
+#ifdef ECHO_SERIAL
+  Serial.print("setup pulseDistance =   ");
+  char setupBuffer[25];
+  dtostrf(pulseDistance, 20, 12, setupBuffer);
+  Serial.println(setupBuffer);
+#endif
 
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
@@ -102,14 +105,15 @@ void setup() {
   speedoSerial.begin(9600);
   delay(500);
   speedoSerial.write(0x76);
-
-
   odoSerial.begin(9600);
   delay(500);
-
+  speedoPixels.begin(); // This initializes the NeoPixel library.
+  delay(500);
+  
   // Initialize ODOMETER and TRIPMETER(s) display
   setupOdometerDisplay();
   displayOdometer();
+  displaySpeed(0);
   
   // set the led on pin 13 to off
   pinMode(pinLed, OUTPUT);
@@ -126,12 +130,11 @@ void setup() {
 
 
   // Attach interrupt for the vehicle speed sensor
-  attachInterrupt(speedoInterrupt, sensorTriggered, RISING);
+  attachInterrupt(speedoInterrupt, sensorTriggered_2, RISING);
 
   lightsOn = 0;
 
   setBrightness();
-
 }
 
 
@@ -148,8 +151,8 @@ void loop() {
     writeOdometer();
 
 
-
     checkForTimeout();
+    checkForEepromWrite();
    }
 
 

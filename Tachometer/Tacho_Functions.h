@@ -5,11 +5,11 @@
 * duration, we assume the engine has stopped.
 */
 void checkForTimeout() {
-  if ((loopTime - lastTachoTrigger) > timeoutValue) {
-    pps = 0.0;
+  if ((loopTime - lastTrigger) > timeoutValue) {
+    rpm = 0;
   }
 
-#ifdef ECHO_SERIAL
+#ifdef ECHO_SERIAL_1
 
   Serial.print("loopTime    ");
   Serial.print(loopTime);
@@ -21,21 +21,34 @@ void checkForTimeout() {
 
 }
 
-
 /*
-* ISR attached to the vehicle speed sensor, triggered on every pulse from vss
+* ISR attached to the vehicle tachometer for petrol engines
+* this is attached to the w or s terminal of the altenator on diesel engines
+* triggered on every pulse
 */
+
 void sensorTriggered() {
-  if (millis() > lastTachoTrigger)				// check to see if millis() has rolled over occurs approximately every 50 days.
+
+  lastTrigger = millis();
+  if (lastTrigger > lastTachoTrigger)
    {
-    unsigned long duration = millis() - lastTachoTrigger;
-    if (duration > 0)
+    pulseCount++;
+    if (pulseCount == pulseMaxCount)
      {
-       pps = float(1000.0/duration);
+       pulseCount = 0UL;
+       duration = millis() - lastTachoTrigger;
+       doTacho = !doTacho;
+       lastTachoTrigger = millis();
+
+#ifdef ECHO_SERIAL_1
+       Serial.print("duration     ");
+       Serial.println(duration);
+       Serial.print("lastTachoTrigger    ");
+       Serial.println(lastTachoTrigger);
+#endif
+
      }
    }
-  lastTachoTrigger = millis();
-
 
   // blink the led on pin 13 for debugging purposes
 
@@ -45,18 +58,38 @@ void sensorTriggered() {
 }
 
 
+
+
+
 /*
-* Updates the speedo, odometer and tachometer screen depending on the current mode
+* Updates the tachometer screen depending on the current mode
 *
 */
 void updateDisplay() {
 
-  int rpm = 1101;
+  if (doTacho)
+   {
+    doTacho = !doTacho;
+    rpm = 1101;
 
-  rpm = (pps * 60) / tachoPPR;
+//    rpm = (pps * 60) / tachoPPR;
 
-  displayRpm(rpm);
+    float v1 = (float(duration) / float(pulseMaxCount));
 
+    rpm = int( ((1000.0 / v1) * 60) / tachoPPR );
+
+#ifdef ECHO_SERIAL
+
+    Serial.print("v1      ");
+    Serial.println(v1);
+
+    Serial.print("rpm     ");
+    Serial.println(rpm);
+
+#endif
+
+    displayRpm(rpm);
+   }
 }
 
 

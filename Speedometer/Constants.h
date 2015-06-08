@@ -1,7 +1,13 @@
-// Constant values
+// Constants.h
 
 // update the display every number of milliseconds
-static const long updateTime = 1000;
+static const long updateTime = 500;
+
+// number of counts to average speed
+//static const byte maxCount = 5;
+
+// maximum number of counts for pulseCount
+static const byte pulseMaxCount = 100;
 
 // decimal points to use 100 = 2, 1000 = 3, etc
 static const long decimals = 100;
@@ -43,12 +49,17 @@ static const byte pinOdoSerialTX = 7;
 // the speedo led serial pin
 static const byte pinSpeedoSerialTX = 8;
 
+// the speedo neopixel pin
+static const byte pinSpeedoNeopixel = 9;
 
 // timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;
 
 // EEPROM has a limited life span; be careful how often we write to it
-static const int odometerWriteFrequency = 60000;
+static const long odometerWriteFrequency = 60000;
+
+// timeout for updating info in EEPROM
+static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 
 // active tripmeter indicator
 // this is a small square in the centre of the lcd character

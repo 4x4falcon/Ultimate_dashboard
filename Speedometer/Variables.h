@@ -1,11 +1,23 @@
 // Current millis updated on each loop
-unsigned long loopTime = 0;
+volatile unsigned long loopTime = 0;
 
 // time between pulses
-unsigned long duration = 0;
+volatile unsigned long duration = 0;
 
 // last speed displayed
-byte lastSpeed = 0;
+//volatile byte lastSpeed = 0;
+
+// speed
+volatile int speed = 0;
+
+// pulses counted for duration
+volatile byte pulseCount = 0;
+
+// max count pulses reached
+volatile byte doSpeed = 0;
+
+// timeout
+volatile unsigned long lastTrigger = 0;
 
 // The last time the vss sensor was triggered
 volatile unsigned long lastVssTrigger = 0;
@@ -14,13 +26,13 @@ volatile unsigned long lastVssTrigger = 0;
 volatile float rps = 0.0;
 
 // Odometer value, set by the speedo ISR
-volatile float totalOdometer = 0.0;
+volatile unsigned long totalOdometer = 0UL;
 
 // TripMeter 1 value, set by the speedo ISR
-volatile float totalTrip_1 = 0.0;
+volatile unsigned long totalTrip_1 = 0UL;
 
 // TripMeter 2 value, set by the speedo ISR
-volatile float totalTrip_2 = 0.0;
+volatile unsigned long totalTrip_2 = 0UL;
 
 // Current trip mode
 volatile byte modeTrip = MODE_TRIPMETER_1;
@@ -36,7 +48,7 @@ volatile byte startCalibrateSpeed;
 volatile byte calibrateCounter;
 
 // The last time the odometer value was written to memory
-unsigned long lastOdometerWrite = 0;
+volatile unsigned long lastOdometerWrite = 0;
 
 
 // Helper class for handling TRIP button presses
@@ -81,6 +93,10 @@ SoftwareSerial speedoSerial(pinSerialRX, pinSpeedoSerialTX);
 
 // The soft serial for the odometer/tripmeter display
 SoftwareSerial odoSerial(pinSerialRX,pinOdoSerialTX);
+
+
+// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
+Adafruit_NeoPixel speedoPixels = Adafruit_NeoPixel(numSpeedoLeds, pinSpeedoNeopixel, NEO_GRB + NEO_KHZ800);
 
 
 // the led on pin 13 state

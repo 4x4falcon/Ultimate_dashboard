@@ -58,10 +58,9 @@ void odoDisplay(byte on)
 
 void displaySpeed (int speed) {
 
-  char buffer[6];
+  char buffer[10];
 
   sprintf(buffer, "%4d", speed);
-
   speedoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
@@ -72,7 +71,27 @@ void displaySpeed (int speed) {
   Serial.println(buffer);
 #endif
 
+  byte pixels = speed / 10;
+
+  for(byte i=0;i<pixels;i++)
+   {
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,20)); // blue color.
+    if (i >= 11)
+     {
+      speedoPixels.setPixelColor(i, speedoPixels.Color(20,0,0)); // red color.
+     }
+   }
+  for(byte i=pixels;i<=numSpeedoLeds;i++)
+   {
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,0)); // blank the pixel
+   }
+
+  speedoPixels.show(); // This sends the updated pixel color to the hardware.
+
 }
+
 
 
 /*
@@ -107,7 +126,16 @@ void displayOdometer () {
   odoSerial.write(254);
   odoSerial.write(135);
 
-  dtostrf(totalOdometer,9,1,buffer);
+  float odo = (totalOdometer * pulseDistance) / 1000.0;
+
+  if (odo > 999999.9)
+   {
+     odo = 0.0;
+     totalOdometer = 0;
+   }
+
+
+  dtostrf(odo,9,1,buffer);
 
   odoSerial.print(buffer);
 
@@ -135,17 +163,25 @@ void displayTripmeter () {
 
 // cursor to the first character of bottom line
 
-  odoSerial.write(254);
-  odoSerial.write(192);
+//  odoSerial.write(254);
+//  odoSerial.write(192);
 
-  odoSerial.print("1        2      ");
+//  odoSerial.print("1        2      ");
 
 // cursor to third character of bottom line
 
   odoSerial.write(254);
   odoSerial.write(194);
 
-  dtostrf(totalTrip_1,5,1,buffer);
+  float odo = (totalTrip_1 * pulseDistance) / 1000.0;
+  
+  if (odo > 999.9)
+   {
+     odo = 0.0;
+     totalTrip_1 = 0;
+   }
+
+  dtostrf(odo,5,1,buffer);
   odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
@@ -160,7 +196,16 @@ void displayTripmeter () {
   odoSerial.write(254);
   odoSerial.write(203);
 
-  dtostrf(totalTrip_2,5,1,buffer);
+  odo = (totalTrip_2 * pulseDistance) / 1000.0;
+  
+  if (odo > 999.9)
+   {
+     odo = 0.0;
+     totalTrip_2 = 0;
+   }
+
+
+  dtostrf(odo,5,1,buffer);
   odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
@@ -175,9 +220,15 @@ void displayTripmeter () {
     odoSerial.write(254);
     odoSerial.write(193);        // second character of bottom row
     odoSerial.print(tripActive);
+    odoSerial.write(254);
+    odoSerial.write(202);        // eleventh character of bottom row
+    odoSerial.print(" ");
    }
   else
    {
+    odoSerial.write(254);
+    odoSerial.write(193);        // second character of bottom row
+    odoSerial.print(" ");
     odoSerial.write(254);
     odoSerial.write(202);        // eleventh character of bottom row
     odoSerial.print(tripActive);

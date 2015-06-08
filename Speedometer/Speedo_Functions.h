@@ -7,43 +7,64 @@
 * save tripmeters and odometer to EEPROM here as well
 */
 void checkForTimeout() {
-  if ((rps > 0.00001) && (loopTime > lastVssTrigger))
+
+  unsigned long lT = lastTrigger;
+  
+  if ( (loopTime > lT) && (lT > timeoutValue) && ((loopTime - lT) > timeoutValue) )
    {
-    if ((loopTime - lastVssTrigger) > timeoutValue) {
-      rps = 0.0;
+    speed = 0;
+    displaySpeed (speed);
 
 #ifdef ECHO_SERIAL
+      Serial.print("pulseCount    ");
+      Serial.println(pulseCount);
+#endif
+
+#ifdef ECHO_SERIAL_2
       Serial.print("timeout looptime    ");
       Serial.println(loopTime);
       Serial.print("timeout lastVssTrigger    ");
       Serial.println(lastVssTrigger);
+      Serial.print("timeout lastTrigger    ");
+      Serial.println(lastTrigger);
       Serial.print("timeout timeoutValue    ");
       Serial.println(timeoutValue);   
 #endif
+   }
+}
 
-      if (odoNotSaved)
-       {
-#ifdef ECHO_SERIAL
+void checkForEepromWrite() {
+
+#ifdef ECHO_SERIAL_3
+        Serial.print("odoTimeout     ");
+        Serial.println(odoTimeout);
+#endif
+
+  if ((millis() - lastOdometerWrite) > odoTimeout)
+   {
+    lastOdometerWrite = millis();
+    if (odoNotSaved)
+     {
+#ifdef ECHO_SERIAL_3
         Serial.print("Timeout Saving odometer to EEPROM    ");
         Serial.println(totalOdometer);
 #else
-        EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+      EEPROM.writeLong(eepromOdoAddress, totalOdometer);
 #endif
-        odoNotSaved = !odoNotSaved;
-       }
-      if (tripNotSaved)
-       {
-#ifdef ECHO_SERIAL
+      odoNotSaved = !odoNotSaved;
+     }
+    if (tripNotSaved)
+     {
+  #ifdef ECHO_SERIAL_3
         Serial.print("Timeout Saving Trip_1 to EEPROM    ");
         Serial.println(totalTrip_1);
         Serial.print("Timeout Saving Trip_2 to EEPROM    ");
         Serial.println(totalTrip_2);
-#else
-        EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
-        EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
-#endif
-       tripNotSaved = !tripNotSaved;
-      }
+  #else
+     EEPROM.writeLong(eepromTrip1Address,totalTrip_1);
+     EEPROM.writeLong(eepromTrip2Address,totalTrip_2);
+  #endif
+      tripNotSaved = !tripNotSaved;
     }
   }
 }
@@ -108,26 +129,42 @@ void writeTripmeter() {
 }
 
 
+
+
+
 /*
 * ISR attached to the vehicle speed sensor, triggered on every pulse from vss
 */
+/*
 void sensorTriggered() {
 //  if (modeFunc != FUNC_CAL)
 //   {
     if (millis() > (lastVssTrigger/10))				// check to see if millis() has rolled over occurs approximately every 50 days.
      {
-      duration = (millis() - lastVssTrigger) * 10;
+//      duration = (millis() - lastVssTrigger) * 10;              // need to remove the /10 and * 10 when hardware divider is incorporated
 //      unsigned long duration = millis() - lastVssTrigger;
 //      if (duration > 0)
 //       {
 //        rps = 1000.0 / duration;				// Update pulses per second
 
-//        totalOdometer += pulseDistance;			// Increment odometer
-//        totalTrip_1 += pulseDistance;                     // Increment tripmeter 1
-//        totalTrip_2 += pulseDistance;                     // Increment tripmeter 2
-//        tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
-//        odoNotSaved = 1;                                  // odometer can be saved to EEPROM
-//       }
+        avCount++;
+        if (avCount > maxCount)
+         {
+          avCount = 1;
+          duration = (millis() - lastVssTrigger) * 10;              // need to remove the /10 and * 10 when hardware divider is incorporated
+         }
+        else
+         {
+          duration += (millis() - lastVssTrigger) * 10;
+         }
+
+
+          totalOdometer++;   // += pulseDistance;			// Increment odometer
+          totalTrip_1++;       // += pulseDistance;                     // Increment tripmeter 1
+          totalTrip_2++;       // += pulseDistance;                     // Increment tripmeter 2
+          tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
+          odoNotSaved = 1;                                  // odometer can be saved to EEPROM
+//      }
      }
 //   }
 //  else
@@ -140,6 +177,42 @@ void sensorTriggered() {
 //  arduinoLed = !arduinoLed;
 //  digitalWrite(13, arduinoLed);
 }
+*/
+
+
+/*
+ *
+ * a different ISR it counts the time for 100 pulses
+ *
+ */
+
+void sensorTriggered_2() {
+
+  lastTrigger = millis();
+  if (lastTrigger > lastVssTrigger)
+   {
+    pulseCount++;
+    if (pulseCount == pulseMaxCount)
+     {
+       pulseCount = 0UL;
+       duration = millis() - lastVssTrigger;
+       doSpeed = !doSpeed;
+       lastVssTrigger = millis();
+       
+       Serial.print("duration     ");
+       Serial.println(duration);
+       Serial.print("lastVssTrigger    ");
+       Serial.println(lastVssTrigger);
+     }
+
+    totalOdometer++;   // += pulseDistance;			// Increment odometer
+    totalTrip_1++;       // += pulseDistance;                     // Increment tripmeter 1
+    totalTrip_2++;       // += pulseDistance;                     // Increment tripmeter 2
+    tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
+    odoNotSaved = 1;                                  // odometer can be saved to EEPROM
+   }
+}
+
 
 
 /*
@@ -148,30 +221,39 @@ void sensorTriggered() {
 */
 void updateDisplay() {
 
-//  rps = 1000.0 / duration;
-
-  if (duration > 500) return;  
-  int speed = (int)(((1000.0 / duration) * pulseDistance) * 3600.0);
-//  if ((((speed * 10) < (lastSpeed * 11)) && ((speed * 10) > (lastSpeed * 9))) || (lastSpeed == 0))
-//   {
-    displaySpeed(speed);
-    lastSpeed = byte(speed);
-//   }
+  if (doSpeed)
+   {
+    doSpeed = !doSpeed;
 
 #ifdef ECHO_SERIAL
   Serial.print("duration   ");
   Serial.println(duration);
-  Serial.print("rps   ");
-  Serial.println(rps);
+  Serial.print("pulseMaxCount   ");
+  Serial.println(pulseMaxCount);
+  Serial.print("pulseDistance   ");
+  Serial.println(pulseDistance);
 #endif
 
+    speed = int(((((1000.0 * float(pulseMaxCount)) / float(duration)) * pulseDistance) * 3600.0) / 1000.0);
+    displaySpeed(speed);
+
+#ifdef ECHO_SERIAL_2
+  Serial.print ("Speed    ");
+  Serial.println (speed);
+#endif
 
 //update odometer
-  displayOdometer();
+    displayOdometer();
 
 //update tripmeters
-  displayTripmeter();
-  
+    displayTripmeter();
+
+// toggle pin 13 led for  debugging
+    arduinoLed = !arduinoLed;
+    digitalWrite(13, arduinoLed);
+
+
+   }
   setBrightness();
 }
 
