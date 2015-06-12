@@ -66,11 +66,14 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 // from datasheet
 static const char tripActive = B10100101;
 
-// lights on digital input
-static const byte pinLightsOn = 12;
-
 // ignition on digital input
 static const byte pinIgnOn = 3;
+
+// brightness switch
+static const byte pinBrightnessSwitch = 11;
+
+// lights on digital input
+static const byte pinLightsOn = 12;
 
 // The SPEEDO LED screen has 4 digits
 static const byte numSpeedoDigits = 4;

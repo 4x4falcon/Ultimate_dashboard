@@ -6,16 +6,16 @@ Digital pins
 0	
 1	
 2	speedoInterrupt		int.0 Vehicle Speed sensor
-3	
+3	pinIgnOn		ignition on
 4	pinTripButton		Trip Button
 5	pinModeButton		Mode Button
-6	pinOdoSerialTX		Odo LCD soft serial tx
-7	pinSerialRX		soft serial rx (not actually used or wired)
+6	pinSerialRX		soft serial rx (not actually used or wired)
+7	pinOdoSerialTX		Odo LCD soft serial tx
 8	pinSpeedoSerialTX	Speedo LED soft serial tx
-9	
+9	pinSpeedoNeopixel	Speedo neopixel tx	
 10	
 11	
-12	
+12	pinLightsOn		lights on pin
 13	pinLed			led on arduino pin 13 toggled by vss irs value held in arduinoLed
 
 
