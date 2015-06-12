@@ -15,12 +15,11 @@
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
 
-// my library includes
-//#include "gauge.h"
+// includes for helpers
+#include <Button.h>
+#include <Timer.h>
 
 // local includes
-#include "Button.h"
-#include "Timer.h"
 #include "Constants.h"
 #include "Variables.h"
 #include "Display_Functions.h"

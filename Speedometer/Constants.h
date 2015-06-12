@@ -67,7 +67,7 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 static const char tripActive = B10100101;
 
 // lights on digital input
-static const byte pinLightsOn = 3;
+static const byte pinLightsOn = 12;
 
 // ignition on digital input
 static const byte pinIgnOn = 3;

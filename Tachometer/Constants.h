@@ -18,9 +18,11 @@ static const byte pinSerialRX = 7;
 // the tachometer lcd serial pin
 static const byte pinTachoSerialTX = 9;
 
-
 // the tachometer neopixel led
 static const byte pinTachoNeopixel = 10;
+
+// the headlight on pin
+static const byte pinLightsOn = 12;
 
 // timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;
@@ -34,7 +36,7 @@ static int pulseMaxCount = 100;
 // The TACHO LED screen has 4 digits
 static const byte numTachoDigits = 4;
 // The TACHO LED arc has 15 leds
-static const byte numTachoLeds = 15;
+static const byte numTachoLeds = 16;
 
 // the tachometer sensor interrupt
 

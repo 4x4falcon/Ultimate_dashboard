@@ -88,6 +88,7 @@ void updateDisplay() {
 
 #endif
 
+    setBrightness();
     displayRpm(rpm);
    }
 }

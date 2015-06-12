@@ -38,6 +38,8 @@ volatile int calibrateCounter;
 volatile byte tachoPPR;
 volatile int tachoRedline;
 volatile int tachoShift;
+volatile int tachoMaximum;
+volatile int tachoStep;
 
 
 // Helper class for handling MODE button presses
@@ -65,6 +67,9 @@ volatile int eepromTachoRedlineAddress;
 
 volatile int eepromTachoShiftAddress;
 
+//EEPROM storage address for tacho maximump
+
+volatile int eepromTachoMaximumAddress;
 
 // The soft serial for the speedometer display
 SoftwareSerial tachoSerial(pinSerialRX, pinTachoSerialTX);
@@ -74,4 +79,11 @@ Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds, pinTachoNeopixel
 
 // the led on pin 13
 volatile byte arduinoLed = LOW;
+
+// the brightness of the pixels initially set to daytime 20
+volatile byte pixelBrightness = 20;
+
+// lights on
+volatile byte lightsOn = 0;
+
 

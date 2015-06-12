@@ -13,7 +13,7 @@
 */
 
 // echo to serial for debugging
-#define ECHO_SERIAL 1
+//#define ECHO_SERIAL 1
 //#define ECHO_SERIAL_1 1
 
 //library includes
@@ -22,8 +22,8 @@
 #include <Adafruit_NeoPixel.h>
 
 //local includes for helpers
-#include "Button.h"
-#include "Timer.h"
+#include <Button.h>
+#include <Timer.h>
 
 //local includes for global constants and variables
 #include "Constants.h"
@@ -55,12 +55,16 @@ void setup() {
   eepromTachoPPRAddress = EEPROM.getAddress(sizeof(byte));
   eepromTachoRedlineAddress = EEPROM.getAddress(sizeof(int));
   eepromTachoShiftAddress = EEPROM.getAddress(sizeof(int));
+  eepromTachoMaximumAddress = EEPROM.getAddress(sizeof(int));
 
   // Read ppr, redline and shift from EEPROM
   tachoPPR = EEPROM.readByte(eepromTachoPPRAddress);
   tachoRedline = EEPROM.readInt(eepromTachoRedlineAddress);
   tachoShift = EEPROM.readInt(eepromTachoShiftAddress);
+  tachoMaximum = EEPROM.readInt(eepromTachoMaximumAddress);
   
+  tachoStep = tachoMaximum / numTachoLeds;
+
 #ifdef ECHO_SERIAL
   Serial.print("tachoPPR    ");
   Serial.println(tachoPPR);
@@ -68,6 +72,12 @@ void setup() {
   Serial.println(tachoRedline);
   Serial.print("tachoShift    ");
   Serial.println(tachoShift);
+  Serial.print("tachoMaximum    ");
+  Serial.println(tachoMaximum);
+  Serial.print("numTachoLeds    ");
+  Serial.println(numTachoLeds);
+  Serial.print("tachoStep    ");
+  Serial.println(tachoStep);
 #endif
 
   // timer to update the speedo and odometer display every 1000ms (1s)
@@ -82,10 +92,6 @@ void setup() {
   tachoSerial.begin(9600);
   delay(500);
   tachoSerial.write(0x76);
-  
-
-  // Initialize tacho display
-//  setupTachoDisplay();
 
   tachoPixels.begin();
 
@@ -97,6 +103,9 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
 
+  // set up the lights on input and set brightness
+  pinMode(pinLightsOn, INPUT_PULLUP);
+  setBrightness();
 
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(tachoInterrupt, sensorTriggered, RISING);
@@ -120,6 +129,7 @@ void loop() {
     buttonMode.check();
 
     checkForTimeout();
+
    }
 
 }

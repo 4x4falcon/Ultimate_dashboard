@@ -1,5 +1,33 @@
 //Display_Functions.h
 
+
+/*
+ * Sets the display brightness depending on if the headlights are on
+ *
+ */
+
+void setBrightness() {
+  
+  lightsOn = digitalRead(pinLightsOn);
+
+  if (lightsOn)
+   {
+    pixelBrightness = 12;        // this sets up the brightness used in displayRpm routine
+                                 // for the 7 segment display set it here as it will remain that way until changed
+    tachoSerial.write(0x7A);
+    tachoSerial.write(byte(255));
+   }
+  else
+   {
+    pixelBrightness = 4;
+    tachoSerial.write(0x7A);
+    tachoSerial.write(byte(80));
+#ifdef ECHO_SERIAL
+    Serial.println("Lights on");
+#endif
+   }
+}
+
 /*
  * Displays current rpm on 4 DIGIT LED
  * TODO display on 15 led 1/4 neo ring
@@ -8,8 +36,8 @@
 void displayRpm (int rpm) {
 
   char buffer[6];
-  byte pixels = rpm / 1000;                             // needs to be a function of max tacho reading
-  byte redLine = tachoRedline / 1000;
+  byte pixels = rpm / tachoStep;                 // needs to be a function of max tacho reading
+  byte redLine = tachoRedline / tachoStep;
 
   if (rpm > 9999)
    {
@@ -20,6 +48,7 @@ void displayRpm (int rpm) {
    {
     sprintf(buffer, "%4d", int(rpm/10)*10);		// always display last digit as 0 stops jitter
    }
+
   tachoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
@@ -27,16 +56,19 @@ void displayRpm (int rpm) {
   Serial.println(buffer);
   Serial.print("redLine  ");
   Serial.println(redLine);
+  Serial.print("pixels     ");
+  Serial.println(pixels);
+  Serial.print("tachoStep   ");
+  Serial.println(tachoStep);
 #endif
-
 
   for(byte i=0;i<pixels;i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
-    tachoPixels.setPixelColor(i, tachoPixels.Color(0,0,20)); // blue color.
+    tachoPixels.setPixelColor(i, tachoPixels.Color(0,0,pixelBrightness)); // blue color.
     if (i >= redLine)
      {
-      tachoPixels.setPixelColor(i, tachoPixels.Color(20,0,0)); // red color.
+      tachoPixels.setPixelColor(i, tachoPixels.Color(pixelBrightness*20,0,0)); // red color with blue due to blue perspex.
      }
    }
   for(byte i=pixels;i<=numTachoLeds;i++)
@@ -46,10 +78,6 @@ void displayRpm (int rpm) {
    }
 
   tachoPixels.show(); // This sends the updated pixel color to the hardware.
-
-
-
-
 }
 
 /*

@@ -14,7 +14,7 @@ void setBrightness()
       odoSerial.write(byte(133));
 
       speedoSerial.write(0x7A);
-      speedoSerial.write(byte(10));
+      speedoSerial.write(byte(1));
 
      }
    }
@@ -23,10 +23,10 @@ void setBrightness()
 // set brightness to full on when headlights are off
     lightsOn = 0;
     odoSerial.write(0x7C);
-    odoSerial.write(byte(157));
+    odoSerial.write(byte(255));
 
     speedoSerial.write(0x7A);
-    speedoSerial.write(byte(20));
+    speedoSerial.write(byte(8));
 
    }
  }

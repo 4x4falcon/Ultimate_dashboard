@@ -2,8 +2,8 @@
 
 #include <Arduino.h>
 
-#include "Button.h"
-#include "Timer.h"
+#include <Button.h>
+#include <Timer.h>
 
 // the speedo tone value
 volatile int toneSpeedoValue = 40;

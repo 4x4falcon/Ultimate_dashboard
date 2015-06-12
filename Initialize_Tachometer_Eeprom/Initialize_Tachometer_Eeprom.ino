@@ -22,6 +22,7 @@ void setup () {
   int eepromTachoPPRAddress = EEPROM.getAddress(sizeof(byte));
   int eepromTachoRedlineAddress = EEPROM.getAddress(sizeof(int));
   int eepromTachoShiftAddress = EEPROM.getAddress(sizeof(int));
+  int eepromTachoMaximumAddress = EEPROM.getAddress(sizeof(int));
 
   EEPROM.writeBlock(eepromTachoTitleAddress, title);
   EEPROM.writeByte(eepromTachoVersionHighAddress, versionHigh);
@@ -43,10 +44,10 @@ void setup () {
   //    calibration = 8
 
   EEPROM.writeByte(eepromTachoPPRAddress, 4);
-  EEPROM.writeInt(eepromTachoRedlineAddress, 6200);
-  EEPROM.writeInt(eepromTachoShiftAddress, 4000);
-
-
+  EEPROM.writeInt(eepromTachoRedlineAddress, 3300);
+  EEPROM.writeInt(eepromTachoShiftAddress, 2800);
+  EEPROM.writeInt(eepromTachoMaximumAddress, 4500);
+  
   // confirm eeprom has been written to
 
   Serial.print("Tacho title address = ");
@@ -82,7 +83,13 @@ void setup () {
   Serial.print(eepromTachoShiftAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromTachoShiftAddress));    
+  Serial.println(EEPROM.readInt(eepromTachoShiftAddress));
+  Serial.print("Tacho Maximum address = ");
+  Serial.print(eepromTachoMaximumAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readInt(eepromTachoMaximumAddress));
+  
 
 }
 
