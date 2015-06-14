@@ -18,69 +18,126 @@ static const byte FUNC_CAL_OIL = 3;
 static const byte FUNC_CAL_TEMP = 4;
 static const byte FUNC_CAL_FUEL = 5;
 
+// tacho mode constants
+static const byte FUNC_TACHO_NOR = 0;
+static const byte FUNC_TACHO_CAL = 1;
+
 // tacho types
 static const byte TACHO_PETROL = 0;
 static const byte TACHO_DIESEL = 1;
 
+// EEPROM has a limited life span; be careful how often we write to it
+static const long odometerWriteFrequency = 60000;
+// odometer write to eeprom timeout
+static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 
-// the trip button pin
-static const byte pinTripButton = 4;
+/*
+ * Pin assignments with constants, description and connection point on shield
+ *
+2	pinSpeedoInterrupt	speedoInterrupt = 0	Vehicle Speed sensor		J14	pin 2
+3	pinTachoInterrupt	tachoInterrupt = 1	Tacho input			J18	pin 2
+	
+5	pinTripButton		Trip Button				J16	pin 1
+6	pinSpeedoModeButton	Speedo Mode Button			J15	pin 1
+7	pinTachoModeButton	Tacho Mode Button			J17	pin 1
+8	pinLightsOn		Lights on input				J12	pin 1
+9	pinBrigthnessSw		Brightness switch			J12	pin 2
+10	pinIgnOn		Ignition on				J12	pin 3
 
-// the mode button pin
-static const byte pinModeButton = 5;
+11
+12
+13
 
-// rx pin for all serial displays
-static const byte pinSerialRX = 7;
+14	pinSerialRX		soft serial rx (not actually used or wired)	J19	pin 1
+15	pinOdoSerialTX		Odo LCD soft serial tx				J19     pin 2
+16	pinSpeedoSerialTX	Speedo LED soft serial tx			J19     pin 3
+17	pinSpeedoNeopixel	Speedo neopixel tx				J19     pin 4
+18	pinTachoSerialTX	Tacho LED soft serial tx			J19     pin 5
+19	pinTachoNeopixel	Tacho neopixel tx				J19     pin 6
 
-// the odometer lcd serial pin
-static const byte pinOdoSerialTX = 6;
+22	voltSerialTX		voltmeter display serial TX			J22	pin 1
 
-// the speedo led serial pin
-static const byte pinSpeedoSerialTX = 8;
+24	oilSerialTX		oil pressure meter display serial TX		J22	pin 2
 
-// the tacho led serial pin
-static const byte pinTachoSerialTX = 13;
+26	tempSerialTX		water temperature display serial TX		J22	pin 3
 
-// VOLTMETER
-// the voltmeter display serial pin
-static const byte pinVoltSerialTX = 12;
-// the voltmeter analog pin
-static const byte pinVoltAnalog = 0;
+28	fuelSerialTX		fuel level display serial TX			J22	pin 4
+
+*/
+
+// INPUTS
+
+// vss interrupt pin
+static const byte pinSpeedoInterrupt = 2;
+static const byte speedoInterrupt = 0;
+
+// tacho input interrupt pin
+static const byte pinTachoInterrupt = 3;
+static const byte tachoInterrupt = 1;
+
+// button inputs
+static const byte pinTripButton = 5;		//	trip button
+static const byte pinSpeedoModeButton = 6;	//	Speedo Mode Button
+static const byte pinTachoModeButton = 7;	//	Tacho Mode Button
+
+// digital inputs from 12V
+static const byte pinLightsOn = 8;		//	Lights on input
+static const byte pinBrigthnessSw = 9;		//	Brightness switch
+static const byte pinIgnOn = 10;		//	Ignition on
+
+// serial RX for displays not used in hardware
+static const byte pinSerialRX = 14;
+
+// OUTPUTS will depend on display type, these are for software serial
+
+// these could be used with SPI and then these would become the CS lines
+
+// odometer
+static const byte pinOdoSerialTX = 15;		//	Odo LCD soft serial tx
+
+// speedometer
+static const byte pinSpeedoSerialTX = 16;	//	Speedo LED soft serial tx
+static const byte pinSpeedoNeopixel =  17;	//	Speedo neopixel tx
+
+// tachometer
+static const byte pinTachoSerialTX = 18;	//	Tacho LED soft serial tx
+static const byte pinTachoNeopixel = 19;	//	Tacho neopixel tx
+
+// voltmeter
+static const byte pinVoltSerialTX = 22;		//	voltmeter display serial TX
+
+// oil pressure meter
+static const byte pinOilSerialTX = 24;		//	oil pressure meter display serial TX
+
+static const byte pinTempSerialTX = 26;		//	water temperature display serial TX
+
+static const byte pinFuelSerialTX = 28;		//	fuel level display serial TX
 
 
-// Oil pressure
-// the oil pressure display serial pin
-static const byte pinOilSerialTX = 12;
-// the oil pressure analog pin
-static const byte pinOilAnalog = 0;
 
-// Water Temperature
-// the water temperature display serial pin
-static const byte pinTempSerialTX = 12;
-// the water temperature analog pin
-static const byte pinTempAnalog = 0;
+// SPEEDO constants
 
-// Fuel Level
-// the fuel level display serial pin
-static const byte pinFuelSerialTX = 12;
-// the fuel level analog pin
-static const byte pinFuelAnalog = 0;
-
-
-
+// maximum number of counts for pulseCount
+static const byte pulseMaxCount = 100;
 
 // timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;
 
 
-// EEPROM has a limited life span; be careful how often we write to it
-static const int odometerWriteFrequency = 5000;
-
-// The SPEEDO LED screen has 3 digits
-static const byte numSpeedoDigits = 3;
+// The SPEEDO LED screen has 4 digits
+static const byte numSpeedoDigits = 4;
 // The SPEEDO LED arc has 15 leds
 static const byte numSpeedoLeds = 15;
 
+
+// TACHO constants
+// The tacho led screen has 4 digits
+static const byte numTachoDigits = 4;
+// The tacho led arc has 16 leds
+static const byte numTachoLeds = 16;
+
+
+// ODOMETER constants
 // active tripmeter indicator
 // this is a small square in the centre of the lcd character
 // from datasheet

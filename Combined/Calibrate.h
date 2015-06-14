@@ -7,9 +7,9 @@
 *
 */
 
-void storeCalibrateSpeed() {
+void storeCalibrateSpeedo() {
 
-  EEPROM.writeFloat(eepromCalibrateAddress, float(calibrateCounter/2));
+  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, float(calibrateCounter/2));
 
 }
 

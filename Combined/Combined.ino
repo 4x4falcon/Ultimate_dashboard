@@ -11,22 +11,27 @@
 */
 
 //generic include files
-
-#include <Wire.h>
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
-#include <EEPROMVar.h>
+#include <Adafruit_NeoPixel.h>
 
 
 //program specific include files
 
+#include "Version.h"
 #include "Button.h"
 #include "Timer.h"
 #include "Constants.h"
 #include "Variables.h"
 #include "Calibrate.h"
-#include "Display_Functions.h"
+#include "Speedo_Display_Functions.h"
+//#include "Tacho_Display_Functions.h"
+#include "Display.h"
 #include "Speedo_Functions.h"
+#include "Tacho_Functions.h"
+#include "Functions.h"
+
+
 
 
 /*
@@ -36,14 +41,18 @@ void setup() {
   Serial.begin(9600);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
+  eepromTitleAddress = EEPROM.getAddress(sizeof(title));
+  eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
+  eepromVersionLow = EEPROM.getAddress(sizeof(byte));
 
-  eepromOdoAddress = EEPROM.getAddress(sizeof(float));
-  eepromTrip1Address = EEPROM.getAddress(sizeof(float));
-  eepromTrip2Address = EEPROM.getAddress(sizeof(float));
-  eepromCalibrateAddress = EEPROM.getAddress(sizeof(float));
+  eepromOdoAddress = EEPROM.getAddress(sizeof(totalOdometer));
+  eepromTrip1Address = EEPROM.getAddress(sizeof(totalTrip_1));
+  eepromTrip2Address = EEPROM.getAddress(sizeof(totalTrip_2));
+  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(int));
+  eepromModeSpeedoFuncAddress = EEPROM.getAddress(sizeof(byte));
+
   eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(byte));
   eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
-  eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
   eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromVoltUpperAddress = EEPROM.getAddress(sizeof(int));
@@ -81,7 +90,7 @@ void setup() {
   // this gives distance travelled in one pulse from the sensor
   // as fraction of kilometer or mile
 
-  pulseDistance = 1 / (EEPROM.readFloat(eepromCalibrateAddress));
+  pulseDistance = 1 / (EEPROM.readFloat(eepromSpeedoCalibrateAddress));
 
   // calibration for tachometer
   if (EEPROM.readByte(eepromTachoTypeAddress) == TACHO_PETROL)
@@ -95,10 +104,10 @@ void setup() {
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH
-  modeFunc = EEPROM.readByte(eepromModeFuncAddress);
-  if (modeFunc == FUNC_CAL)
+  modeSpeedoFunc = EEPROM.readByte(eepromModeSpeedoFuncAddress);
+  if (modeSpeedoFunc == FUNC_CAL)
    {
-    modeFunc = FUNC_KPH;
+    modeSpeedoFunc = FUNC_KPH;
    }
 
   // get constants for gauges
@@ -123,36 +132,50 @@ void setup() {
   fuelWarn = EEPROM.readInt(eepromFuelWarnAddress);
 
 
-  // Update the speedo and odometer display every 100ms
-  timer.every(100, updateDisplay);
+  // Update the speedo and odometer display every 101ms
+  timer.every(101, updateSpeedoDisplay);
 
-  // update the meters every second (1000ms)
-  timer2.every(1000, updateMeters);
+  // update the meters every second (1030ms)
+  timer2.every(1030, updateDisplay);
 
   // Set up trip button handlers
   buttonTrip.setPressHandler(buttonTripPressed);
   buttonTrip.setLongPressHandler(buttonTripLongPressed);
 
-  // Set up mode button handlers
-  buttonMode.setPressHandler(buttonModePressed);
-  buttonMode.setLongPressHandler(buttonModeLongPressed);
+  // Set up speedo mode button handlers
+  buttonSpeedoMode.setPressHandler(buttonSpeedoModePressed);
+  buttonSpeedoMode.setLongPressHandler(buttonSpeedoModeLongPressed);
+
+  // Set up speedo mode button handlers
+  buttonTachoMode.setPressHandler(buttonTachoModePressed);
+  buttonTachoMode.setLongPressHandler(buttonTachoModeLongPressed);
+
 
   //setup speedo and odo software serial baud
 
   speedoSerial.begin(9600);
+  delay(500);
   speedoSerial.write(0x76);
 
   // Initialize ODOMETER and TRIPMETER(s) display
+  odoSerial.begin(9600);
+  delay(500);
   setupOdometerDisplay();
+  updateDisplay();
+
+  // Initialize GAUGE displays
+  voltSerial.begin(9600);
+  oilSerial.begin(9600);
+  tempSerial.begin(9600);
+  fuelSerial.begin(9600);
+  updateMetersDisplay();
+
+
 
   // Attach interrupt for the vehicle speed sensor
-  attachInterrupt(0, sensorTriggered, RISING);
-
+  attachInterrupt(0, sensorTriggered_2, RISING);
   // attach interrupt for the tachometer
   attachInterrupt(1, tachoTriggered, RISING);
-
-
-
 
 }
 
@@ -162,16 +185,18 @@ void setup() {
 void loop() {
   loopTime = millis();
 
-  if (modeFunc != FUNC_CAL)
+  if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))
    {
     timer.update();
 
     buttonTrip.check();
-    buttonMode.check();
+    buttonSpeedoMode.check();
+    buttonTachoMode.check();
 
     writeOdometer();
 
-    checkForTimeout();
+    checkForSpeedoTimeout();
+    checkForTachoTimeout();
    }
 }
 

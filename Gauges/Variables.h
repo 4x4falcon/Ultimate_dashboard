@@ -3,25 +3,28 @@
 // Current millis updated on each loop
 unsigned long loopTime = 0;
 
+
 // Current function mode
 volatile byte modeFunc = FUNC_NORMAL;
 
+// current value
+volatile float val = 0.0;
+
+// a buffer for the values
+char buffer [20];
+
 // create a voltmeter
 //Gauge volt_meter(voltAnalogPin, voltSerialTX, serialRX, voltDisplayType, "FUEL");
-SoftwareSerial volt_serial(serialRX, voltSerialTX);
-//Gauge volt_meter(voltAnalogPin, volt_serial, voltDisplayType, "Uolt");
+SoftwareSerial voltSerial(serialRX, voltSerialTX);
 
 // create an oil pressure gauge
-//Gauge oil_meter(oilAnalogPin, oilSerialTX, serialRX, oilDisplayType, " OIL");
-SoftwareSerial oil_serial(serialRX, oilSerialTX);
+SoftwareSerial oilSerial(serialRX, oilSerialTX);
 
 // create a water temperature gauge
-//Gauge temp_meter(tempAnalogPin, tempSerialTX, serialRX, tempDisplayType, "TEMP");
-SoftwareSerial temp_serial(serialRX, tempSerialTX);
+SoftwareSerial tempSerial(serialRX, tempSerialTX);
 
 // create a fuel level guage
-//Gauge fuel_meter(fuelAnalogPin, fuelSerialTX, serialRX, fuelDisplayType, "FUEL");
-SoftwareSerial fuel_serial(serialRX, fuelSerialTX);
+SoftwareSerial fuelSerial(serialRX, fuelSerialTX);
 
 // Helper class for handling MODE button presses
 Button buttonMode = Button(pinModeButton, LOW, 3000);

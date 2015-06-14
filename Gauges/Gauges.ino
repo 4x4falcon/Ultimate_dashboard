@@ -28,13 +28,6 @@
 #include "Version.h"
 
 
-// temporary storage for the value
-int val;
-
-// storage to format the value in
-char tempstring[10];
-
-
 // These are the Arduino pins required to create a software seiral
 //  instance. We'll actually only use the TX pin.
 //const int softwareTx = 6;
@@ -118,11 +111,10 @@ void setup() {
   // set the lights on button to INPUT_PULLUP
   pinMode(pinLightsOn, INPUT_PULLUP);
 
-//  pinMode(voltSerialTX, OUTPUT);
-//  digitalWrite(voltSerialTX, LOW);
-//  pinMode(oilSerialTX, OUTPUT);
-//  pinMode(tempSerialTX, OUTPUT);
-//  pinMode(fuelSerialTX, OUTPUT);
+  pinMode(voltSerialTX, OUTPUT);
+  pinMode(oilSerialTX, OUTPUT);
+  pinMode(tempSerialTX, OUTPUT);
+  pinMode(fuelSerialTX, OUTPUT);
 
 
 /*
@@ -132,14 +124,40 @@ void setup() {
  */
 
 
-  volt_serial.begin(9600);
+  voltSerial.begin(9600);
+  oilSerial.begin(9600);
+  tempSerial.begin(9600);
+  fuelSerial.begin(9600);
+
+
+  delay(100);
+  voltSerial.write(0x76);    // clear the display
   delay(1);
-  volt_serial.write(0x76);    // clear the display
+  voltSerial.print("UOLT");  // Displays VOLT on all digits
   delay(1);
-  volt_serial.print("UOLT");  // Displays -HI- on all digits
+  voltSerial.write(0x77);
+  voltSerial.write(0b00000100);  // sets digit 3 decimal on
+
+  oilSerial.write(0x76);    // clear the display
   delay(1);
-  volt_serial.write(0x77);
-  volt_serial.write(0b00000100);  // sets digit 3 decimal on
+  oilSerial.print("OIL");  // Displays OIL on all digits
+  delay(1);
+  oilSerial.write(0x77);
+  oilSerial.write(0b00000100);  // sets digit 3 decimal on
+
+  tempSerial.write(0x76);    // clear the display
+  delay(1);
+  tempSerial.print("TEMP");  // Displays TEMP on all digits
+  delay(1);
+  tempSerial.write(0x77);
+  tempSerial.write(0b00000100);  // sets digit 3 decimal on
+
+  fuelSerial.write(0x76);    // clear the display
+  delay(1);
+  fuelSerial.print("FUEL");  // Displays FUEL on all digits
+  delay(1);
+  fuelSerial.write(0x77);
+  fuelSerial.write(0b00000100);  // sets digit 3 decimal on
 
   setBrightness();
 

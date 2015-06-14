@@ -7,21 +7,19 @@
  */
 
 void setBrightness() {
-  
-  lightsOn = digitalRead(pinLightsOn);
 
-  if (lightsOn)
+  if (!digitalRead(pinLightsOn))
    {
-    pixelBrightness = 12;        // this sets up the brightness used in displayRpm routine
+    pixelBrightness = 4;        // this sets up the brightness used in displayRpm routine
                                  // for the 7 segment display set it here as it will remain that way until changed
     tachoSerial.write(0x7A);
-    tachoSerial.write(byte(255));
+    tachoSerial.write(byte(80));
    }
   else
    {
-    pixelBrightness = 4;
+    pixelBrightness = 12;
     tachoSerial.write(0x7A);
-    tachoSerial.write(byte(80));
+    tachoSerial.write(byte(255));
 #ifdef ECHO_SERIAL
     Serial.println("Lights on");
 #endif

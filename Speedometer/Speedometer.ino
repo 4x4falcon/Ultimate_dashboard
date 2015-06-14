@@ -106,7 +106,7 @@ void setup() {
   delay(500);
   speedoSerial.write(0x76);
   odoSerial.begin(9600);
-  delay(500);
+//  delay(500);
   speedoPixels.begin(); // This initializes the NeoPixel library.
   delay(500);
   
@@ -125,16 +125,13 @@ void setup() {
   pinMode(pinModeButton, INPUT_PULLUP);
 
   pinMode(pinVss, INPUT_PULLUP);
-
   pinMode(pinLightsOn, INPUT_PULLUP);    // need to confirm this when completing circuit
 
+  setBrightness();
 
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(speedoInterrupt, sensorTriggered_2, RISING);
 
-  lightsOn = 0;
-
-  setBrightness();
 }
 
 

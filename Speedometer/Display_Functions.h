@@ -4,24 +4,20 @@
 
 void setBrightness()
  {
-  if (digitalRead(pinLightsOn) == LOW)      // confirm that this is low when completing circuit
+  if (!digitalRead(pinLightsOn))      // confirm that this is low when completing circuit
    {
-    if (!lightsOn)
-     {
 // set brightness to mid range when headlights are on
-      lightsOn = 1;
-      odoSerial.write(0x7C);
-      odoSerial.write(byte(133));
+    pixelBrightness = 4;
+    odoSerial.write(0x7C);
+    odoSerial.write(byte(80));
 
-      speedoSerial.write(0x7A);
-      speedoSerial.write(byte(1));
-
-     }
+    speedoSerial.write(0x7A);
+    speedoSerial.write(byte(1));
    }
   else
    {
 // set brightness to full on when headlights are off
-    lightsOn = 0;
+    pixelBrightness = 12;
     odoSerial.write(0x7C);
     odoSerial.write(byte(255));
 
@@ -76,10 +72,10 @@ void displaySpeed (int speed) {
   for(byte i=0;i<pixels;i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
-    speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,20)); // blue color.
+    speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,pixelBrightness)); // blue color.
     if (i >= 11)
      {
-      speedoPixels.setPixelColor(i, speedoPixels.Color(20,0,0)); // red color.
+      speedoPixels.setPixelColor(i, speedoPixels.Color(pixelBrightness,0,0)); // red color.
      }
    }
   for(byte i=pixels;i<=numSpeedoLeds;i++)

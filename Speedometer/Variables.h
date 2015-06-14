@@ -107,6 +107,6 @@ volatile byte arduinoLed = LOW;
 volatile byte tripNotSaved = 1;
 volatile byte odoNotSaved = 1;
 
-// headlights on
-volatile byte lightsOn = 0;
+// the brightness of the pixels initially set to daytime 12
+volatile byte pixelBrightness = 12;
 

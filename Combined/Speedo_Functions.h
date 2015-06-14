@@ -2,28 +2,94 @@
 
 /*
 * Checks the last time the sensor was trigerred. If it's over a given
-* duration, we assume the wheel has stopped spinning.
+* duration, we assume the vehicle has stopped moving.
+*
+* save tripmeters and odometer to EEPROM here as well
 */
-void checkForTimeout() {
-  if (loopTime - lastVssTrigger > timeoutValue) {
-    rps = 0.0;
+void checkForSpeedoTimeout() {
+
+  unsigned long lT = lastTrigger;
+  
+  if ( (loopTime > lT) && (lT > timeoutValue) && ((loopTime - lT) > timeoutValue) )
+   {
+    speed = 0;
+    displaySpeed (speed);
+
+#ifdef ECHO_SERIAL
+      Serial.print("pulseCount    ");
+      Serial.println(pulseCount);
+#endif
+
+#ifdef ECHO_SERIAL_2
+      Serial.print("timeout looptime    ");
+      Serial.println(loopTime);
+      Serial.print("timeout lastVssTrigger    ");
+      Serial.println(lastVssTrigger);
+      Serial.print("timeout lastTrigger    ");
+      Serial.println(lastTrigger);
+      Serial.print("timeout timeoutValue    ");
+      Serial.println(timeoutValue);   
+#endif
+   }
+}
+
+void checkForEepromWrite() {
+
+#ifdef ECHO_SERIAL_3
+        Serial.print("odoTimeout     ");
+        Serial.println(odoTimeout);
+#endif
+
+  if ((millis() - lastOdometerWrite) > odoTimeout)
+   {
+    lastOdometerWrite = millis();
+    if (odoNotSaved)
+     {
+#ifdef ECHO_SERIAL_3
+        Serial.print("Timeout Saving odometer to EEPROM    ");
+        Serial.println(totalOdometer);
+#else
+      EEPROM.writeLong(eepromOdoAddress, totalOdometer);
+#endif
+      odoNotSaved = !odoNotSaved;
+     }
+    if (tripNotSaved)
+     {
+  #ifdef ECHO_SERIAL_3
+        Serial.print("Timeout Saving Trip_1 to EEPROM    ");
+        Serial.println(totalTrip_1);
+        Serial.print("Timeout Saving Trip_2 to EEPROM    ");
+        Serial.println(totalTrip_2);
+  #else
+     EEPROM.writeLong(eepromTrip1Address,totalTrip_1);
+     EEPROM.writeLong(eepromTrip2Address,totalTrip_2);
+  #endif
+      tripNotSaved = !tripNotSaved;
+    }
   }
 }
 
+
 /*
-* Writes total miles to EEPROM
-* only if it's been longer than write frequency and moving and totalMiles is greater than what is currently stored
+* Writes odometer total to EEPROM
+* only if it's been longer than write frequency and totalOdometer is greater than what is currently stored
+* maybe if vehicle is only moving to0
 * this helps protect EEPROM from excessive writes
 */
 void writeOdometer() {
 
-  if (loopTime - lastOdometerWrite > odometerWriteFrequency)
+  if ((loopTime - lastOdometerWrite) > odometerWriteFrequency)
    {
-    if (rps != 0.0)
+//    if (rps > 0.01)
      {
       if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
        {
+#ifdef ECHO_SERIAL
+        Serial.print("Saving odometer to EEPROM    ");
+        Serial.println(totalOdometer);
+#else
         EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+#endif
         lastOdometerWrite = loopTime;
        }
      }
@@ -42,115 +108,68 @@ void writeOdometer() {
 */
 
 void writeTripmeter() {
-  EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
-  EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
-}
 
-
-/*
-* ISR attached to the vehicle speed sensor, triggered on every pulse from vss
-*/
-void sensorTriggered() {
-  if (modeFunc != FUNC_CAL)
+  if ((rps < 0.00001) && (tripNotSaved))
    {
-    if (millis() > lastVssTrigger)				// check to see if millis() has rolled over occurs approximately every 50 days.
-     {
-      unsigned long duration = millis() - lastVssTrigger;
-      if (duration > 0)
-       {
-        rps = 1000.0 / duration;				// Update pulses per second
+#ifdef ECHO_SERIAL
+        Serial.print("Saving Trip_1 to EEPROM    ");
+        Serial.println(totalTrip_1);
+        Serial.print("Saving Trip_2 to EEPROM    ");
+        Serial.println(totalTrip_2);
+#else
+    EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
+    EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
+#endif
 
-        totalOdometer += pulseDistance;			// Increment odometer
-        totalTrip_1 += pulseDistance;                     // Increment tripmeter 1
-        totalTrip_2 += pulseDistance;                     // Increment tripmeter 2
-       }
-     }
+    tripNotSaved = !tripNotSaved;
    }
   else
    {
-    calibrateCounter++;
+    tripNotSaved = 1;
    }
-  lastVssTrigger = millis();
 }
 
 
-/*
-* ISR attached to the tachometer
-*/
-void tachoTriggered() {
-  unsigned long duration = millis() - lastTachoTrigger;
-  rpm = 60000/duration;
-}
-
 
 /*
-* Updates the speedo, odometer and tachometer screen depending on the current mode
-*
-*/
-void updateDisplay() {
-
-// no tacho interrupts while updating. VSS interrupt must continue otherwise we miss odo reading
-  detachInterrupt(1);
-
-  int speed = (int)((rps * pulseDistance) * 3600.0);
-  displaySpeed(speed);
-
-//update odometer
-  displayOdometer();
-
-//update tripmeters
-  displayTripmeter();
-
-//update tachometer
-  displayTachometer();
-
-//restart the tacho interrupts
-  attachInterrupt(1, tachoTriggered, RISING);
-}
-
-/*
- * update the volt, oil pressure, water temp and fuel level meters
+ *
+ * ISR triggered by Vss counts the duration for 100 pulses
  *
  */
 
-void updateMeters() {
-// no tacho interrupts while updating.  VSS interrupt must continue otherwise we miss odo reading
-  detachInterrupt(1);
-  int val;
+void sensorTriggered_2() {
 
-// Voltmeter
-// TODO setup calibration this should be fixed as no need to recalibrate depending on vehicle
-  val = analogRead(pinVoltAnalog);
-  val = voltMax * (val / (voltUpper - voltLower));
-  displayMeter(voltSerial, val);
+  lastTrigger = millis();
+  if (lastTrigger > lastVssTrigger)
+   {
+    pulseCount++;
+    if (pulseCount == pulseMaxCount)
+     {
+       pulseCount = 0UL;
+       durationSpeedo = millis() - lastVssTrigger;
+       doSpeed = !doSpeed;
+       lastVssTrigger = millis();
+       
+       Serial.print("durationSpeedo     ");
+       Serial.println(durationSpeedo);
+       Serial.print("lastVssTrigger    ");
+       Serial.println(lastVssTrigger);
+     }
 
-// Oil pressure
-// TODO setup calibration
-  val = analogRead(pinVoltAnalog);
-  displayMeter(voltSerial, val);
-
-// Water Temperature
-// TODO setup calibration
-  val = analogRead(pinVoltAnalog);
-  displayMeter(voltSerial, val);
-
-// Fuel Level
-// TODO setup calibration
-  val = analogRead(pinVoltAnalog);
-  displayMeter(voltSerial, val);
-
-
-//restart the tacho interrupts
-  attachInterrupt(1, tachoTriggered, RISING);
- }
-
+    totalOdometer++;   // += pulseDistance;			// Increment odometer
+    totalTrip_1++;       // += pulseDistance;                     // Increment tripmeter 1
+    totalTrip_2++;       // += pulseDistance;                     // Increment tripmeter 2
+    tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
+    odoNotSaved = 1;                                  // odometer can be saved to EEPROM
+   }
+}
 
 
 /*
 * toggle between tripmeter_1 and tripmeter_2 when not in calibrate mode
 */
 void buttonTripPressed() {
-  if (modeFunc != FUNC_CAL)
+  if (modeSpeedoFunc != FUNC_CAL)
    {
     modeTrip = !modeTrip;
    }
@@ -162,15 +181,16 @@ void buttonTripPressed() {
      }
     else
      {
-      storeCalibrateSpeed();
+      storeCalibrateSpeedo();
       startCalibrateSpeed = !startCalibrateSpeed;
-      modeFunc = EEPROM.readByte(eepromModeFuncAddress);
+      modeSpeedoFunc = EEPROM.readByte(eepromModeSpeedoFuncAddress);
      }
    }
 }
 
+
 /*
-* RKS reset (current) trip meter only when trip button is long pressed
+* reset (current) trip meter only when trip button is long pressed
 * odometer needs to be unchangeable
 */
 void buttonTripLongPressed() {
@@ -192,21 +212,21 @@ void buttonTripLongPressed() {
 * this cycles between KPH, MPH and CAL if others are added then change FUNC_CAL to FUNC_
 *
 */
-void buttonModePressed() {
-  if (modeFunc != FUNC_CAL)
+void buttonSpeedoModePressed() {
+  if (modeSpeedoFunc != FUNC_CAL)
    {
-    modeFunc = !modeFunc;
-    EEPROM.writeByte(eepromModeFuncAddress, modeFunc);
+    modeSpeedoFunc = !modeSpeedoFunc;
+#ifdef ECHO_SERIAL
+    Serial.print("Saving modeSpeedoFunc to EEPROM     ");
+    Serial.println(modeSpeedoFunc);
+#else
+    EEPROM.writeByte(eepromModeSpeedoFuncAddress, modeSpeedoFunc);
+#endif
    }
   else
    {
-    modeCalibrate++;
-    if (modeCalibrate > FUNC_CAL_FUEL)
-     {
-      modeCalibrate = FUNC_CAL_SPD;
-     }
+    modeSpeedoCalibrate = FUNC_CAL_SPD;
     updateCalibrateDisplay();
-
    }
 }
 
@@ -215,18 +235,15 @@ void buttonModePressed() {
 * TODO write calibration function for speedo and tacho
 */
 
-void buttonModeLongPressed() {
-  if ((rps < 0.0001) && (rpm < 10))              // only enter calibration if stationary and engine off
+void buttonSpeedoModeLongPressed() {
+  if (rps < 0.0001)                              // only enter calibration if stationary
    {
-    byte tempMode = modeFunc;                    // so can restore to original function mode
-    modeCalibrate = FUNC_CAL_SPD;
-    if (modeFunc == FUNC_CAL)
-     {
-      doCalibrate();
-     }
+    byte tempMode = modeSpeedoFunc;                    // so can restore to original function mode
+    modeSpeedoCalibrate = FUNC_CAL_SPD;
+    doCalibrate();
 
   // last must be to return to previous mode
-    modeFunc = tempMode;
+    modeSpeedoFunc = tempMode;
    }
 }
 
@@ -234,6 +251,8 @@ void buttonModeLongPressed() {
 
 
 /*
+* TODO
+*
 * This is the sleep function
 * It will be activated when the ignition is turned off.
 * It needs to write odo and trip values to the eeprom
@@ -241,21 +260,28 @@ void buttonModeLongPressed() {
 *
 */
 
+/*
 void goToSleep() {
   
 // write the odometer to EEPROM
 
   if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
    {
+#ifdef ECHO_SERIAL
+    Serial.print ("Saving odometer to EEPROM    ");
+    Serial.println (totalOdometer);
+#else
     EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+#endif
    }
 
 // write the tripmeters to EEPROM
   writeTripmeter();
   
-// write the modeFunc to EEPROM
-  EEPROM.writeByte(eepromModeFuncAddress, modeFunc);
+// write the modeSpeedoFunc to EEPROM
+  EEPROM.writeByte(eepromModeSpeedoFuncAddress, modeSpeedoFunc);
 
 
 }
+*/
 
