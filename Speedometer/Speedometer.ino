@@ -34,10 +34,10 @@
 #include "Variables.h"
 
 //local includes for functions
-#include "Calibrate_Functions.h"
 #include "Display_Functions.h"
 #include "Speedo_Functions.h"
 #include "Version.h"
+//#include "Calibrate_Functions.h"
 
 void setup() {
   Serial.begin(9600);
@@ -100,15 +100,19 @@ void setup() {
   buttonMode.setPressHandler(buttonModePressed);
   buttonMode.setLongPressHandler(buttonModeLongPressed);
 
+  // Set up brightness button handlers
+  buttonBrightness.setPressHandler(buttonBrightnessPressed);
+  buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
+
   //setup speedo and odo software serial baud
 
   speedoSerial.begin(9600);
-  delay(500);
-  speedoSerial.write(0x76);
   odoSerial.begin(9600);
-//  delay(500);
   speedoPixels.begin(); // This initializes the NeoPixel library.
   delay(500);
+
+  // 
+  speedoSerial.write(0x76);
   
   // Initialize ODOMETER and TRIPMETER(s) display
   setupOdometerDisplay();
@@ -123,6 +127,7 @@ void setup() {
   
   pinMode(pinTripButton, INPUT_PULLUP);
   pinMode(pinModeButton, INPUT_PULLUP);
+  pinMode(pinBrightnessSw, INPUT_PULLUP);
 
   pinMode(pinVss, INPUT_PULLUP);
   pinMode(pinLightsOn, INPUT_PULLUP);    // need to confirm this when completing circuit
@@ -130,7 +135,7 @@ void setup() {
   setBrightness();
 
   // Attach interrupt for the vehicle speed sensor
-  attachInterrupt(speedoInterrupt, sensorTriggered_2, RISING);
+  attachInterrupt(speedoInterrupt, sensorTriggered_2, FALLING);
 
 }
 
@@ -144,9 +149,9 @@ void loop() {
 
     buttonTrip.check();
     buttonMode.check();
+    buttonBrightness.check();
 
     writeOdometer();
-
 
     checkForTimeout();
     checkForEepromWrite();

@@ -80,8 +80,15 @@ Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds, pinTachoNeopixel
 // the led on pin 13
 volatile byte arduinoLed = LOW;
 
-// the brightness of the pixels initially set to daytime 12
-volatile byte pixelBrightness = 12;
+
+// Helper class for handling MODE button presses
+Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+
+volatile byte brightnessBoost = 5;
+
+
+// the brightness of the pixels initially set to daytime 15
+volatile byte pixelBrightness = 3 * brightnessBoost;
 
 
 

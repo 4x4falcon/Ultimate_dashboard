@@ -5,17 +5,37 @@
 
 void setBrightness()
  {
-   if (!digitalRead(pinLightsOn))
+   byte b = 12 * brightnessBoost;
+
+   if (digitalRead(pinLightsOn))
+    {
+#ifdef ECHO_SERIAL
+      Serial.println("Lights off");
+#endif
+     b = 51 * brightnessBoost;
+    }
+
+   voltSerial.write(0x7A);
+   voltSerial.write(b);
+   oilSerial.write(0x7A);
+   oilSerial.write(b);
+   tempSerial.write(0x7A);
+   tempSerial.write(b);
+   fuelSerial.write(0x7A);
+   fuelSerial.write(b);
+
+/*
+if (!digitalRead(pinLightsOn))
     {
 // set brightness to mid range when headlights are on
      voltSerial.write(0x7A);
-     voltSerial.write(byte(60));
+     voltSerial.write(b);
      oilSerial.write(0x7A);
-     oilSerial.write(byte(60));
+     oilSerial.write(b);
      tempSerial.write(0x7A);
-     tempSerial.write(byte(60));
+     tempSerial.write(b);
      fuelSerial.write(0x7A);
-     fuelSerial.write(byte(60));
+     fuelSerial.write(b);
     }
    else
     {
@@ -28,6 +48,7 @@ void setBrightness()
      fuelSerial.write(0x7A);
      fuelSerial.write(byte(255));
     }
+*/
  }
 
 
@@ -123,4 +144,38 @@ void updateDisplay () {
 
 }
 
+
+void buttonModePressed() {
+
+  
+  Serial.println("Mode button pressed");
+  
+}
+
+void buttonModeLongPressed() {
+
+
+  Serial.println("Mode button long pressed");
+
+}
+
+void buttonBrightnessPressed() {
+
+  brightnessBoost++;
+  if (brightnessBoost > 5)
+   {
+    brightnessBoost = 1;
+   }
+  
+  Serial.println("Brightnes button pressed");
+  
+}
+
+void buttonBrightnessLongPressed() {
+
+  brightnessBoost = 5;
+
+  Serial.println("Brightness button long pressed");
+
+}
 

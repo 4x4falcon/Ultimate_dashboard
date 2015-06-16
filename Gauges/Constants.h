@@ -39,19 +39,18 @@ static const byte fuelAnalogPin = 3;
 static const byte fuelSerialTX = 9;
 static const byte fuelDisplayType = 0;
 
-
-// calibrate button pin
 static const byte pinModeButton = 5;
+
+// digital inputs from 12V
+static const byte pinLightsOn = 8;		//	Lights on input
+static const byte pinBrightnessSw = 9;		//	Brightness switch
+static const byte pinIgnOn = 10;		//	Ignition on
 
 // arduino onboard led pin
 static const byte pinLed = 13;
 
 
 // times in ms
-
 static const unsigned long timeUpdate = 1000;
-
-
-static const byte pinLightsOn = 5;
 
 

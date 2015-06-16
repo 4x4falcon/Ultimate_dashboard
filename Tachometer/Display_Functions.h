@@ -8,6 +8,22 @@
 
 void setBrightness() {
 
+   byte b = 12 * brightnessBoost;
+   pixelBrightness = brightnessBoost;
+   if (digitalRead(pinLightsOn))
+    {
+#ifdef ECHO_SERIAL
+      Serial.println("Lights off");
+#endif
+     b = 51 * brightnessBoost;
+     pixelBrightness = 3 * brightnessBoost;
+    }
+
+    tachoSerial.write(0x7A);
+    tachoSerial.write(b);
+
+
+/*
   if (!digitalRead(pinLightsOn))
    {
     pixelBrightness = 4;        // this sets up the brightness used in displayRpm routine
@@ -24,6 +40,7 @@ void setBrightness() {
     Serial.println("Lights on");
 #endif
    }
+*/
 }
 
 /*
@@ -86,3 +103,26 @@ void displayRpm (int rpm) {
 void setupTachoDisplay() {
   
 }
+
+
+void buttonBrightnessPressed() {
+
+  brightnessBoost++;
+  if (brightnessBoost > 5)
+   {
+    brightnessBoost = 1;
+   }
+  
+  Serial.println("Brightnes button pressed");
+  
+}
+
+void buttonBrightnessLongPressed() {
+
+  brightnessBoost = 5;
+
+  Serial.println("Brightness button long pressed");
+
+}
+
+

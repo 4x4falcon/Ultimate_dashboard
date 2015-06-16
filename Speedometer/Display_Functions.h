@@ -4,27 +4,24 @@
 
 void setBrightness()
  {
-  if (!digitalRead(pinLightsOn))      // confirm that this is low when completing circuit
+  byte b = 12 * brightnessBoost;
+  byte b1 = brightnessBoost;
+  pixelBrightness = brightnessBoost;
+  if (digitalRead(pinLightsOn))
    {
-// set brightness to mid range when headlights are on
-    pixelBrightness = 4;
-    odoSerial.write(0x7C);
-    odoSerial.write(byte(80));
-
-    speedoSerial.write(0x7A);
-    speedoSerial.write(byte(1));
+#ifdef ECHO_SERIAL
+    Serial.println("Lights off");
+#endif
+    b = 51 * brightnessBoost;
+    b1 = 2 * brightnessBoost;
+    pixelBrightness = 3 * brightnessBoost;
    }
-  else
-   {
-// set brightness to full on when headlights are off
-    pixelBrightness = 12;
-    odoSerial.write(0x7C);
-    odoSerial.write(byte(255));
 
-    speedoSerial.write(0x7A);
-    speedoSerial.write(byte(8));
+  odoSerial.write(0x7C);
+  odoSerial.write(byte(b));
 
-   }
+  speedoSerial.write(0x7A);
+  speedoSerial.write(byte(b1));
  }
 
 
@@ -54,7 +51,7 @@ void odoDisplay(byte on)
 
 void displaySpeed (int speed) {
 
-  char buffer[10];
+//  char buffer[10];
 
   sprintf(buffer, "%4d", speed);
   speedoSerial.print(buffer);
@@ -98,7 +95,7 @@ void displaySpeed (int speed) {
 
 void displayOdometer () {
 
-  char buffer[17] = "";
+//  char buffer[17] = "";
   
   odoSerial.write(254);    // cursor to the first character of top row
   odoSerial.write(128);
@@ -136,14 +133,9 @@ void displayOdometer () {
   odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
-
   Serial.print ("Odo    ");
   Serial.println (buffer);
-
 #endif
-
-
-
 }
 
 
@@ -155,14 +147,7 @@ void displayOdometer () {
 
 void displayTripmeter () {
 
-  char buffer[6] = "";
-
-// cursor to the first character of bottom line
-
-//  odoSerial.write(254);
-//  odoSerial.write(192);
-
-//  odoSerial.print("1        2      ");
+//  char buffer[6] = "";
 
 // cursor to third character of bottom line
 
@@ -181,10 +166,8 @@ void displayTripmeter () {
   odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
-
   Serial.print ("Trip_1    ");
   Serial.println (buffer);
-
 #endif
 
 // cursor to twelth character of bottom line
@@ -205,10 +188,8 @@ void displayTripmeter () {
   odoSerial.print(buffer);
 
 #ifdef ECHO_SERIAL
-
   Serial.print ("Trip_2    ");
   Serial.println (buffer);
-
 #endif
 
   if (!modeTrip)
@@ -233,17 +214,6 @@ void displayTripmeter () {
 }
 
 
-/*
- * Displays count on first row of 16x2 LCD
- *
- */
-
-void displayCalibrateCount (int count) {
-						// TODO need function to show calibrate count
-
-
-
-}
 
 
 /*
@@ -278,4 +248,26 @@ void setupOdometerDisplay() {
 }
 
 
+void buttonBrightnessPressed() {
+
+  brightnessBoost++;
+  if (brightnessBoost > 5)
+   {
+    brightnessBoost = 1;
+   }
+#ifdef ECHO_SERIAL
+  Serial.println("Brightnes button pressed");
+#endif
+
+}
+
+void buttonBrightnessLongPressed() {
+
+  brightnessBoost = 5;
+
+#ifdef ECHO_SERIAL
+  Serial.println("Brightness button long pressed");
+#endif
+
+}
 

@@ -7,6 +7,7 @@
 void checkForTimeout() {
   if ((loopTime - lastTrigger) > timeoutValue) {
     rpm = 0;
+    displayRpm(rpm);
   }
 
 #ifdef ECHO_SERIAL_1

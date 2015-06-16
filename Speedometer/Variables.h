@@ -4,6 +4,9 @@ volatile unsigned long loopTime = 0;
 // time between pulses
 volatile unsigned long duration = 0;
 
+// a character output buffer
+char buffer[20];
+
 // last speed displayed
 //volatile byte lastSpeed = 0;
 
@@ -45,7 +48,7 @@ volatile byte modeCalibrate = FUNC_CAL_SPD;
 
 volatile byte startCalibrateSpeed;
 
-volatile byte calibrateCounter;
+volatile int calibrateCounter;
 
 // The last time the odometer value was written to memory
 volatile unsigned long lastOdometerWrite = 0;
@@ -107,6 +110,11 @@ volatile byte arduinoLed = LOW;
 volatile byte tripNotSaved = 1;
 volatile byte odoNotSaved = 1;
 
-// the brightness of the pixels initially set to daytime 12
-volatile byte pixelBrightness = 12;
+// Helper class for handling MODE button presses
+Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+
+volatile byte brightnessBoost = 5;
+
+// the brightness of the pixels initially set to daytime 15
+volatile byte pixelBrightness = 3 * brightnessBoost;
 

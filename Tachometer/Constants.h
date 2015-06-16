@@ -1,5 +1,8 @@
 // Constant values
 
+// update the display every number of milliseconds
+static const long updateTime = 500;
+
 // these are the mode constants
 static const byte FUNC_TACHO = 0;
 static const byte FUNC_CAL = 1;
@@ -16,22 +19,18 @@ static const byte pinModeButton = 5;
 static const byte pinSerialRX = 6;
 
 // the tachometer lcd serial pin
-static const byte pinTachoSerialTX = 8;
+static const byte pinTachoSerialTX = 11;
 
 // the tachometer neopixel led
-static const byte pinTachoNeopixel = 9;
+static const byte pinTachoNeopixel = 12;
 
-// ignition on digital input
-static const byte pinIgnOn = 3;
-
-// brightness switch
-static const byte pinBrightnessSwitch = 11;
-
-// the headlight on pin
-static const byte pinLightsOn = 12;
+// digital inputs from 12V
+static const byte pinLightsOn = 8;		//	Lights on input
+static const byte pinBrightnessSw = 9;		//	Brightness switch
+static const byte pinIgnOn = 10;		//	Ignition on
 
 // timeout for setting to zero 1.5s
-static const int timeoutValue = 1500;
+static const int timeoutValue = 5000;
 
 // EEPROM has a limited life span; be careful how often we write to it
 static const int eepromWriteFrequency = 5000;

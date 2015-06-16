@@ -100,13 +100,16 @@ void setup() {
   buttonMode.setPressHandler(buttonModePressed);
   buttonMode.setLongPressHandler(buttonModeLongPressed);
 
+  buttonBrightness.setPressHandler(buttonBrightnessPressed);
+  buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
   
   // set the led on pin 13 to off
   pinMode(pinLed, OUTPUT);
   digitalWrite(pinLed, arduinoLed);
 
-  // set the button and vss pins to be INPUT_PULLUP
+  // set the button pins to be INPUT_PULLUP
   pinMode(pinModeButton, INPUT_PULLUP);
+  pinMode(pinBrightnessSw, INPUT_PULLUP);
 
   // set the lights on button to INPUT_PULLUP
   pinMode(pinLightsOn, INPUT_PULLUP);
@@ -172,6 +175,7 @@ void loop() {
     timer.update();
 
     buttonMode.check();
+    buttonBrightness.check();
 
     checkForTimeout();
    }

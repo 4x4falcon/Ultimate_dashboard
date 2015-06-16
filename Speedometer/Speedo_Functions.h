@@ -129,60 +129,9 @@ void writeTripmeter() {
 }
 
 
-
-
-
-/*
-* ISR attached to the vehicle speed sensor, triggered on every pulse from vss
-*/
-/*
-void sensorTriggered() {
-//  if (modeFunc != FUNC_CAL)
-//   {
-    if (millis() > (lastVssTrigger/10))				// check to see if millis() has rolled over occurs approximately every 50 days.
-     {
-//      duration = (millis() - lastVssTrigger) * 10;              // need to remove the /10 and * 10 when hardware divider is incorporated
-//      unsigned long duration = millis() - lastVssTrigger;
-//      if (duration > 0)
-//       {
-//        rps = 1000.0 / duration;				// Update pulses per second
-
-        avCount++;
-        if (avCount > maxCount)
-         {
-          avCount = 1;
-          duration = (millis() - lastVssTrigger) * 10;              // need to remove the /10 and * 10 when hardware divider is incorporated
-         }
-        else
-         {
-          duration += (millis() - lastVssTrigger) * 10;
-         }
-
-
-          totalOdometer++;   // += pulseDistance;			// Increment odometer
-          totalTrip_1++;       // += pulseDistance;                     // Increment tripmeter 1
-          totalTrip_2++;       // += pulseDistance;                     // Increment tripmeter 2
-          tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
-          odoNotSaved = 1;                                  // odometer can be saved to EEPROM
-//      }
-     }
-//   }
-//  else
-//   {
-//    calibrateCounter++;
-//   }
-  lastVssTrigger = millis();
-  
-  // toggle pin 13 led for  debugging
-//  arduinoLed = !arduinoLed;
-//  digitalWrite(13, arduinoLed);
-}
-*/
-
-
 /*
  *
- * a different ISR it counts the time for 100 pulses
+ * ISR it counts the time for 100 pulses
  *
  */
 
@@ -266,19 +215,6 @@ void buttonTripPressed() {
    {
     modeTrip = !modeTrip;
    }
-  else
-   {
-    if (!startCalibrateSpeed)
-     {
-      startCalibrateSpeed = !startCalibrateSpeed;
-     }
-    else
-     {
-      storeCalibrateSpeed();
-      startCalibrateSpeed = !startCalibrateSpeed;
-      modeFunc = EEPROM.readByte(eepromModeFuncAddress);
-     }
-   }
 }
 
 /*
@@ -298,6 +234,82 @@ void buttonTripLongPressed() {
 }
 
 
+/*
+*
+* These are the calibration functions
+*
+*
+*/
+
+void countCalibrate () {
+  calibrateCounter++;
+}
+
+
+void doCalibrate() {
+
+  byte tempMode = EEPROM.readByte(eepromModeFuncAddress);
+  
+  calibrateCounter = 0;
+
+  detachInterrupt(speedoInterrupt);
+
+// clear the odo display
+  odoSerial.write(254);
+  odoSerial.write(128);
+
+  odoSerial.write("                ");
+  odoSerial.write("                ");
+
+// show message on display to start and distance to drive
+  odoSerial.print("press mode      ");
+
+  if (tempMode == FUNC_KPH)
+   {
+    odoSerial.print("drive 2 km      ");
+   }
+  else
+   {
+    odoSerial.print("drive 2 m       ");
+   }
+   
+// wait for button press
+  do
+   {
+    delay(100);
+   }
+  while (digitalRead(pinModeButton));
+
+  attachInterrupt(speedoInterrupt, countCalibrate, FALLING);
+
+// show message start driving and press button at end
+  odoSerial.print("start driving   ");
+  odoSerial.print("press mode @ end");
+
+  delay(1000);
+  do
+   {
+// update the calibrate counter display;
+    odoSerial.print("                ");
+    sprintf(buffer, "%12d", calibrateCounter);
+    odoSerial.print(buffer);
+   }
+  while (digitalRead(pinModeButton));
+
+// save calibrate data to eeprom{
+  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, float(calibrateCounter/2));
+
+  detachInterrupt(speedoInterrupt);
+
+  attachInterrupt(speedoInterrupt, sensorTriggered_2, FALLING);
+  
+  // return to default mode
+  modeFunc = tempMode;
+  setupOdometerDisplay();
+}
+
+
+
 /* RKS
 *
 * toggle between functions when mode button is pressed
@@ -305,21 +317,13 @@ void buttonTripLongPressed() {
 *
 */
 void buttonModePressed() {
-  if (modeFunc != FUNC_CAL)
+
+  modeFunc++;
+  if (modeFunc > FUNC_CAL)
    {
-    modeFunc = !modeFunc;
-#ifdef ECHO_SERIAL
-    Serial.print("Saving modeFunc to EEPROM     ");
-    Serial.println(modeFunc);
-#else
-    EEPROM.writeByte(eepromModeFuncAddress, modeFunc);
-#endif
+    modeFunc = FUNC_KPH;
    }
-  else
-   {
-    modeCalibrate = FUNC_CAL_SPD;
-    updateCalibrateDisplay();
-   }
+
 }
 
 /*
@@ -328,14 +332,9 @@ void buttonModePressed() {
 */
 
 void buttonModeLongPressed() {
-  if (rps < 0.0001)                              // only enter calibration if stationary
+  if ((rps < 0.0001) && (modeFunc == FUNC_CAL))                              // only enter calibration if stationary and already selected calibrate
    {
-    byte tempMode = modeFunc;                    // so can restore to original function mode
-    modeCalibrate = FUNC_CAL_SPD;
     doCalibrate();
-
-  // last must be to return to previous mode
-    modeFunc = tempMode;
    }
 }
 

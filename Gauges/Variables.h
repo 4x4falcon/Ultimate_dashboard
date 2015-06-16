@@ -29,6 +29,10 @@ SoftwareSerial fuelSerial(serialRX, fuelSerialTX);
 // Helper class for handling MODE button presses
 Button buttonMode = Button(pinModeButton, LOW, 3000);
 
+// Helper class for handling MODE button presses
+Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+
+volatile byte brightnessBoost = 5;
 
 // Helper class for processing at intervals
 Timer timer = Timer();

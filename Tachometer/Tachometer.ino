@@ -80,36 +80,45 @@ void setup() {
   Serial.println(tachoStep);
 #endif
 
-  // timer to update the speedo and odometer display every 1000ms (1s)
-  timer.every(1000, updateDisplay);
+  // timer to update the tachometer display every 1000ms (1s)
+  timer.every(updateTime, updateDisplay);
 
   // Set up mode button handlers
   buttonMode.setPressHandler(buttonModePressed);
   buttonMode.setLongPressHandler(buttonModeLongPressed);
+
+  // Set up brightness button handlers
+  buttonBrightness.setPressHandler(buttonBrightnessPressed);
+  buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
 
   //setup speedo and odo software serial baud
 
   tachoSerial.begin(9600);
   delay(500);
   tachoSerial.write(0x76);
-
   tachoPixels.begin();
+
+//  tachoSerial.print(" RPM");
 
   displayRpm(0);
 
   pinMode(tachoInterrupt, INPUT_PULLUP);
   
-  // turn the led on pin 13 off
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
-
   // set up the lights on input and set brightness
   pinMode(pinLightsOn, INPUT_PULLUP);
+  pinMode(pinModeButton, INPUT_PULLUP);
+  pinMode(pinBrightnessSw, INPUT_PULLUP);
+
+  pinMode(pinLightsOn, INPUT_PULLUP);
+
   setBrightness();
 
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(tachoInterrupt, sensorTriggered, RISING);
 
+  // turn the led on pin 13 off
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
 }
 
 
@@ -127,6 +136,7 @@ void loop() {
     timer.update();
 
     buttonMode.check();
+    buttonBrightness.check();
 
     checkForTimeout();
 
