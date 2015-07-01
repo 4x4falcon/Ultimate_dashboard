@@ -22,7 +22,7 @@ volatile byte pulseCount = 0;
 volatile byte doSpeed = 0;
 
 // Rotations (rps) per second, set by the speedo ISR
-volatile float rps = 0.0;
+//volatile float rps = 0.0;
 
 // timeout
 volatile unsigned long lastTrigger = 0;

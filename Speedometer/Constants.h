@@ -82,5 +82,3 @@ static const byte numOdoDigits = 16;
 static const byte numOdoLines = 2;
 
 
-
-

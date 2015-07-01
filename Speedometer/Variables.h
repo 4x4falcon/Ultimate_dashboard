@@ -25,9 +25,6 @@ volatile unsigned long lastTrigger = 0;
 // The last time the vss sensor was triggered
 volatile unsigned long lastVssTrigger = 0;
 
-// Rotations (rps) per second, set by the speedo ISR
-volatile float rps = 0.0;
-
 // Odometer value, set by the speedo ISR
 volatile unsigned long totalOdometer = 0UL;
 

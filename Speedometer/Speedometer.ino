@@ -37,7 +37,6 @@
 #include "Display_Functions.h"
 #include "Speedo_Functions.h"
 #include "Version.h"
-//#include "Calibrate_Functions.h"
 
 void setup() {
   Serial.begin(9600);
@@ -55,8 +54,6 @@ void setup() {
   eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
 
   eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
-
-
 
   // Read odometer value from flash memory
   totalOdometer = EEPROM.readLong(eepromOdoAddress);
@@ -156,7 +153,5 @@ void loop() {
     checkForTimeout();
     checkForEepromWrite();
    }
-
-
 }
 

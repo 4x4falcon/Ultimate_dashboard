@@ -109,7 +109,7 @@ void writeOdometer() {
 
 void writeTripmeter() {
 
-  if ((rps < 0.00001) && (tripNotSaved))
+  if ((speed == 0) && (tripNotSaved))
    {
 #ifdef ECHO_SERIAL
         Serial.print("Saving Trip_1 to EEPROM    ");
@@ -169,23 +169,7 @@ void sensorTriggered_2() {
 * toggle between tripmeter_1 and tripmeter_2 when not in calibrate mode
 */
 void buttonTripPressed() {
-  if (modeSpeedoFunc != FUNC_CAL)
-   {
-    modeTrip = !modeTrip;
-   }
-  else
-   {
-    if (!startCalibrateSpeed)
-     {
-      startCalibrateSpeed = !startCalibrateSpeed;
-     }
-    else
-     {
-      storeCalibrateSpeedo();
-      startCalibrateSpeed = !startCalibrateSpeed;
-      modeSpeedoFunc = EEPROM.readByte(eepromModeSpeedoFuncAddress);
-     }
-   }
+  modeTrip = !modeTrip;
 }
 
 
@@ -197,13 +181,89 @@ void buttonTripLongPressed() {
 
   if (modeTrip == MODE_TRIPMETER_1)
    {
-    totalTrip_1 = 0.0;
+    totalTrip_1 = 0;
    }
   if (modeTrip == MODE_TRIPMETER_2)
    {
-    totalTrip_2 = 0.0;
+    totalTrip_2 = 0;
    }
 }
+
+
+/*
+*
+* These are the calibration functions
+*
+*
+*/
+
+void countCalibrate () {
+  calibrateCounter++;
+}
+
+
+void doCalibrate() {
+
+  byte tempMode = EEPROM.readByte(eepromModeSpeedoFuncAddress);
+  
+  calibrateCounter = 0;
+
+  detachInterrupt(speedoInterrupt);
+
+// clear the odo display
+  odoSerial.write(254);
+  odoSerial.write(128);
+
+  odoSerial.write("                ");
+  odoSerial.write("                ");
+
+// show message on display to start and distance to drive
+  odoSerial.print("press mode      ");
+
+  if (tempMode == FUNC_KPH)
+   {
+    odoSerial.print("drive 2 km      ");
+   }
+  else
+   {
+    odoSerial.print("drive 2 m       ");
+   }
+   
+// wait for button press
+  do
+   {
+    delay(100);
+   }
+  while (digitalRead(pinSpeedoModeButton));
+
+  attachInterrupt(speedoInterrupt, countCalibrate, FALLING);
+
+// show message start driving and press button at end
+  odoSerial.print("start driving   ");
+  odoSerial.print("press mode @ end");
+
+  delay(1000);
+  do
+   {
+// update the calibrate counter display;
+    odoSerial.print("                ");
+    sprintf(buffer, "%12d", calibrateCounter);
+    odoSerial.print(buffer);
+   }
+  while (digitalRead(pinSpeedoModeButton));
+
+// save calibrate data to eeprom{
+  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, float(calibrateCounter/2));
+
+  detachInterrupt(speedoInterrupt);
+
+  attachInterrupt(speedoInterrupt, sensorTriggered_2, FALLING);
+  
+  // return to default mode
+  modeSpeedoFunc = tempMode;
+  setupOdometerDisplay();
+}
+
 
 
 /* RKS
@@ -213,20 +273,10 @@ void buttonTripLongPressed() {
 *
 */
 void buttonSpeedoModePressed() {
-  if (modeSpeedoFunc != FUNC_CAL)
+  modeSpeedoFunc++;
+  if (modeSpeedoFunc > FUNC_CAL)
    {
-    modeSpeedoFunc = !modeSpeedoFunc;
-#ifdef ECHO_SERIAL
-    Serial.print("Saving modeSpeedoFunc to EEPROM     ");
-    Serial.println(modeSpeedoFunc);
-#else
-    EEPROM.writeByte(eepromModeSpeedoFuncAddress, modeSpeedoFunc);
-#endif
-   }
-  else
-   {
-    modeSpeedoCalibrate = FUNC_CAL_SPD;
-    updateCalibrateDisplay();
+    modeSpeedoFunc = FUNC_KPH;
    }
 }
 
@@ -236,14 +286,9 @@ void buttonSpeedoModePressed() {
 */
 
 void buttonSpeedoModeLongPressed() {
-  if (rps < 0.0001)                              // only enter calibration if stationary
+  if ((speed ==  0) && (modeSpeedoFunc == FUNC_CAL))                              // only enter calibration if stationary and already selected calibrate
    {
-    byte tempMode = modeSpeedoFunc;                    // so can restore to original function mode
-    modeSpeedoCalibrate = FUNC_CAL_SPD;
     doCalibrate();
-
-  // last must be to return to previous mode
-    modeSpeedoFunc = tempMode;
    }
 }
 

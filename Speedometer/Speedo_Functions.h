@@ -79,7 +79,6 @@ void writeOdometer() {
 
   if ((loopTime - lastOdometerWrite) > odometerWriteFrequency)
    {
-//    if (rps > 0.01)
      {
       if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
        {
@@ -108,13 +107,13 @@ void writeOdometer() {
 
 void writeTripmeter() {
 
-  if ((rps < 0.00001) && (tripNotSaved))
+  if ((speed == 0) && (tripNotSaved))
    {
 #ifdef ECHO_SERIAL
-        Serial.print("Saving Trip_1 to EEPROM    ");
-        Serial.println(totalTrip_1);
-        Serial.print("Saving Trip_2 to EEPROM    ");
-        Serial.println(totalTrip_2);
+    Serial.print("Saving Trip_1 to EEPROM    ");
+    Serial.println(totalTrip_1);
+    Serial.print("Saving Trip_2 to EEPROM    ");
+    Serial.println(totalTrip_2);
 #else
     EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
     EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
@@ -332,7 +331,7 @@ void buttonModePressed() {
 */
 
 void buttonModeLongPressed() {
-  if ((rps < 0.0001) && (modeFunc == FUNC_CAL))                              // only enter calibration if stationary and already selected calibrate
+  if ((speed ==  0) && (modeFunc == FUNC_CAL))                              // only enter calibration if stationary and already selected calibrate
    {
     doCalibrate();
    }
