@@ -188,6 +188,7 @@ void loop() {
   if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))
    {
     timer.update();
+    timer2.update();
 
     buttonTrip.check();
     buttonSpeedoMode.check();

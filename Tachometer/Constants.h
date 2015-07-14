@@ -45,6 +45,6 @@ static const byte numTachoLeds = 16;
 
 // the tachometer sensor interrupt
 
-static const byte tachoInterrupt = 0;
+static const byte tachoInterrupt = 1;
 
 

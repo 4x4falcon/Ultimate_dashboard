@@ -36,7 +36,7 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
  *
 2	pinSpeedoInterrupt	speedoInterrupt = 0	Vehicle Speed sensor		J14	pin 2
 3	pinTachoInterrupt	tachoInterrupt = 1	Tacho input			J18	pin 2
-	
+4 	
 5	pinTripButton		Trip Button				J16	pin 1
 6	pinSpeedoModeButton	Speedo Mode Button			J15	pin 1
 7	pinTachoModeButton	Tacho Mode Button			J17	pin 1
