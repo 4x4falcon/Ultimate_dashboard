@@ -48,7 +48,7 @@ void setup() {
   eepromOdoAddress = EEPROM.getAddress(sizeof(totalOdometer));
   eepromTrip1Address = EEPROM.getAddress(sizeof(totalTrip_1));
   eepromTrip2Address = EEPROM.getAddress(sizeof(totalTrip_2));
-  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(int));
+  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
   eepromModeSpeedoFuncAddress = EEPROM.getAddress(sizeof(byte));
 
   eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(byte));
@@ -76,13 +76,13 @@ void setup() {
 
 
   // Read odometer value from flash memory
-  totalOdometer = EEPROM.readFloat(eepromOdoAddress);
+  totalOdometer = EEPROM.readLong(eepromOdoAddress);
 
   // Read tripmeter 1 value from flash memory
-  totalTrip_1 = EEPROM.readFloat(eepromTrip1Address);
+  totalTrip_1 = EEPROM.readLong(eepromTrip1Address);
 
   // Read tripmeter 2 value from flash memory
-  totalTrip_2 = EEPROM.readFloat(eepromTrip2Address);
+  totalTrip_2 = EEPROM.readLong(eepromTrip2Address);
 
   // calculate pulse distance
   // calibration is over 2 kilometers or miles but is stored as for 1 kilometer or mile
@@ -129,6 +129,7 @@ void setup() {
 
   fuelLower = EEPROM.readInt(eepromFuelLowerAddress);
   fuelUpper = EEPROM.readInt(eepromFuelUpperAddress);
+  fuelMax = EEPROM.readInt(eepromFuelMaxAddress);
   fuelWarn = EEPROM.readInt(eepromFuelWarnAddress);
 
 
@@ -183,6 +184,18 @@ void setup() {
 * Main loop
 */
 void loop() {
+
+  while (Serial.available()) {
+    char c = Serial.read();  //gets one byte from serial buffer
+    readString += c; //makes the string readString
+    delay(2);  //slow looping to allow buffer to fill with next character
+  }
+
+  if (readString.length() >0) {
+    doSerialCommand(readString);
+    readString=""; //empty for next input
+  } 
+  
   loopTime = millis();
 
   if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))

@@ -6,19 +6,24 @@
  *
  */
 
+#include <SoftwareSerial.h>
 #include <EEPROMex.h>
-#include <EEPROMVar.h>
+#include <Adafruit_NeoPixel.h>
 
+#include "Button.h"
+#include "Timer.h"
+#include "Constants.h";
 #include "Version.h";
+#include "Variables.h";
 
 void setup () {
 
   Serial.begin(9600);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
-  int eepromTachoTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
-  int eepromTachoVersionHighAddress = EEPROM.getAddress(sizeof(byte));
-  int eepromTachoVersionLowAddress = EEPROM.getAddress(sizeof(byte));
+  eepromTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
+  eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
+  eepromVersionLow = EEPROM.getAddress(sizeof(byte));
 
   int eepromOdoAddress = EEPROM.getAddress(sizeof(long));
   int eepromTrip1Address = EEPROM.getAddress(sizeof(long));
@@ -28,13 +33,45 @@ void setup () {
 
   int eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
-  EEPROM.writeBlock(eepromTachoTitleAddress, title);
-  EEPROM.writeByte(eepromTachoVersionHighAddress, versionHigh);
-  EEPROM.writeByte(eepromTachoVersionLowAddress, versionLow);
+  eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(byte));
+  eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
+
+// VOLTMETER
+   eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
+   eepromVoltUpperAddress =  EEPROM.getAddress(sizeof(int));
+   eepromVoltMaxAddress =  EEPROM.getAddress(sizeof(int));
+   eepromVoltWarnAddress =  EEPROM.getAddress(sizeof(int));
+
+// OIL PRESSURE METER
+  eepromOilLowerAddress =  EEPROM.getAddress(sizeof(int));
+  eepromOilUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromOilMaxAddress =  EEPROM.getAddress(sizeof(int));
+  eepromOilWarnAddress =  EEPROM.getAddress(sizeof(int));
+
+// WATER TEMPERATURE METER
+  eepromTempLowerAddress =  EEPROM.getAddress(sizeof(int));
+  eepromTempUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromTempMaxAddress =  EEPROM.getAddress(sizeof(int));
+  eepromTempWarnAddress =  EEPROM.getAddress(sizeof(int));
+
+// FUEL LEVEL METER  
+  eepromFuelLowerAddress =  EEPROM.getAddress(sizeof(int));
+  eepromFuelUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromFuelMaxAddress =  EEPROM.getAddress(sizeof(int));
+  eepromFuelWarnAddress =  EEPROM.getAddress(sizeof(int));
+
+
+
+
+  EEPROM.writeBlock(eepromTitleAddress, title);
+  EEPROM.writeByte(eepromVersionHigh, versionHigh);
+  EEPROM.writeByte(eepromVersionLow, versionLow);
 
   EEPROM.writeLong(eepromOdoAddress, 0UL);
   EEPROM.writeLong(eepromTrip1Address, 0UL);
   EEPROM.writeLong(eepromTrip2Address, 0UL);
+
+
 
 
   // This is the distance per pulse in km
@@ -71,26 +108,57 @@ void setup () {
 
   EEPROM.writeByte(eepromModeFuncAddress, 0);
 
+
+  EEPROM.writeByte(eepromTachoCalibrateAddress, 4);
+  EEPROM.writeByte(eepromTachoTypeAddress, TACHO_PETROL);
+
+
+  // Setup voltmeter
+
+  EEPROM.writeInt(eepromVoltLowerAddress, voltLower);
+  EEPROM.writeInt(eepromVoltUpperAddress, voltUpper);
+  EEPROM.writeInt(eepromVoltMaxAddress, voltMax);
+  EEPROM.writeInt(eepromVoltWarnAddress, voltWarn);
+
+  // Setup oil pressure meter
+  EEPROM.writeInt(eepromOilLowerAddress, oilLower);
+  EEPROM.writeInt(eepromOilUpperAddress, oilUpper);
+  EEPROM.writeInt(eepromOilMaxAddress, oilMax);
+  EEPROM.writeInt(eepromOilWarnAddress, oilWarn);
+
+  // Setup water temperature meter
+  EEPROM.writeInt(eepromTempLowerAddress, tempLower);
+  EEPROM.writeInt(eepromTempUpperAddress, tempUpper);
+  EEPROM.writeInt(eepromTempMaxAddress, tempMax);
+  EEPROM.writeInt(eepromTempWarnAddress, tempWarn);
+
+  // Setup fuel level meter
+  EEPROM.writeInt(eepromFuelLowerAddress, fuelLower);
+  EEPROM.writeInt(eepromFuelUpperAddress, fuelUpper);
+  EEPROM.writeInt(eepromFuelMaxAddress, fuelMax);
+  EEPROM.writeInt(eepromFuelWarnAddress, fuelWarn);
+
+
   // confirm eeprom has been written to
 
   Serial.print("Speedo title address = ");
-  Serial.print(eepromTachoTitleAddress);
+  Serial.print(eepromTitleAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  EEPROM.readBlock(eepromTachoTitleAddress, title);
+  EEPROM.readBlock(eepromTitleAddress, title);
   Serial.println(title);
 
   Serial.print("Speedo Version High address = ");
-  Serial.print(eepromTachoVersionHighAddress);
+  Serial.print(eepromVersionHigh);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromTachoVersionHighAddress));    
+  Serial.println(EEPROM.readByte(eepromVersionHigh));    
 
-  Serial.print("Speedo Version High address = ");
-  Serial.print(eepromTachoVersionLowAddress);
+  Serial.print("Speedo Version Low address = ");
+  Serial.print(eepromVersionLow);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromTachoVersionLowAddress));    
+  Serial.println(EEPROM.readByte(eepromVersionLow));
 
   Serial.println();
   Serial.print("Odometer address = ");
@@ -113,6 +181,9 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readFloat(eepromSpeedoCalibrateAddress));    
+
+
+
 
 }
 

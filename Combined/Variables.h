@@ -165,7 +165,8 @@ volatile int tempMax = 150;		// 150deg C
 volatile int tempWarn = 100;		// 100deg C warn when above this
 volatile int fuelLower = 0;
 volatile int fuelUpper = 1023;		// no max for fuel as it is displayed as percentage
-volatile int fuelWarn = 5;		// warn when below this
+volatile int fuelMax = 100;    // 100%
+volatile int fuelWarn = 5;    // warn when below this
 
 
 // The distance travelled in one pulse from the vehicle speed sensor in km for miles multiply by .58 in display function
@@ -214,4 +215,7 @@ SoftwareSerial fuelSerial(pinSerialRX,pinFuelSerialTX);
 
 // the state of the arduino led on pin 13
 volatile byte arduinoLed = 0;
+
+int passCode = 9009;
+String readString;
 
