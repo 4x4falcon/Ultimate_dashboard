@@ -1,3 +1,4 @@
+// Tacho_Functions.h
 // Tacho Functions
 
 /*
@@ -57,44 +58,6 @@ void tachoTriggered() {
 
 }
 
-
-
-
-
-/*
-* Updates the tachometer screen depending on the current mode
-*
-*/
-/*
-void updateTachoDisplay() {
-
-  if (doTacho)
-   {
-    doTacho = !doTacho;
-    rpm = 1101;
-
-//    rpm = (pps * 60) / tachoPPR;
-
-    float v1 = (float(durationTacho) / float(pulseMaxCount));
-
-    rpm = int( ((1000.0 / v1) * 60) / tachoPPR );
-
-#ifdef ECHO_SERIAL
-
-    Serial.print("v1      ");
-    Serial.println(v1);
-
-    Serial.print("rpm     ");
-    Serial.println(rpm);
-
-#endif
-
-//    setBrightness();
-    displayRpm(rpm);
-   }
-}
-*/
-
 /*
 * mode button pressed
 */
@@ -108,21 +71,4 @@ void buttonTachoModeLongPressed() {
 
 }
 
-
-
-/*
-* TODO
-*
-* This is the sleep function
-* It will be activated when the ignition is turned off.
-* It needs to write odo and trip values to the eeprom
-* Will wake up on ignition turned on
-*
-*/
-/*
-void goToSleep() {
-  
-
-}
-*/
 

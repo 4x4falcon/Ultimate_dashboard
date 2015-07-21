@@ -1,3 +1,4 @@
+// Speedo_Functions.h
 // Speedo Functions
 
 /*
@@ -69,7 +70,6 @@ void checkForEepromWrite() {
   }
 }
 
-
 /*
 * Writes odometer total to EEPROM
 * only if it's been longer than write frequency and totalOdometer is greater than what is currently stored
@@ -80,22 +80,18 @@ void writeOdometer() {
 
   if ((loopTime - lastOdometerWrite) > odometerWriteFrequency)
    {
-//    if (rps > 0.01)
+    if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
      {
-      if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
-       {
 #ifdef ECHO_SERIAL
-        Serial.print("Saving odometer to EEPROM    ");
-        Serial.println(totalOdometer);
+      Serial.print("Saving odometer to EEPROM    ");
+      Serial.println(totalOdometer);
 #else
-        EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
+      EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
 #endif
-        lastOdometerWrite = loopTime;
-       }
+      lastOdometerWrite = loopTime;
      }
    }
 }
-
 
 /*
 * write tripmeters to EEPROM
@@ -120,7 +116,6 @@ void writeTripmeter() {
     EEPROM.writeFloat(eepromTrip1Address,totalTrip_1);
     EEPROM.writeFloat(eepromTrip2Address,totalTrip_2);
 #endif
-
     tripNotSaved = !tripNotSaved;
    }
   else
@@ -128,8 +123,6 @@ void writeTripmeter() {
     tripNotSaved = 1;
    }
 }
-
-
 
 /*
  *
@@ -164,14 +157,12 @@ void sensorTriggered_2() {
    }
 }
 
-
 /*
 * toggle between tripmeter_1 and tripmeter_2 when not in calibrate mode
 */
 void buttonTripPressed() {
   modeTrip = !modeTrip;
 }
-
 
 /*
 * reset (current) trip meter only when trip button is long pressed
@@ -189,7 +180,6 @@ void buttonTripLongPressed() {
    }
 }
 
-
 /*
 *
 * These are the calibration functions
@@ -200,7 +190,6 @@ void buttonTripLongPressed() {
 void countCalibrate () {
   calibrateCounter++;
 }
-
 
 void doCalibrate() {
 
@@ -264,8 +253,6 @@ void doCalibrate() {
   setupOdometerDisplay();
 }
 
-
-
 /* RKS
 *
 * toggle between functions when mode button is pressed
@@ -292,41 +279,4 @@ void buttonSpeedoModeLongPressed() {
    }
 }
 
-
-
-
-/*
-* TODO
-*
-* This is the sleep function
-* It will be activated when the ignition is turned off.
-* It needs to write odo and trip values to the eeprom
-* Will wake up on ignition turned on
-*
-*/
-
-/*
-void goToSleep() {
-  
-// write the odometer to EEPROM
-
-  if (totalOdometer > EEPROM.readFloat(eepromOdoAddress))
-   {
-#ifdef ECHO_SERIAL
-    Serial.print ("Saving odometer to EEPROM    ");
-    Serial.println (totalOdometer);
-#else
-    EEPROM.writeFloat(eepromOdoAddress, totalOdometer);
-#endif
-   }
-
-// write the tripmeters to EEPROM
-  writeTripmeter();
-  
-// write the modeSpeedoFunc to EEPROM
-  EEPROM.writeByte(eepromModeSpeedoFuncAddress, modeSpeedoFunc);
-
-
-}
-*/
 

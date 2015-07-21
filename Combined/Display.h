@@ -2,8 +2,6 @@
 
 // Set the display brightness
 
-// TODO move all display changes to here rather than different files
-
 void setBrightness() {
 
 if (!digitalRead(pinLightsOn))      // confirm that this is low when completing circuit
@@ -200,9 +198,295 @@ void updateTachoDisplay() {
    }
 }
 
+
+
+/*
+ * Sets KPH,MPH and CAL display
+ * Displays current odometer distance at eighth character of top row of 16x2 white on black LCD
+ *
+ */
+
+void displayOdometer () {
+
+  char buffer[17] = "";
+  
+  odoSerial.write(254);    // cursor to the first character of top row
+  odoSerial.write(128);
+
+  if (modeSpeedoFunc == FUNC_KPH)
+   {
+    odoSerial.print("KPH");
+   }
+  else if (modeSpeedoFunc == FUNC_MPH)
+   {
+    odoSerial.print("MPH");
+   }
+  else if (modeSpeedoFunc == FUNC_CAL)
+   {
+    odoSerial.print("CAL");
+   }
+
+
+
+// cursor to eighth character of top line
+  odoSerial.write(254);
+  odoSerial.write(135);
+
+  float odo = (totalOdometer * pulseDistance) / 1000.0;
+
+  if (odo > 999999.9)
+   {
+     odo = 0.0;
+     totalOdometer = 0;
+   }
+
+
+  dtostrf(odo,9,1,buffer);
+
+  odoSerial.print(buffer);
+
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Odo    ");
+  Serial.println (buffer);
+
+#endif
+
+}
+
+/*
+ * Displays tripmeter 1 at third digit of lower row of 16x2 white on black LCD
+ * Displays tripmeter 2 at twelth digit of lower row of 16x2 white on black LCD
+ *
+ */
+
+void displayTripmeter () {
+
+  char buffer[6] = "";
+
+// cursor to the first character of bottom line
+
+//  odoSerial.write(254);
+//  odoSerial.write(192);
+
+//  odoSerial.print("1        2      ");
+
+// cursor to third character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(194);
+
+  float odo = (totalTrip_1 * pulseDistance) / 1000.0;
+  
+  if (odo > 999.9)
+   {
+     odo = 0.0;
+     totalTrip_1 = 0;
+   }
+
+  dtostrf(odo,5,1,buffer);
+  odoSerial.print(buffer);
+
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Trip_1    ");
+  Serial.println (buffer);
+
+#endif
+
+// cursor to twelth character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(203);
+
+  odo = (totalTrip_2 * pulseDistance) / 1000.0;
+  
+  if (odo > 999.9)
+   {
+     odo = 0.0;
+     totalTrip_2 = 0;
+   }
+
+
+  dtostrf(odo,5,1,buffer);
+  odoSerial.print(buffer);
+
+#ifdef ECHO_SERIAL
+
+  Serial.print ("Trip_2    ");
+  Serial.println (buffer);
+
+#endif
+
+  if (!modeTrip)
+   {
+    odoSerial.write(254);
+    odoSerial.write(193);        // second character of bottom row
+    odoSerial.print(tripActive);
+    odoSerial.write(254);
+    odoSerial.write(202);        // eleventh character of bottom row
+    odoSerial.print(" ");
+   }
+  else
+   {
+    odoSerial.write(254);
+    odoSerial.write(193);        // second character of bottom row
+    odoSerial.print(" ");
+    odoSerial.write(254);
+    odoSerial.write(202);        // eleventh character of bottom row
+    odoSerial.print(tripActive);
+   }
+
+}
+
+
+/*
+ * setup the odometer Display
+ *
+ */
+
+
+void setupOdometerDisplay() {
+
+// top line shows current function mode setting (KPH, MPH or CAL)
+// cursor to the first character of the top line
+
+  odoSerial.write(254);
+  odoSerial.write(128);
+
+  odoSerial.write("KPH    0000000.0");
+
+// display current Odometer reading  
+  displayOdometer();
+
+// bottom line shows tripmeters with current one highlighted
+// cursor to first character of bottom line
+
+  odoSerial.write(254);
+  odoSerial.write(192);
+  
+  odoSerial.write("1 000.0  2 000.0");
+
+  displayTripmeter();
+
+}
+
+
+
 void updateMetersDisplay() {
   // GAUGES display
+
+#ifdef ECHO_SERIAL
+  Serial.println("Updating display voltmeter, oil pressure gauge, water temperature gauge, fuel level gauge");
+#endif
+
+#define SAMPLES 3
+
+// voltmeter
+// does not need maximum/minimum values as is based on voltage divider
+  val = 0.0;
+  for (int i=0; i< SAMPLES ; i++) val += analogRead(voltAnalogPin);
+  val /= SAMPLES;
+
+  float v = (val * 5.0) / 1024;
+  float v2 = v / (r2 / (r1 + r2));
+#ifdef ECHO_SERIAL
+  dtostrf(v2, 4, 1, buffer);
+  Serial.println(buffer);
+#endif
+
+  sprintf(buffer, "%4d", int(v2 * 10));  // setup as integer
+  voltSerial.print(buffer);             // write the value to the display
+
+// check for voltage warning
+  if (voltWarnLow)
+   {
+    
+   }
+  else
+   {
+    
+   }
+
+// oil pressure meter
+  val = 0.0;
+  for (int i=0; i< SAMPLES ; i++) val += analogRead(oilAnalogPin);
+  val /= SAMPLES;
+
+//  float v = (val * 5.0) / 1024;
+//  float v2 = v / (r2 / (r1 + r2));
+#ifdef ECHO_SERIAL
+  dtostrf(v2, 4, 1, buffer);
+  Serial.println(buffer);
+#endif
+
+  sprintf(buffer, "%4d", int(v2 * 10));  // setup as integer
+  oilSerial.print(buffer);             // write the value to the display
+
+// check for voltage warning
+  if (oilWarnLow)
+   {
+    
+   }
+  else
+   {
+    
+   }
+  
+// water temperature meter
+  val = 0.0;
+  for (int i=0; i< SAMPLES ; i++) val += analogRead(tempAnalogPin);
+  val /= SAMPLES;
+
+//  float v = (val * 5.0) / 1024;
+//  float v2 = v / (r2 / (r1 + r2));
+#ifdef ECHO_SERIAL
+  dtostrf(v2, 4, 1, buffer);
+  Serial.println(buffer);
+#endif
+
+  sprintf(buffer, "%4d", int(v2 * 10));  // setup as integer
+  tempSerial.print(buffer);             // write the value to the display
+  
+// check for voltage warning
+  if (tempWarnLow)
+   {
+    
+   }
+  else
+   {
+    
+   }
+
+// fuel level meter display
+  val = 0.0;
+  for (int i=0; i< SAMPLES ; i++) val += analogRead(fuelAnalogPin);
+  val /= SAMPLES;
+
+//  float v = (val * 5.0) / 1024;
+//  float v2 = v / (r2 / (r1 + r2));
+#ifdef ECHO_SERIAL
+  dtostrf(v2, 4, 1, buffer);
+  Serial.println(buffer);
+#endif
+
+  sprintf(buffer, "%4d", int(v2 * 10));  // setup as integer
+  fuelSerial.print(buffer);             // write the value to the display
+
+// check for voltage warning
+  if (fuelWarnLow)
+   {
+    
+   }
+  else
+   {
+    
+   }
+  
 }
+
+
+
 
 void updateDisplay() {
 
@@ -217,3 +501,5 @@ void updateDisplay() {
   updateMetersDisplay();
   setBrightness();
 }
+
+

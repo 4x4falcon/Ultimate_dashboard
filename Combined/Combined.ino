@@ -1,7 +1,5 @@
 /*
 * Ultimate Dashboard
-* This is the speedo section of the programming
-* It will hold all parts of the programming eventually
 * there should only be setup and loop functions in this file
 *
 * all other functions should be in the included .h files below
@@ -15,7 +13,6 @@
 #include <EEPROMex.h>
 #include <Adafruit_NeoPixel.h>
 
-
 //program specific include files
 
 #include "Version.h"
@@ -23,22 +20,16 @@
 #include "Timer.h"
 #include "Constants.h"
 #include "Variables.h"
-//#include "Calibrate.h"
-#include "Speedo_Display_Functions.h"
-//#include "Tacho_Display_Functions.h"
 #include "Display.h"
 #include "Speedo_Functions.h"
 #include "Tacho_Functions.h"
 #include "Functions.h"
 
-
-
-
 /*
 * Initialization
 */
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
   eepromTitleAddress = EEPROM.getAddress(sizeof(title));
@@ -56,23 +47,31 @@ void setup() {
 
   eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromVoltUpperAddress = EEPROM.getAddress(sizeof(int));
+  eepromVoltMinAddress = EEPROM.getAddress(sizeof(int));
   eepromVoltMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromVoltWarnAddress = EEPROM.getAddress(sizeof(int));
+  eepromVoltWarnLowAddress = EEPROM.getAddress(sizeof(byte));
 
   eepromOilLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromOilUpperAddress = EEPROM.getAddress(sizeof(int));
+  eepromOilMinAddress = EEPROM.getAddress(sizeof(int));
   eepromOilMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromOilWarnAddress = EEPROM.getAddress(sizeof(int));
+  eepromOilWarnLowAddress = EEPROM.getAddress(sizeof(byte));
   
   eepromTempLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromTempUpperAddress = EEPROM.getAddress(sizeof(int));
+  eepromTempMinAddress = EEPROM.getAddress(sizeof(int));
   eepromTempMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromTempWarnAddress = EEPROM.getAddress(sizeof(int));
+  eepromTempWarnLowAddress = EEPROM.getAddress(sizeof(byte));
   
   eepromFuelLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelUpperAddress = EEPROM.getAddress(sizeof(int));
+  eepromFuelMinAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelWarnAddress = EEPROM.getAddress(sizeof(int));
+  eepromFuelWarnLowAddress = EEPROM.getAddress(sizeof(byte));
 
 
   // Read odometer value from flash memory
@@ -114,24 +113,31 @@ void setup() {
   
   voltLower = EEPROM.readInt(eepromVoltLowerAddress);
   voltUpper = EEPROM.readInt(eepromVoltUpperAddress);
+  voltMin = EEPROM.readInt(eepromVoltMinAddress);
   voltMax = EEPROM.readInt(eepromVoltMaxAddress);
   voltWarn = EEPROM.readInt(eepromVoltWarnAddress);
+  voltWarnLow = EEPROM.readInt(eepromVoltWarnLowAddress);
 
   oilLower = EEPROM.readInt(eepromOilLowerAddress);
   oilUpper = EEPROM.readInt(eepromOilUpperAddress);
+  oilMin = EEPROM.readInt(eepromOilMinAddress);
   oilMax = EEPROM.readInt(eepromOilMaxAddress);
   oilWarn = EEPROM.readInt(eepromOilWarnAddress);
+  oilWarnLow = EEPROM.readInt(eepromOilWarnLowAddress);
 
   tempLower = EEPROM.readInt(eepromTempLowerAddress);
   tempUpper = EEPROM.readInt(eepromTempUpperAddress);
+  tempMin = EEPROM.readInt(eepromTempMinAddress);
   tempMax = EEPROM.readInt(eepromTempMaxAddress);
   tempWarn = EEPROM.readInt(eepromTempWarnAddress);
+  tempWarnLow = EEPROM.readInt(eepromTempWarnLowAddress);
 
   fuelLower = EEPROM.readInt(eepromFuelLowerAddress);
   fuelUpper = EEPROM.readInt(eepromFuelUpperAddress);
+  fuelMin = EEPROM.readInt(eepromFuelMinAddress);
   fuelMax = EEPROM.readInt(eepromFuelMaxAddress);
   fuelWarn = EEPROM.readInt(eepromFuelWarnAddress);
-
+  fuelWarnLow = EEPROM.readInt(eepromFuelWarnLowAddress);
 
   // Update the speedo and odometer display every 101ms
   timer.every(101, updateSpeedoDisplay);
@@ -150,7 +156,6 @@ void setup() {
   // Set up speedo mode button handlers
   buttonTachoMode.setPressHandler(buttonTachoModePressed);
   buttonTachoMode.setLongPressHandler(buttonTachoModeLongPressed);
-
 
   //setup speedo and odo software serial baud
 
@@ -171,8 +176,6 @@ void setup() {
   fuelSerial.begin(9600);
   updateMetersDisplay();
 
-
-
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(0, sensorTriggered_2, RISING);
   // attach interrupt for the tachometer
@@ -185,17 +188,21 @@ void setup() {
 */
 void loop() {
 
-  while (Serial.available()) {
-    char c = Serial.read();  //gets one byte from serial buffer
-    readString += c; //makes the string readString
-    delay(2);  //slow looping to allow buffer to fill with next character
+  // see if there are serial commands
+
+  while ((Serial.available()) && (speed == 0)) {
+    char c = Serial.read();     //gets one byte from serial buffer
+    readString += c;            //makes the string readString
+    delay(2);                   //slow looping to allow buffer to fill with next character
   }
+
+  // act on serial commands
 
   if (readString.length() >0) {
     doSerialCommand(readString);
-    readString=""; //empty for next input
+    readString="";              //empty for next input
   } 
-  
+
   loopTime = millis();
 
   if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))
@@ -213,5 +220,4 @@ void loop() {
     checkForTachoTimeout();
    }
 }
-
 

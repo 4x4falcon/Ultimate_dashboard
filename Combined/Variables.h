@@ -1,9 +1,14 @@
+// Variables.h
+
 // Current millis updated on each loop
 unsigned long loopTime = 0;
 
 // Display variables
 // the brightness of the neopixels default daylight
 volatile byte pixelBrightness = 12;
+
+// current value of gauge
+volatile float val = 0.0;
 
 // a buffer for storing displays
 char buffer[20];
@@ -128,45 +133,71 @@ volatile int eepromTachoTypeAddress = 0;
 // VOLTMETER
 volatile int eepromVoltLowerAddress = 0;
 volatile int eepromVoltUpperAddress = 0;
+volatile int eepromVoltMinAddress = 0;
 volatile int eepromVoltMaxAddress = 0;
 volatile int eepromVoltWarnAddress = 0;
+volatile byte eepromVoltWarnLowAddress = 0;
 
 // OIL PRESSURE METER
 volatile int eepromOilLowerAddress = 0;
 volatile int eepromOilUpperAddress = 0;
+volatile int eepromOilMinAddress = 0;
 volatile int eepromOilMaxAddress = 0;
 volatile int eepromOilWarnAddress = 0;
+volatile byte eepromOilWarnLowAddress = 0;
 
 // WATER TEMPERATURE METER
 volatile int eepromTempLowerAddress = 0;
 volatile int eepromTempUpperAddress = 0;
+volatile int eepromTempMinAddress = 0;
 volatile int eepromTempMaxAddress = 0;
 volatile int eepromTempWarnAddress = 0;
+volatile byte eepromTempWarnLowAddress = 0;
 
-// FUEL LEVEL METER  
+// FUEL LEVEL METER
 volatile int eepromFuelLowerAddress = 0;
 volatile int eepromFuelUpperAddress = 0;
+volatile int eepromFuelMinAddress = 0;
 volatile int eepromFuelMaxAddress = 0;
 volatile int eepromFuelWarnAddress = 0;
+volatile byte eepromFuelWarnLowAddress = 0;
 
 
-// meter calibration limits
+/* 
+ *  meter calibration limits
+ *  these are the values from the adc on the analog pins
+ *  if inverted (Lower>Higher) then this will work with negative coefficent sensors
+ *  Min is minimum of the gauge (this allows for expanded scale meters
+ *  Max is the full scale of the gauge
+ *  Warn is the warning level trigger
+ *  WarnLow determines if to check for below Warn (Warn=1) or above Warn (Warn=0)
+ *  
+ */
+
 volatile int voltLower = 0;
 volatile int voltUpper = 1023;
-volatile int voltMax = 16;		// 16 volts
-volatile int voltWarn = 11;		// 11 volts warn when below this
+volatile int voltMin = 0;      // 0 volts
+volatile int voltMax = 16;		 // 16 volts
+volatile int voltWarn = 11;		 // 11 volts warn when below this
+volatile byte voltWarnLow = 1;  // warn for volts low
 volatile int oilLower = 0;
 volatile int oilUpper = 1023;
-volatile int oilMax = 200;		// 200 psi
-volatile int oilWarn = 20;		// 20 psi warn when below this
+volatile int oilMin = 0;       // 0 psi
+volatile int oilMax = 200;		 // 200 psi
+volatile int oilWarn = 20;		 // 20 psi warn when below this
+volatile byte oilWarnLow = 1;   // warn for oil pressure low
 volatile int tempLower = 0;
 volatile int tempUpper = 1023;
-volatile int tempMax = 150;		// 150deg C
-volatile int tempWarn = 100;		// 100deg C warn when above this
+volatile int tempMin = 0;      // 0deg C
+volatile int tempMax = 150;		 // 150deg C
+volatile int tempWarn = 100;	 // 100deg C warn when above this
+volatile byte tempWarnLow = 0;  // warn for temp high
 volatile int fuelLower = 0;
-volatile int fuelUpper = 1023;		// no max for fuel as it is displayed as percentage
+volatile int fuelUpper = 1023;
+volatile int fuelMin = 0;      // 0%
 volatile int fuelMax = 100;    // 100%
-volatile int fuelWarn = 5;    // warn when below this
+volatile int fuelWarn = 5;     // warn when below this
+volatile byte fuelWarnLow = 1; // warn for fuel low
 
 
 // The distance travelled in one pulse from the vehicle speed sensor in km for miles multiply by .58 in display function

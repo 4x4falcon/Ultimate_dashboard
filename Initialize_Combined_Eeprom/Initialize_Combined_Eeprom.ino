@@ -37,28 +37,36 @@ void setup () {
   eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
 
 // VOLTMETER
-   eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
-   eepromVoltUpperAddress =  EEPROM.getAddress(sizeof(int));
-   eepromVoltMaxAddress =  EEPROM.getAddress(sizeof(int));
-   eepromVoltWarnAddress =  EEPROM.getAddress(sizeof(int));
+  eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
+  eepromVoltUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromVoltMinAddress =  EEPROM.getAddress(sizeof(int));
+  eepromVoltMaxAddress =  EEPROM.getAddress(sizeof(int));
+  eepromVoltWarnAddress =  EEPROM.getAddress(sizeof(int));
+  eepromVoltWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
 
 // OIL PRESSURE METER
   eepromOilLowerAddress =  EEPROM.getAddress(sizeof(int));
   eepromOilUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromOilMinAddress =  EEPROM.getAddress(sizeof(int));
   eepromOilMaxAddress =  EEPROM.getAddress(sizeof(int));
   eepromOilWarnAddress =  EEPROM.getAddress(sizeof(int));
+  eepromOilWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
 
 // WATER TEMPERATURE METER
   eepromTempLowerAddress =  EEPROM.getAddress(sizeof(int));
   eepromTempUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromTempMinAddress =  EEPROM.getAddress(sizeof(int));
   eepromTempMaxAddress =  EEPROM.getAddress(sizeof(int));
   eepromTempWarnAddress =  EEPROM.getAddress(sizeof(int));
+  eepromTempWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
 
 // FUEL LEVEL METER  
   eepromFuelLowerAddress =  EEPROM.getAddress(sizeof(int));
   eepromFuelUpperAddress =  EEPROM.getAddress(sizeof(int));
+  eepromFuelMinAddress =  EEPROM.getAddress(sizeof(int));
   eepromFuelMaxAddress =  EEPROM.getAddress(sizeof(int));
   eepromFuelWarnAddress =  EEPROM.getAddress(sizeof(int));
+  eepromFuelWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
 
 
 
@@ -117,26 +125,34 @@ void setup () {
 
   EEPROM.writeInt(eepromVoltLowerAddress, voltLower);
   EEPROM.writeInt(eepromVoltUpperAddress, voltUpper);
+  EEPROM.writeInt(eepromVoltMinAddress, voltMin);
   EEPROM.writeInt(eepromVoltMaxAddress, voltMax);
   EEPROM.writeInt(eepromVoltWarnAddress, voltWarn);
+  EEPROM.writeByte(eepromVoltWarnLowAddress, voltWarnLow);
 
   // Setup oil pressure meter
   EEPROM.writeInt(eepromOilLowerAddress, oilLower);
   EEPROM.writeInt(eepromOilUpperAddress, oilUpper);
+  EEPROM.writeInt(eepromOilMinAddress, oilMin);
   EEPROM.writeInt(eepromOilMaxAddress, oilMax);
   EEPROM.writeInt(eepromOilWarnAddress, oilWarn);
+  EEPROM.writeByte(eepromOilWarnLowAddress, oilWarnLow);
 
   // Setup water temperature meter
   EEPROM.writeInt(eepromTempLowerAddress, tempLower);
   EEPROM.writeInt(eepromTempUpperAddress, tempUpper);
+  EEPROM.writeInt(eepromTempMinAddress, tempMin);
   EEPROM.writeInt(eepromTempMaxAddress, tempMax);
   EEPROM.writeInt(eepromTempWarnAddress, tempWarn);
+  EEPROM.writeByte(eepromTempWarnLowAddress, tempWarnLow);
 
   // Setup fuel level meter
   EEPROM.writeInt(eepromFuelLowerAddress, fuelLower);
   EEPROM.writeInt(eepromFuelUpperAddress, fuelUpper);
+  EEPROM.writeInt(eepromFuelMinAddress, fuelMin);
   EEPROM.writeInt(eepromFuelMaxAddress, fuelMax);
   EEPROM.writeInt(eepromFuelWarnAddress, fuelWarn);
+  EEPROM.writeByte(eepromFuelWarnLowAddress, fuelWarnLow);
 
 
   // confirm eeprom has been written to

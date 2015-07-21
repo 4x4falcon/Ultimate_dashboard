@@ -1,3 +1,4 @@
+// Constants.h
 // Constant values
 
 
@@ -38,8 +39,8 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 3	pinTachoInterrupt	tachoInterrupt = 1	Tacho input			J18	pin 2
 4 	
 5	pinTripButton		Trip Button				J16	pin 1
-6	pinSpeedoModeButton	Speedo Mode Button			J15	pin 1
-7	pinTachoModeButton	Tacho Mode Button			J17	pin 1
+6	pinTachoModeButton	Tacho Mode Button			J15	pin 1
+7  pinSpeedoModeButton Speedo Mode Button      J17 pin 1
 8	pinLightsOn		Lights on input				J12	pin 1
 9	pinBrigthnessSw		Brightness switch			J12	pin 2
 10	pinIgnOn		Ignition on				J12	pin 3
@@ -77,8 +78,8 @@ static const byte tachoInterrupt = 1;
 
 // button inputs
 static const byte pinTripButton = 5;		//	trip button
-static const byte pinSpeedoModeButton = 6;	//	Speedo Mode Button
-static const byte pinTachoModeButton = 7;	//	Tacho Mode Button
+static const byte pinSpeedoModeButton = 7;	//	Speedo Mode Button
+static const byte pinTachoModeButton = 6;	//	Tacho Mode Button
 
 // digital inputs from 12V
 static const byte pinLightsOn = 8;		//	Lights on input
@@ -87,6 +88,32 @@ static const byte pinIgnOn = 10;		//	Ignition on
 
 // serial RX for displays not used in hardware
 static const byte pinSerialRX = 14;
+
+
+// Voltmeter
+
+static const byte voltAnalogPin = 0;
+// values of resistors in divider network on voltAnalogPin
+static const float r1 = 100000.0;
+static const float r2 = 10000.0;
+
+
+// Oil pressure meter
+
+static const byte oilAnalogPin = 1;
+
+
+// Water Temperature meter
+
+static const byte tempAnalogPin = 2;
+
+
+// Fuel Level meter
+
+static const byte fuelAnalogPin = 3;
+
+
+
 
 // OUTPUTS will depend on display type, these are for software serial
 
