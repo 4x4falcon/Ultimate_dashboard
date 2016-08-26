@@ -12,6 +12,12 @@ Uno = Arduino Uno - utilizing a separate Uno for Speedometer, Tachometer and Gau
 
 Nano = Arduino Nano - utilizing a separate Nano for Speedometer, Tachometer and Gauges
 
+
+Development, particularly hardware, is currently (August 2016) focused on Nano version as I need these for a particular application
+
+
+Eventually all of this will probably be combined into the mega only version which will include some vehicle specific hardware files.
+
 They are arranged as:
 
 Speedometer
