@@ -99,7 +99,8 @@ void setup() {
   tachoPixels.begin();
 
 //  tachoSerial.print(" RPM");
-
+//  displayRpm(1101);
+//  delay(5000);
   displayRpm(0);
 
   pinMode(tachoInterrupt, INPUT_PULLUP);

@@ -101,6 +101,10 @@ void setup() {
   buttonBrightness.setPressHandler(buttonBrightnessPressed);
   buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
 
+  pinMode(pinOdoSerialTX, OUTPUT);
+  pinMode(pinSpeedoSerialTX, OUTPUT);
+  pinMode(pinSpeedoNeopixel, OUTPUT);
+
   //setup speedo and odo software serial baud
 
   speedoSerial.begin(9600);

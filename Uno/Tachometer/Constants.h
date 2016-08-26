@@ -19,10 +19,14 @@ static const byte pinModeButton = 5;
 static const byte pinSerialRX = 6;
 
 // the tachometer lcd serial pin
-static const byte pinTachoSerialTX = 11;
+//static const byte pinTachoSerialTX = 11;
 
 // the tachometer neopixel led
-static const byte pinTachoNeopixel = 12;
+//static const byte pinTachoNeopixel = 12;
+
+// tachometer
+static const byte pinTachoSerialTX = 18;  //  Tacho LED soft serial tx
+static const byte pinTachoNeopixel = 19;  //  Tacho neopixel tx
 
 // digital inputs from 12V
 static const byte pinLightsOn = 8;		//	Lights on input

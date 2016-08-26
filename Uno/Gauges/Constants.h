@@ -12,7 +12,7 @@ static const byte serialRX = 12;
 // Voltmeter
 
 static const byte voltAnalogPin = 0;
-static const byte voltSerialTX = 4;
+static const byte voltSerialTX = 22;
 static const byte voltDisplayType = 1;
 // values of resistors in divider network on voltAnalogPin
 static const float r1 = 100000.0;
@@ -22,21 +22,21 @@ static const float r2 = 10000.0;
 // Oil pressure meter
 
 static const byte oilAnalogPin = 1;
-static const byte oilSerialTX = 5;
+static const byte oilSerialTX = 24;
 static const byte oilDisplayType = 0;
 
 
 // Water Temperature meter
 
 static const byte tempAnalogPin = 2;
-static const byte tempSerialTX = 6;
+static const byte tempSerialTX = 30;
 static const byte tempDisplayType = 0;
 
 
 // Fuel Level meter
 
 static const byte fuelAnalogPin = 3;
-static const byte fuelSerialTX = 7;
+static const byte fuelSerialTX = 28;
 static const byte fuelDisplayType = 0;
 
 static const byte pinModeButton = 5;

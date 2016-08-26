@@ -44,13 +44,13 @@ static const byte pinModeButton = 5;
 static const byte pinSerialRX = 6;
 
 // the odometer lcd serial pin
-static const byte pinOdoSerialTX = 11;
+static const byte pinOdoSerialTX = 15;
 
 // the speedo led serial pin
-static const byte pinSpeedoSerialTX = 12;
+static const byte pinSpeedoSerialTX = 16;
 
 // the speedo neopixel pin
-static const byte pinSpeedoNeopixel = 13;
+static const byte pinSpeedoNeopixel = 17;
 
 // timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;

@@ -11,7 +11,7 @@ volatile byte modeFunc = FUNC_NORMAL;
 volatile float val = 0.0;
 
 // a buffer for the values
-char buffer [20];
+char buffer[20];
 
 // create a voltmeter
 //Gauge volt_meter(voltAnalogPin, voltSerialTX, serialRX, voltDisplayType, "FUEL");

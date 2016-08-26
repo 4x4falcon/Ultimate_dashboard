@@ -7,8 +7,8 @@
 */
 
 // echo to serial for debugging
-#define ECHO_SERIAL 1
-
+//#define ECHO_SERIAL 1
+#define ECHO_SERIAL_DISPLAY 1
 
 // include libraries
 #include <SoftwareSerial.h>
@@ -177,7 +177,7 @@ void loop() {
     buttonMode.check();
     buttonBrightness.check();
 
-    checkForTimeout();
+//    checkForTimeout();
    }
 
 }

@@ -77,7 +77,7 @@ void updateDisplay () {
   
   setBrightness();
 
-#ifdef ECHO_SERIAL
+#ifdef ECHO_SERIAL_GAUGES
   Serial.println("Updating display voltmeter, oil pressure gauge, water temperature gauge, fuel level gauge");
 #endif
   // flash the onboard led to show it's working correctly
