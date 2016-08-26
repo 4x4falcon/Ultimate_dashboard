@@ -25,6 +25,10 @@
 #include "Tacho_Functions.h"
 #include "Functions.h"
 
+//debugging defines
+#define ECHO_SERIAL_GAUGES 1
+
+
 /*
 * Initialization
 */
@@ -162,6 +166,7 @@ void setup() {
   speedoSerial.begin(9600);
   delay(500);
   speedoSerial.write(0x76);
+  setupSpeedoDisplay();
 
   // Initialize ODOMETER and TRIPMETER(s) display
   odoSerial.begin(9600);
@@ -169,11 +174,15 @@ void setup() {
   setupOdometerDisplay();
   updateDisplay();
 
+  setupTachoDisplay();
+
   // Initialize GAUGE displays
   voltSerial.begin(9600);
   oilSerial.begin(9600);
   tempSerial.begin(9600);
   fuelSerial.begin(9600);
+  delay(500);
+  setupMetersDisplay();
   updateMetersDisplay();
 
   // Attach interrupt for the vehicle speed sensor

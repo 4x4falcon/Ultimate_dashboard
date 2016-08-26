@@ -35,34 +35,34 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 /*
  * Pin assignments with constants, description and connection point on shield
  *
-2	pinSpeedoInterrupt	speedoInterrupt = 0	Vehicle Speed sensor		J14	pin 2
-3	pinTachoInterrupt	tachoInterrupt = 1	Tacho input			J18	pin 2
+2	 pinSpeedoInterrupt	speedoInterrupt = 0	Vehicle Speed sensor		J14 pin 2
+3	 pinTachoInterrupt	tachoInterrupt = 1	Tacho input			        J18 pin 2
 4 	
-5	pinTripButton		Trip Button				J16	pin 1
-6	pinTachoModeButton	Tacho Mode Button			J15	pin 1
-7  pinSpeedoModeButton Speedo Mode Button      J17 pin 1
-8	pinLightsOn		Lights on input				J12	pin 1
-9	pinBrigthnessSw		Brightness switch			J12	pin 2
-10	pinIgnOn		Ignition on				J12	pin 3
+5	 pinTripButton		   Trip Button				     J24 pin 1                  gnd J25 pin 1
+6	 pinTachoModeButton	 Tacho Mode Button			 J24 pin 2                  gnd J25 pin 2  
+7  pinSpeedoModeButton Speedo Mode Button      J24 pin 3                  gnd J25 pin 3
+8	 pinLightsOn         Lights on input         J12 pin 1
+9	 pinBrigthnessSw     Brightness switch       J12 pin 2
+10 pinIgnOn            Ignition on             J12 pin 3
 
 11
 12
 13
 
-14	pinSerialRX		soft serial rx (not actually used or wired)	J19	pin 1
-15	pinOdoSerialTX		Odo LCD soft serial tx				J19     pin 2
-16	pinSpeedoSerialTX	Speedo LED soft serial tx			J19     pin 3
-17	pinSpeedoNeopixel	Speedo neopixel tx				J19     pin 4
-18	pinTachoSerialTX	Tacho LED soft serial tx			J19     pin 5
-19	pinTachoNeopixel	Tacho neopixel tx				J19     pin 6
+14	pinSerialRX        soft serial rx (not actually used or wired)	J19	pin 1
+15	pinOdoSerialTX     Odo LCD soft serial tx       J19 pin 2
+16	pinSpeedoSerialTX  Speedo LED soft serial tx    J19 pin 3
+17	pinSpeedoNeopixel  Speedo neopixel tx           J19 pin 4
+18	pinTachoSerialTX   Tacho LED soft serial tx     J19 pin 5
+19	pinTachoNeopixel   Tacho neopixel tx            J19 pin 6
 
-22	voltSerialTX		voltmeter display serial TX			J22	pin 1
+22	voltSerialTX       voltmeter display serial TX           J22 pin 1
 
-24	oilSerialTX		oil pressure meter display serial TX		J22	pin 2
+24	oilSerialTX        oil pressure meter display serial TX  J22 pin 2
 
-26	tempSerialTX		water temperature display serial TX		J22	pin 3
+28	tempSerialTX       water temperature display serial TX   J22 pin 3
 
-28	fuelSerialTX		fuel level display serial TX			J22	pin 4
+30	fuelSerialTX       fuel level display serial TX          J22 pin 4
 
 */
 
@@ -120,23 +120,23 @@ static const byte fuelAnalogPin = 3;
 // these could be used with SPI and then these would become the CS lines
 
 // odometer
-static const byte pinOdoSerialTX = 15;		//	Odo LCD soft serial tx
+static const byte pinOdoSerialTX = 14;		//	Odo LCD soft serial tx
 
 // speedometer
-static const byte pinSpeedoSerialTX = 16;	//	Speedo LED soft serial tx
-static const byte pinSpeedoNeopixel =  17;	//	Speedo neopixel tx
+static const byte pinSpeedoSerialTX = 15;	//	Speedo LED soft serial tx
+static const byte pinSpeedoNeopixel =  16;	//	Speedo neopixel tx
 
 // tachometer
-static const byte pinTachoSerialTX = 18;	//	Tacho LED soft serial tx
-static const byte pinTachoNeopixel = 19;	//	Tacho neopixel tx
+static const byte pinTachoSerialTX = 36;	//	Tacho LED soft serial tx
+static const byte pinTachoNeopixel = 34;	//	Tacho neopixel tx
 
 // voltmeter
-static const byte pinVoltSerialTX = 22;		//	voltmeter display serial TX
+static const byte pinVoltSerialTX = 22;		//	voltmeter display serial TX  
 
 // oil pressure meter
 static const byte pinOilSerialTX = 24;		//	oil pressure meter display serial TX
 
-static const byte pinTempSerialTX = 26;		//	water temperature display serial TX
+static const byte pinTempSerialTX = 30;		//	water temperature display serial TX
 
 static const byte pinFuelSerialTX = 28;		//	fuel level display serial TX
 
