@@ -1,0 +1,50 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=speedo_arduino_nano_input_shield
+*Date=14:59:26
+*CreatedBy=Fritzing 0.8.5b.12.16.8b2c
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;THT;22.1909;-48.1897;0;Bottom;U4
+2;;THT;85.6909;-46.9197;0;Bottom;J6
+3;9V;TO220 [THT];79.3409;-31.4257;180;Bottom;U6
+4;330;THT;75.2134;-46.9197;180;Bottom;R1
+5;;300 mil [THT];14.5963;-30.4097;180;Bottom;D16
+6;10µF;100 mil [THT, electrolytic];70.4509;-31.6797;-90;Bottom;C1
+7;;THT;10.7609;-41.8397;180;Bottom;J7
+8;;THT;22.1909;-25.3297;0;Bottom;U5
+9;330;THT;12.3484;-27.8697;0;Bottom;R4
+10;;;97.1208;-17.7098;0;Bottom;Hole6
+11;330;THT;14.2534;-50.7297;0;Bottom;R3
+12;;THT;94.5809;-5.00974;0;Bottom;J12
+13;;;53.9409;-17.7097;0;Bottom;Hole1
+14;;300 mil [THT];22.1655;-55.8097;0;Bottom;D15
+15;;THT;65.3709;-46.9197;180;Bottom;U2
+16;;;97.1208;-58.3497;0;Bottom;Hole7
+17;;THT;22.1909;-17.7097;0;Bottom;U3
+18;;;38.7008;-17.7098;0;Bottom;Hole2
+19;;;38.7008;-58.3497;0;Bottom;Hole3
+20;;;53.9408;-58.3497;0;Bottom;Hole4
+21;;;79.3409;-17.7096;0;Bottom;Hole5
+22;;THT;6.95085;-55.8097;90;Bottom;J9
+23;;300 mil [THT];8.22085;-26.5743;-90;Bottom;D14
+24;;300 mil [THT];78.0455;-49.4597;0;Bottom;D13
+25;;;46.3209;-38.0212;0;Bottom;Part1
+26;330;THT;12.3484;-20.2497;0;Bottom;R2
+27;;;5.68075;-15.1698;0;Bottom;Hole9
+28;;;59.0209;-20.2497;0;Bottom;Jumper1
+29;;;13.3008;-58.3497;0;Bottom;Hole8
+30;100nF;100 mil [THT, multilayer];65.3709;-32.9497;0;Bottom;C2
+31;10µF;100 mil [THT, electrolytic];88.2309;-31.6797;-90;Bottom;C3
+32;;THT;33.6209;-30.4097;0;Bottom;J10
+33;;THT;94.5809;-31.6797;180;Bottom;J5
+34;;THT;10.7609;-36.7597;0;Bottom;J8
+35;;THT;6.95085;-60.8897;90;Bottom;J11
