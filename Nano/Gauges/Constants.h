@@ -12,7 +12,7 @@ static const byte serialRX = 12;
 // Voltmeter
 
 static const byte voltAnalogPin = 0;
-static const byte voltSerialTX = 22;
+static const byte voltSerialTX = 6;
 static const byte voltDisplayType = 1;
 // values of resistors in divider network on voltAnalogPin
 static const float r1 = 100000.0;
@@ -22,21 +22,21 @@ static const float r2 = 10000.0;
 // Oil pressure meter
 
 static const byte oilAnalogPin = 1;
-static const byte oilSerialTX = 24;
+static const byte oilSerialTX = 7;
 static const byte oilDisplayType = 0;
 
 
 // Water Temperature meter
 
 static const byte tempAnalogPin = 2;
-static const byte tempSerialTX = 30;
+static const byte tempSerialTX = 8;
 static const byte tempDisplayType = 0;
 
 
 // Fuel Level meter
 
 static const byte fuelAnalogPin = 3;
-static const byte fuelSerialTX = 28;
+static const byte fuelSerialTX = 9;
 static const byte fuelDisplayType = 0;
 
 static const byte pinModeButton = 5;
@@ -64,6 +64,9 @@ const static char message100[] PROGMEM = "Title";         // Title
 const static char message101[] PROGMEM = "Ver high";      // Version High digit
 const static char message102[] PROGMEM = "Ver low";       // Version Low digit
 
+
+/*
+ * 
 
 // Voltmeter messages
 const char message300[] PROGMEM = "($300)Volt lower calibration";
@@ -137,4 +140,5 @@ const char* const string_table[] PROGMEM = {message000,           // =          
 
                                           };
 
+*/
 

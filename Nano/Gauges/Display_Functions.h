@@ -95,14 +95,17 @@ void updateDisplay () {
   val = 0.0;
 
   for (int i=0; i< SAMPLES ; i++) val += analogRead(voltAnalogPin);
-
   val /= SAMPLES;
 
   float v = (val * 5.0) / (voltUpper - voltLower);
   float v2 = v / (r2 / (r1 + r2));
+
+  
   sprintf(b, "%d", int(v2 * 10));
 
+#ifdef ECHO_SERIAL_DISPLAY
   Serial.println(b);
+#endif
 
 //  voltSerial.print(b);             // write the value to the display
 
@@ -114,9 +117,13 @@ void updateDisplay () {
 
   v = (val * 5.0) / (oilUpper - oilLower);
 //  v2 = v / (r2 / (r1 + r2));
+
+
   sprintf(b, "%d", int(v * 10));
 
+#ifdef ECHO_SERIAL_DISPLAY
   Serial.println(b);
+#endif
 
 //  oilSerial.print(b);             // write the value to the display
 
@@ -130,7 +137,9 @@ void updateDisplay () {
 //  v2 = v / (r2 / (r1 + r2));
   sprintf(b, "%d", int(v * 10));
 
+#ifdef ECHO_SERIAL_DISPLAY
   Serial.println(b);
+#endif
 
 //  tempSerial.print(b);             // write the value to the display
   
@@ -144,7 +153,9 @@ void updateDisplay () {
 //  v2 = v / (r2 / (r1 + r2));
   sprintf(b, "%d", int(v * 10));
 
+#ifdef ECHO_SERIAL_DISPLAY
   Serial.println(b);
+#endif
 
 //  fuelSerial.print(b);             // write the value to the display
 
