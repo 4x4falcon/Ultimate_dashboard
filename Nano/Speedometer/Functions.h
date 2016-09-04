@@ -4,33 +4,39 @@
 
 void doSerialCommand(String readString)
  {
+    byte p = 0;
+
     Serial.println(readString);  //so you can see the captured string 
 
     if (readString == "$")
      {
-      Serial.println("EEPROM Contains");
+      Serial.println(F("EEPROM Contains"));
       EEPROM.readBlock(eepromTitle, title);
-      Serial.print("Title = ");
+      Serial.print(F("Title = "));
       Serial.println(title);
-      Serial.print("Version high = ");
+      Serial.print(F("Version high = "));
       Serial.println(EEPROM.readByte(eepromVersionHigh));
-      Serial.print("Version low = ");
+      Serial.print(F("Version low = "));
       Serial.println(EEPROM.readByte(eepromVersionLow));
 
   // get speedo settings
 
-      Serial.print("($100)Speedo calibration = ");
+      Serial.print(F("($100)Speedo calibration = "));
       float c = EEPROM.readFloat(eepromSpeedoCalibrate);
       dtostrf(c, 6, 4, buffer);
       Serial.println(buffer);
 
-      Serial.print("Odometer count (read only) = ");
+      Serial.print(F("Odometer count (read only) = "));
       Serial.println(EEPROM.readLong(eepromOdo));
 
-      Serial.print("($102)Tripmeter 1 count = ");
+      Serial.print(F("($102)Tripmeter 1 count = "));
       Serial.println(EEPROM.readLong(eepromTrip1));
-      Serial.print("($103)Tripmeter 2 count = ");
+      Serial.print(F("($103)Tripmeter 2 count = "));
       Serial.println(EEPROM.readLong(eepromTrip2));
+
+      Serial.print(F("($910)debug value = "));
+      Serial.println(EEPROM.readByte(eepromDebug));
+     
      }
     else
      {
@@ -38,7 +44,7 @@ void doSerialCommand(String readString)
        {
         if (readString.startsWith("$0"))
          {
-          Serial.println("Resetting EEPROM except for odometer");
+          Serial.println(F("Resetting EEPROM except for odometer"));
          }
         else
          {
@@ -55,14 +61,14 @@ void doSerialCommand(String readString)
               case 100:
                 if (parameter == "")
                  {
-                  Serial.print("($100)Speedo calibration = ");
+                  Serial.print(F("($100)Speedo calibration = "));
                   float c = EEPROM.readFloat(eepromSpeedoCalibrate);
                   dtostrf(c, 10, 8, buffer);
                   Serial.println(buffer);
                  }
                 else
                  {
-                  Serial.print("Setting ($100) Speedo calibration = ");
+                  Serial.print(F("Setting ($100) Speedo calibration = "));
                   Serial.println(parameter);
                   // EEPROM.writeFloat(eepromSpeedoCalibrate, parameter);
                  }
@@ -70,12 +76,12 @@ void doSerialCommand(String readString)
               case 102:
                 if (parameter == "")
                  {
-                  Serial.print("($102)Tripmeter 1 value = ");
+                  Serial.print(F("($102)Tripmeter 1 value = "));
                   Serial.println(EEPROM.readLong(eepromTrip1));
                  }
                 else
                  {
-                  Serial.print("Setting ($102) Tripmeter 1 value = ");
+                  Serial.print(F("Setting ($102) Tripmeter 1 value = "));
                   Serial.println(parameter);
                   // EEPROM.writeLong(eepromTrip1, parameter);
                  }
@@ -83,20 +89,44 @@ void doSerialCommand(String readString)
               case 103:
                 if (parameter == "")
                  {
-                  Serial.print("($103)Tripmeter 2 value = ");
+                  Serial.print(F("($103)Tripmeter 2 value = "));
                   Serial.println(EEPROM.readLong(eepromTrip2));
                  }
                 else
                  {
-                  Serial.print("Setting ($103) Tripmeter 2 value = ");
+                  Serial.print(F("Setting ($103) Tripmeter 2 value = "));
                   Serial.println(parameter);
                   // EEPROM.writeLong(eepromTrip2, parameter);
+                 }
+                break;
+              case 910:
+                if (parameter == "")
+                 {
+                  Serial.print(F("($910) debug value = "));
+                  Serial.println(EEPROM.readByte(eepromDebug));
+                 }
+                else
+                 {
+                  
+                  p = parameter.toInt();
+                  if (p < 4)
+                   {
+                    Serial.print(F("Setting ($910) debug value = "));
+                    Serial.println(parameter);
+                    EEPROM.writeByte(eepromDebug, p);
+                    debug = p;
+                   }
+                  else
+                   {
+                    Serial.println(F("Invalid value for debug parameter"));
+                    debug = 0;
+                   }
                  }
                 break;
               case 999:
                 if ((parameter == "") || (parameter.length() < 5))
                  {
-                  Serial.println("You must supply a value and passcode");
+                  Serial.println(F("You must supply a value and passcode"));
                  }
                 else
                  {
@@ -104,33 +134,33 @@ void doSerialCommand(String readString)
                   String pc = parameter.substring(parameter.length()-4);
                   if (pc.toInt() == passCode)
                    {
-                    Serial.println("Resetting odometer");
-                    Serial.print("Odometer = ");
+                    Serial.println(F("Resetting odometer"));
+                    Serial.print(F("Odometer = "));
                     Serial.println(odo);
                     //
                    }
                   else
                    {
-                    Serial.println("ERROR: Incorrect passcode");
+                    Serial.println(F("ERROR: Incorrect passcode"));
                    }
                  }
                 
                 break;
 
               default:
-                Serial.println("ERROR: Unknown setting");
+                Serial.println(F("ERROR: Unknown setting"));
                 break;
              }
            }
           else
            {
-            Serial.println("ERROR: Invalid input");
+            Serial.println(F("ERROR: Invalid input"));
            }
          }
        }
       else
        {
-        Serial.println("ERROR: Unknown command");
+        Serial.println(F("ERROR: Unknown command"));
        }
      }
 //    readString=""; //empty for next input

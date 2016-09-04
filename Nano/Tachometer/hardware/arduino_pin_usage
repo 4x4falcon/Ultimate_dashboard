@@ -9,7 +9,7 @@ Digital pins
 3	pinBrightness		brightness switch
 4
 5	pinModeButton		Mode Button
-6	pinSerialRX		soft serial rx (not actually used or wired)
+6								pinSerialRX		soft serial rx (not actually used or wired)
 7	
 8	pinTachoSerialTX	Tacho LED soft serial tx
 9	pinTachoNeopixel	Tacho neopixel tx	

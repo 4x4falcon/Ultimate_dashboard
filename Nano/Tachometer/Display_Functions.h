@@ -8,39 +8,33 @@
 
 void setBrightness() {
 
-   byte b = 12 * brightnessBoost;
-   pixelBrightness = brightnessBoost;
+
+   byte b = brightnessBoost;
+
    if (digitalRead(pinLightsOn))
     {
-#ifdef ECHO_SERIAL
-      Serial.println("Lights off");
-#endif
-     b = 51 * brightnessBoost;
+     b = 2 * brightnessBoost;
+     pixelBrightness = brightnessBoost;
+     if (debug == 1)
+      {
+       Serial.print(F("Lights on  "));
+       Serial.println(b);
+      }
+    }
+   else
+    {
+     b= 15 * brightnessBoost;
      pixelBrightness = 3 * brightnessBoost;
+     if (debug == 1)
+      {
+       Serial.print(F("Lights off  "));
+       Serial.println(b);
+      }
     }
 
     tachoSerial.write(0x7A);
     tachoSerial.write(b);
 
-
-/*
-  if (!digitalRead(pinLightsOn))
-   {
-    pixelBrightness = 4;        // this sets up the brightness used in displayRpm routine
-                                 // for the 7 segment display set it here as it will remain that way until changed
-    tachoSerial.write(0x7A);
-    tachoSerial.write(byte(80));
-   }
-  else
-   {
-    pixelBrightness = 12;
-    tachoSerial.write(0x7A);
-    tachoSerial.write(byte(255));
-#ifdef ECHO_SERIAL
-    Serial.println("Lights on");
-#endif
-   }
-*/
 }
 
 /*
@@ -66,16 +60,17 @@ void displayRpm (int rpm) {
 
   tachoSerial.print(buffer);
 
-#ifdef ECHO_SERIAL
-  Serial.print("RPM      ");
-  Serial.println(buffer);
-  Serial.print("redLine  ");
-  Serial.println(redLine);
-  Serial.print("pixels     ");
-  Serial.println(pixels);
-  Serial.print("tachoStep   ");
-  Serial.println(tachoStep);
-#endif
+  if (debug == 1)
+   {
+    Serial.print(F("RPM      "));
+    Serial.println(buffer);
+    Serial.print(F("redLine  "));
+    Serial.println(redLine);
+    Serial.print(F("pixels     "));
+    Serial.println(pixels);
+    Serial.print(F("tachoStep   "));
+    Serial.println(tachoStep);
+   }
 
   for(byte i=0;i<pixels;i++)
    {

@@ -95,7 +95,11 @@ void setup () {
 								//
 								//
 
+  int eepromGaugesDebugAddress = EEPROM.getAddress(sizeof(byte));
+  EEPROM.writeByte(eepromGaugesDebugAddress, 0);
+
   // confirm eeprom has been written to
+
 
   Serial.print("Gauges title address = ");
   Serial.print(eepromGaugesTitleAddress);
@@ -260,6 +264,13 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readByte(eepromGaugesFuelSensorTypeAddress));
+
+  Serial.print("Gauges Debug address = ");
+  Serial.print(eepromGaugesDebugAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
+
 
 
 }

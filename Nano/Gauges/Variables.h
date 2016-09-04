@@ -13,6 +13,9 @@ volatile float val = 0.0;
 // a buffer for the values
 char buffer[50];
 
+
+byte debug = 0;
+
 // create a voltmeter
 //Gauge volt_meter(voltAnalogPin, voltSerialTX, serialRX, voltDisplayType, "FUEL");
 SoftwareSerial voltSerial(serialRX, voltSerialTX);
@@ -84,6 +87,8 @@ volatile int eepromFuelMaxAddress = 0;
 volatile int eepromFuelWarnAddress = 0;
 volatile int eepromFuelWarnLowAddress = 0;
 volatile int eepromFuelSensorTypeAddress = 0;
+
+volatile int eepromGaugesDebugAddress = 0;
 
 /* 
  *  meter calibration limits

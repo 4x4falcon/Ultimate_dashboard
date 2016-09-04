@@ -47,6 +47,9 @@ volatile byte startCalibrateSpeed;
 
 volatile int calibrateCounter;
 
+volatile byte debug = 0;
+
+
 // The last time the odometer value was written to memory
 volatile unsigned long lastOdometerWrite = 0;
 
@@ -82,6 +85,9 @@ volatile byte eepromModeFunc;
 
 volatile int eepromSpeedoCalibrate;
 
+// EEPROM storage address for debug
+
+volatile int eepromDebug;
 
 
 // The distance travelled in one pulse from the vehicle speed sensor

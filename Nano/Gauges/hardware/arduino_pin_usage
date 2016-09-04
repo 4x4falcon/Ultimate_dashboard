@@ -17,7 +17,7 @@ Digital pins
 
 10	pinLightsOn             Headlights on input	
 11	pinIgnition		Ignition on	
-12	serial RX		all displays serial RX
+12									serial RX		all displays serial RX
 13	pinLed			led on arduino pin 13 toggled by vss irs value held in arduinoLed
 
 

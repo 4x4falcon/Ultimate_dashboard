@@ -5,14 +5,25 @@
 
 void setBrightness()
  {
-   byte b = 12 * brightnessBoost;
+   byte b = brightnessBoost;
 
    if (digitalRead(pinLightsOn))
     {
-#ifdef ECHO_SERIAL
-      Serial.println("Lights off");
-#endif
-     b = 51 * brightnessBoost;
+     b = 2 * brightnessBoost;
+     if (debug == 1)
+      {
+       Serial.print("Lights on  ");
+       Serial.println(b);
+      }
+    }
+   else
+    {
+     b= 15 * brightnessBoost;
+     if (debug == 1)
+      {
+       Serial.print("Lights off  ");
+       Serial.println(b);
+      }
     }
 
    voltSerial.write(0x7A);
@@ -23,33 +34,6 @@ void setBrightness()
    tempSerial.write(b);
    fuelSerial.write(0x7A);
    fuelSerial.write(b);
-
-
-
-if (!digitalRead(pinLightsOn))
-    {
-// set brightness to mid range when headlights are on
-     voltSerial.write(0x7A);
-     voltSerial.write(b);
-     oilSerial.write(0x7A);
-     oilSerial.write(b);
-     tempSerial.write(0x7A);
-     tempSerial.write(b);
-     fuelSerial.write(0x7A);
-     fuelSerial.write(b);
-    }
-   else
-    {
-     voltSerial.write(0x7A);
-     voltSerial.write(byte(255));
-     oilSerial.write(0x7A);
-     oilSerial.write(byte(255));
-     tempSerial.write(0x7A);
-     tempSerial.write(byte(255));
-     fuelSerial.write(0x7A);
-     fuelSerial.write(byte(255));
-    }
-
  }
 
 
@@ -82,10 +66,12 @@ void updateDisplay () {
 
   setBrightness();
 
-#ifdef ECHO_SERIAL_DISPLAY
-  Serial.println("Updating display voltmeter, oil pressure gauge, water temperature gauge, fuel level gauge");
-#endif
-  // flash the onboard led to show it's working correctly
+  if (debug == 3)
+   {
+    Serial.println("Updating display voltmeter, oil pressure gauge, water temperature gauge, fuel level gauge");
+   }
+
+// flash the onboard led to show it's working correctly
   arduinoLed = !arduinoLed;
   digitalWrite(pinLed, arduinoLed);
 
@@ -99,15 +85,18 @@ void updateDisplay () {
 
   float v = (val * 5.0) / (voltUpper - voltLower);
   float v2 = v / (r2 / (r1 + r2));
-
   
-  sprintf(b, "%d", int(v2 * 10));
+//  sprintf(b, "%4d", int(v2 * 10));
+  sprintf(b, "%4d", int(v * 10));
 
-#ifdef ECHO_SERIAL_DISPLAY
-  Serial.println(b);
-#endif
+  if (debug == 3)
+   {
+    Serial.println(b);
+   }
 
-//  voltSerial.print(b);             // write the value to the display
+  voltSerial.print(b);             // write the value to the display
+  voltSerial.write(0x77);
+  voltSerial.write(0b00000100);  // sets digit 3 decimal on
 
 
 // oil pressure meter
@@ -118,14 +107,15 @@ void updateDisplay () {
   v = (val * 5.0) / (oilUpper - oilLower);
 //  v2 = v / (r2 / (r1 + r2));
 
+  sprintf(b, "%4d", int(v * 10));
 
-  sprintf(b, "%d", int(v * 10));
-
-#ifdef ECHO_SERIAL_DISPLAY
-  Serial.println(b);
-#endif
-
-//  oilSerial.print(b);             // write the value to the display
+  if (debug == 3)
+   {
+    Serial.println(b);
+   }
+  oilSerial.print(b);             // write the value to the display
+  oilSerial.write(0x77);
+  oilSerial.write(0b00000100);  // sets digit 3 decimal on
 
   
 // water temperature meter
@@ -135,14 +125,17 @@ void updateDisplay () {
 
   v = (val * 5.0) / (tempUpper - tempLower);
 //  v2 = v / (r2 / (r1 + r2));
-  sprintf(b, "%d", int(v * 10));
+  sprintf(b, "%4d", int(v * 10));
 
-#ifdef ECHO_SERIAL_DISPLAY
-  Serial.println(b);
-#endif
+  if (debug == 3)
+   {
+    Serial.println(b);
+   }
 
-//  tempSerial.print(b);             // write the value to the display
-  
+  tempSerial.print(b);             // write the value to the display
+  tempSerial.write(0x77);
+  tempSerial.write(0b00000100);  // sets digit 3 decimal on
+
 
 // fuel level meter display
   val = 0.0;
@@ -151,13 +144,16 @@ void updateDisplay () {
 
   v = (val * 5.0) / (tempUpper - tempLower);
 //  v2 = v / (r2 / (r1 + r2));
-  sprintf(b, "%d", int(v * 10));
+  sprintf(b, "%4d", int(v * 10));
 
-#ifdef ECHO_SERIAL_DISPLAY
-  Serial.println(b);
-#endif
+  if (debug == 3)
+   {
+    Serial.println(b);
+   }
 
-//  fuelSerial.print(b);             // write the value to the display
+  fuelSerial.print(b);             // write the value to the display
+  fuelSerial.write(0x77);
+  fuelSerial.write(0b00000100);  // sets digit 3 decimal on
 
 }
 
@@ -194,5 +190,12 @@ void buttonBrightnessLongPressed() {
 
   Serial.println("Brightness button long pressed");
 
+}
+
+
+void displayValue(SoftwareSerial d, char b, byte p) {
+
+  d.write(0x76);
+  d.print(b);
 }
 

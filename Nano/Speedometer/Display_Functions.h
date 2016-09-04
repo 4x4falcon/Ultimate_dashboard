@@ -4,18 +4,32 @@
 
 void setBrightness()
  {
-  byte b = 12 * brightnessBoost;
+  byte b = brightnessBoost;
   byte b1 = brightnessBoost;
   pixelBrightness = brightnessBoost;
-  if (digitalRead(pinLightsOn))
-   {
-#ifdef ECHO_SERIAL
-    Serial.println("Lights off");
-#endif
-    b = 51 * brightnessBoost;
-    b1 = 2 * brightnessBoost;
-    pixelBrightness = 3 * brightnessBoost;
-   }
+
+   if (digitalRead(pinLightsOn))
+    {
+     b = 2 * brightnessBoost;
+     b1 = 2 * brightnessBoost;
+     pixelBrightness = brightnessBoost;
+     if (debug == 1)
+      {
+       Serial.print(F("Lights on  "));
+       Serial.println(b);
+      }
+    }
+   else
+    {
+     b= 15 * brightnessBoost;
+     b1 = 15 * brightnessBoost;
+     pixelBrightness = 3 * brightnessBoost;
+     if (debug == 1)
+      {
+       Serial.print(F("Lights off  "));
+       Serial.println(b);
+      }
+    }
 
   odoSerial.write(0x7C);
   odoSerial.write(byte(b));
@@ -46,7 +60,6 @@ void odoDisplay(byte on)
 
 /*
  * Displays current speed on 4 DIGIT LED
- * TODO display on 15 led 1/4 neo ring
  */
 
 void displaySpeed (int speed) {
@@ -56,13 +69,13 @@ void displaySpeed (int speed) {
   sprintf(buffer, "%4d", speed);
   speedoSerial.print(buffer);
 
-#ifdef ECHO_SERIAL
-
-  Serial.print ("Speed    ");
-  Serial.println (speed);
-  Serial.print ("Speed buffer    ");
-  Serial.println(buffer);
-#endif
+  if (debug == 1)
+   {
+    Serial.print (F("Speed    "));
+    Serial.println (speed);
+    Serial.print (F("Speed buffer    "));
+    Serial.println(buffer);
+   }
 
   byte pixels = speed / 10;
 
@@ -102,15 +115,15 @@ void displayOdometer () {
 
   if (modeFunc == FUNC_KPH)
    {
-    odoSerial.print("KPH");
+    odoSerial.print(F("KPH"));
    }
   else if (modeFunc == FUNC_MPH)
    {
-    odoSerial.print("MPH");
+    odoSerial.print(F("MPH"));
    }
   else if (modeFunc == FUNC_CAL)
    {
-    odoSerial.print("CAL");
+    odoSerial.print(F("CAL"));
    }
 
 
@@ -132,11 +145,12 @@ void displayOdometer () {
 
   odoSerial.print(buffer);
 
-#ifdef ECHO_SERIAL
-  Serial.print ("Odo    ");
-  Serial.println (buffer);
-#endif
-}
+  if (debug == 1)
+   {
+    Serial.print (F("Odo    "));
+    Serial.println (buffer);
+   }
+ }
 
 
 /*
@@ -165,10 +179,11 @@ void displayTripmeter () {
   dtostrf(odo,5,1,buffer);
   odoSerial.print(buffer);
 
-#ifdef ECHO_SERIAL
-  Serial.print ("Trip_1    ");
-  Serial.println (buffer);
-#endif
+  if (debug == 1)
+   {
+    Serial.print (F("Trip_1    "));
+    Serial.println (buffer);
+   }
 
 // cursor to twelth character of bottom line
 
@@ -187,10 +202,11 @@ void displayTripmeter () {
   dtostrf(odo,5,1,buffer);
   odoSerial.print(buffer);
 
-#ifdef ECHO_SERIAL
-  Serial.print ("Trip_2    ");
-  Serial.println (buffer);
-#endif
+  if (debug == 1)
+   {
+    Serial.print (F("Trip_2    "));
+    Serial.println (buffer);
+   }
 
   if (!modeTrip)
    {
@@ -255,19 +271,19 @@ void buttonBrightnessPressed() {
    {
     brightnessBoost = 1;
    }
-#ifdef ECHO_SERIAL
-  Serial.println("Brightnes button pressed");
-#endif
-
+  if (debug == 1)
+   {
+    Serial.println(F("Brightnes button pressed"));
+   }
 }
 
 void buttonBrightnessLongPressed() {
 
   brightnessBoost = 5;
 
-#ifdef ECHO_SERIAL
-  Serial.println("Brightness button long pressed");
-#endif
-
+  if (debug == 1)
+   {
+    Serial.println(F("Brightness button long pressed"));
+   }
 }
 

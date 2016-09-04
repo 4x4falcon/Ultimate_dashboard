@@ -15,55 +15,65 @@ void checkForTimeout() {
     speed = 0;
     displaySpeed (speed);
 
-#ifdef ECHO_SERIAL
-      Serial.print("pulseCount    ");
+    if (debug == 1)
+     {
+      Serial.print(F("pulseCount    "));
       Serial.println(pulseCount);
-#endif
+     }
 
-#ifdef ECHO_SERIAL_2
-      Serial.print("timeout looptime    ");
+    if (debug == 2)
+     {
+      Serial.print(F("timeout looptime    "));
       Serial.println(loopTime);
-      Serial.print("timeout lastVssTrigger    ");
+      Serial.print(F("timeout lastVssTrigger    "));
       Serial.println(lastVssTrigger);
-      Serial.print("timeout lastTrigger    ");
+      Serial.print(F("timeout lastTrigger    "));
       Serial.println(lastTrigger);
-      Serial.print("timeout timeoutValue    ");
+      Serial.print(F("timeout timeoutValue    "));
       Serial.println(timeoutValue);   
-#endif
+     }
    }
 }
 
 void checkForEepromWrite() {
 
-#ifdef ECHO_SERIAL_3
-        Serial.print("odoTimeout     ");
-        Serial.println(odoTimeout);
-#endif
+  if (debug == 3)
+   {
+    Serial.print(F("odoTimeout     "));
+    Serial.println(odoTimeout);
+   }
 
   if ((millis() - lastOdometerWrite) > odoTimeout)
    {
     lastOdometerWrite = millis();
     if (odoNotSaved)
      {
-#ifdef ECHO_SERIAL_3
-        Serial.print("Timeout Saving odometer to EEPROM    ");
+      if (debug == 3)
+       {
+        Serial.print(F("Timeout Saving odometer to EEPROM    "));
         Serial.println(totalOdometer);
-#else
-      EEPROM.writeLong(eepromOdo, totalOdometer);
-#endif
+       }
+      else
+       {
+        EEPROM.writeLong(eepromOdo, totalOdometer);
+       }
       odoNotSaved = !odoNotSaved;
      }
     if (tripNotSaved)
      {
-  #ifdef ECHO_SERIAL_3
-        Serial.print("Timeout Saving Trip_1 to EEPROM    ");
+      if (debug == 3)
+       {
+        Serial.print(F("Timeout Saving Trip_1 to EEPROM    "));
         Serial.println(totalTrip_1);
-        Serial.print("Timeout Saving Trip_2 to EEPROM    ");
+        Serial.print(F("Timeout Saving Trip_2 to EEPROM    "));
         Serial.println(totalTrip_2);
-  #else
-     EEPROM.writeLong(eepromTrip1,totalTrip_1);
-     EEPROM.writeLong(eepromTrip2,totalTrip_2);
-  #endif
+       }
+      else
+       {
+        EEPROM.writeLong(eepromTrip1,totalTrip_1);
+        EEPROM.writeLong(eepromTrip2,totalTrip_2);
+       }
+
       tripNotSaved = !tripNotSaved;
     }
   }
@@ -82,12 +92,15 @@ void writeOdometer() {
      {
       if (totalOdometer > EEPROM.readFloat(eepromOdo))
        {
-#ifdef ECHO_SERIAL
-        Serial.print("Saving odometer to EEPROM    ");
-        Serial.println(totalOdometer);
-#else
-        EEPROM.writeFloat(eepromOdo, totalOdometer);
-#endif
+        if (debug == 3)
+         {
+          Serial.print(F("Saving odometer to EEPROM    "));
+          Serial.println(totalOdometer);
+         }
+        else
+         {
+          EEPROM.writeFloat(eepromOdo, totalOdometer);
+         }
         lastOdometerWrite = loopTime;
        }
      }
@@ -109,16 +122,18 @@ void writeTripmeter() {
 
   if ((speed == 0) && (tripNotSaved))
    {
-#ifdef ECHO_SERIAL
-    Serial.print("Saving Trip_1 to EEPROM    ");
-    Serial.println(totalTrip_1);
-    Serial.print("Saving Trip_2 to EEPROM    ");
-    Serial.println(totalTrip_2);
-#else
-    EEPROM.writeFloat(eepromTrip1,totalTrip_1);
-    EEPROM.writeFloat(eepromTrip2,totalTrip_2);
-#endif
-
+    if (debug == 3)
+     {
+      Serial.print(F("Saving Trip_1 to EEPROM    "));
+      Serial.println(totalTrip_1);
+      Serial.print(F("Saving Trip_2 to EEPROM    "));
+      Serial.println(totalTrip_2);
+     }
+    else
+     {
+      EEPROM.writeFloat(eepromTrip1,totalTrip_1);
+      EEPROM.writeFloat(eepromTrip2,totalTrip_2);
+     }
     tripNotSaved = !tripNotSaved;
    }
   else
@@ -147,9 +162,9 @@ void sensorTriggered_2() {
        doSpeed = !doSpeed;
        lastVssTrigger = millis();
        
-       Serial.print("duration     ");
+       Serial.print(F("duration     "));
        Serial.println(duration);
-       Serial.print("lastVssTrigger    ");
+       Serial.print(F("lastVssTrigger    "));
        Serial.println(lastVssTrigger);
      }
 
@@ -173,22 +188,24 @@ void updateDisplay() {
    {
     doSpeed = !doSpeed;
 
-#ifdef ECHO_SERIAL
-  Serial.print("duration   ");
-  Serial.println(duration);
-  Serial.print("pulseMaxCount   ");
-  Serial.println(pulseMaxCount);
-  Serial.print("pulseDistance   ");
-  Serial.println(pulseDistance);
-#endif
+    if (debug == 1)
+     {
+      Serial.print(F("duration   "));
+      Serial.println(duration);
+      Serial.print(F("pulseMaxCount   "));
+      Serial.println(pulseMaxCount);
+      Serial.print(F("pulseDistance   "));
+      Serial.println(pulseDistance);
+     }
 
     speed = int(((((1000.0 * float(pulseMaxCount)) / float(duration)) * pulseDistance) * 3600.0) / 1000.0);
     displaySpeed(speed);
 
-#ifdef ECHO_SERIAL_2
-  Serial.print ("Speed    ");
-  Serial.println (speed);
-#endif
+    if (debug == 1)
+     {
+      Serial.print (F("Speed    "));
+      Serial.println (speed);
+     }
 
 //update odometer
     displayOdometer();
@@ -282,8 +299,8 @@ void doCalibrate() {
   attachInterrupt(speedoInterrupt, countCalibrate, FALLING);
 
 // show message start driving and press button at end
-  odoSerial.print("start driving   ");
-  odoSerial.print("press mode @ end");
+  odoSerial.print(F("start driving   "));
+  odoSerial.print(F("press mode @ end"));
 
   delay(1000);
   do

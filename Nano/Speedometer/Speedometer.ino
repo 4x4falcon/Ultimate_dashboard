@@ -11,13 +11,8 @@
 *
 *	tripmeters (individually resetable)
 *
-*
+* Using Arduino Nano
 */
-
-// echo to serial for debugging
-//#define ECHO_SERIAL 1
-//#define ECHO_SERIAL_2 1
-//#define ECHO_SERIAL_3 1
 
 //library includes
 #include <SoftwareSerial.h>
@@ -41,7 +36,7 @@
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
   
@@ -56,6 +51,8 @@ void setup() {
   eepromSpeedoCalibrate = EEPROM.getAddress(sizeof(float));
 
   eepromModeFunc = EEPROM.getAddress(sizeof(byte));
+
+  eepromDebug = EEPROM.getAddress(sizeof(byte));
 
   // Read odometer value from flash memory
   totalOdometer = EEPROM.readLong(eepromOdo);
@@ -72,13 +69,17 @@ void setup() {
 
   pulseDistance = EEPROM.readFloat(eepromSpeedoCalibrate);
 
-#ifdef ECHO_SERIAL
-  Serial.print("setup pulseDistance =   ");
-  char setupBuffer[25];
-  dtostrf(pulseDistance, 20, 12, setupBuffer);
-  Serial.println(setupBuffer);
-#endif
+  // get debug value
 
+  debug = EEPROM.readByte(eepromDebug);
+
+  if (debug == 1)
+   {
+    Serial.print(F("setup pulseDistance =   "));
+    char setupBuffer[25];
+    dtostrf(pulseDistance, 20, 12, setupBuffer);
+    Serial.println(setupBuffer);
+   }
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH
@@ -87,6 +88,7 @@ void setup() {
    {
     modeFunc = FUNC_KPH;
    }
+
 
   // timer to update the speedo and odometer display every 100ms
   timer.every(updateTime, updateDisplay);
@@ -114,12 +116,16 @@ void setup() {
   speedoPixels.begin(); // This initializes the NeoPixel library.
   delay(500);
 
+  setBrightness();
+
   // 
   speedoSerial.write(0x76);
-  
+  speedoSerial.print("SPED");
   // Initialize ODOMETER and TRIPMETER(s) display
   setupOdometerDisplay();
   displayOdometer();
+  delay(1000);
+
   displaySpeed(0);
   
   // set the led on pin 13 to off
@@ -134,8 +140,6 @@ void setup() {
 
   pinMode(pinVss, INPUT_PULLUP);
   pinMode(pinLightsOn, INPUT_PULLUP);    // need to confirm this when completing circuit
-
-  setBrightness();
 
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(speedoInterrupt, sensorTriggered_2, FALLING);

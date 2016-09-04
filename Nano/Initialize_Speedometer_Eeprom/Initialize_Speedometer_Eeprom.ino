@@ -16,9 +16,9 @@ void setup () {
   Serial.begin(115200);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
-  int eepromTachoTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
-  int eepromTachoVersionHighAddress = EEPROM.getAddress(sizeof(byte));
-  int eepromTachoVersionLowAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromSpeedoTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
+  int eepromSpeedoVersionHighAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromSpeedoVersionLowAddress = EEPROM.getAddress(sizeof(byte));
 
   int eepromOdoAddress = EEPROM.getAddress(sizeof(long));
   int eepromTrip1Address = EEPROM.getAddress(sizeof(long));
@@ -28,14 +28,15 @@ void setup () {
 
   int eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
-  EEPROM.writeBlock(eepromTachoTitleAddress, title);
-  EEPROM.writeByte(eepromTachoVersionHighAddress, versionHigh);
-  EEPROM.writeByte(eepromTachoVersionLowAddress, versionLow);
+  int eepromDebugAddress = EEPROM.getAddress(sizeof(byte));
+
+  EEPROM.writeBlock(eepromSpeedoTitleAddress, title);
+  EEPROM.writeByte(eepromSpeedoVersionHighAddress, versionHigh);
+  EEPROM.writeByte(eepromSpeedoVersionLowAddress, versionLow);
 
   EEPROM.writeLong(eepromOdoAddress, 0UL);
   EEPROM.writeLong(eepromTrip1Address, 0UL);
   EEPROM.writeLong(eepromTrip2Address, 0UL);
-
 
   // This is the distance per pulse in km
   // the value here is calculated from the following
@@ -71,26 +72,28 @@ void setup () {
 
   EEPROM.writeByte(eepromModeFuncAddress, 0);
 
+  EEPROM.writeByte(eepromDebugAddress, 0);
+
   // confirm eeprom has been written to
 
   Serial.print("Speedo title address = ");
-  Serial.print(eepromTachoTitleAddress);
+  Serial.print(eepromSpeedoTitleAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  EEPROM.readBlock(eepromTachoTitleAddress, title);
+  EEPROM.readBlock(eepromSpeedoTitleAddress, title);
   Serial.println(title);
 
   Serial.print("Speedo Version High address = ");
-  Serial.print(eepromTachoVersionHighAddress);
+  Serial.print(eepromSpeedoVersionHighAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromTachoVersionHighAddress));    
+  Serial.println(EEPROM.readByte(eepromSpeedoVersionHighAddress));    
 
-  Serial.print("Speedo Version High address = ");
-  Serial.print(eepromTachoVersionLowAddress);
+  Serial.print("Speedo Version Low address = ");
+  Serial.print(eepromSpeedoVersionLowAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromTachoVersionLowAddress));    
+  Serial.println(EEPROM.readByte(eepromSpeedoVersionLowAddress));    
 
   Serial.println();
   Serial.print("Odometer address = ");
@@ -113,6 +116,18 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readFloat(eepromSpeedoCalibrateAddress));    
+
+  Serial.print("Speedo Mode address = ");
+  Serial.print(eepromModeFuncAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromModeFuncAddress));    
+
+  Serial.print("Speedo debug address = ");
+  Serial.print(eepromDebugAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromDebugAddress));    
 
 }
 

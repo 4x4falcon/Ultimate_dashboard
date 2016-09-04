@@ -4,6 +4,9 @@
 
 void doSerialCommand(String readString)
  {
+
+    byte p = 0;
+
     Serial.println(readString);  //so you can see the captured string 
 
     if (readString == "$")
@@ -81,7 +84,6 @@ void doSerialCommand(String readString)
       Serial.print(F("($605)Fuel level  warning low = "));
       Serial.println(EEPROM.readByte(eepromFuelWarnLowAddress));
 
-
 /*
   // a  
       Serial.print(F("($?00)  lower calibration = "));
@@ -97,6 +99,9 @@ void doSerialCommand(String readString)
       Serial.print(F("($?04)  warning low = "));
       Serial.println(EEPROM.readInt(eepromFuelWarnLowAddress));
 */
+
+    Serial.print(F("($910)Gauges Debug = "));
+    Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
 
      }
     else
@@ -466,7 +471,29 @@ void doSerialCommand(String readString)
 
 
 
-
+            case 910:
+              if (para == "")
+               {
+                Serial.print(F("($910) debug value = "));
+                Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
+               }
+              else
+               {
+                p = para.toInt();
+                if (p < 4)
+                 {
+                  Serial.print(F("Setting ($910) debug value = "));
+                  Serial.println(para);
+                  EEPROM.writeByte(eepromGaugesDebugAddress, p);
+                  debug = p;
+                 }
+                else
+                 {
+                  Serial.println(F("Invalid value for debug parameter"));
+                  debug = 0;
+                 }
+               }
+              break;
 
               default:
                 Serial.println(F("ERROR: Unknown setting"));

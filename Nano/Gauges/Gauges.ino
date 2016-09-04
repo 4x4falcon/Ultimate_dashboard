@@ -3,12 +3,10 @@
 /*
 *	Gauge reading and display
 *
-*
+* Using Arduino Nano
 */
 
 // echo to serial for debugging
-//#define ECHO_SERIAL 1
-//#define ECHO_SERIAL_DISPLAY 1
 
 // include libraries
 #include <SoftwareSerial.h>
@@ -36,7 +34,7 @@
 //SoftwareSerial s7s(softwareRx, softwareTx);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
 // Get eeprom storage addresses MUST be before anything else and in the same order
   eepromTitle = EEPROM.getAddress(sizeof(char)*sizeof(title));
@@ -117,6 +115,9 @@ void setup() {
   fuelSenderType = EEPROM.readByte(eepromFuelSensorTypeAddress);
 
 
+  eepromGaugesDebugAddress = EEPROM.getAddress(sizeof(byte));
+  debug = EEPROM.readByte(eepromGaugesDebugAddress);
+
   // timer to update the gauges display every 5000ms (5s)
   timer.every(timeUpdate, updateDisplay);
 
@@ -152,6 +153,7 @@ void setup() {
   tempSerial.begin(9600);
   fuelSerial.begin(9600);
 
+  setBrightness();
 
   delay(100);
   voltSerial.write(0x76);    // clear the display
@@ -163,14 +165,14 @@ void setup() {
 
   oilSerial.write(0x76);    // clear the display
   delay(1);
-  oilSerial.print("OIL");  // Displays OIL on all digits
+  oilSerial.print("OIL ");  // Displays OIL on all digits
   delay(1);
   oilSerial.write(0x77);
   oilSerial.write(0b00000100);  // sets digit 3 decimal on
 
   tempSerial.write(0x76);    // clear the display
   delay(1);
-  tempSerial.print("TEMP");  // Displays TEMP on all digits
+  tempSerial.print("TENP");  // Displays TEMP on all digits
   delay(1);
   tempSerial.write(0x77);
   tempSerial.write(0b00000100);  // sets digit 3 decimal on
@@ -182,7 +184,10 @@ void setup() {
   fuelSerial.write(0x77);
   fuelSerial.write(0b00000100);  // sets digit 3 decimal on
 
-  setBrightness();
+  delay(1000);
+
+//  setBrightness();
+  updateDisplay();
 
 }
 
@@ -204,10 +209,6 @@ void loop() {
     readString="";              //empty for next input
   } 
 
-//  arduinoLed = !arduinoLed;
-//  digitalWrite(pinLed, arduinoLed);
-//  delay(1000);              // wait for a second
-
   loopTime = millis();
 
 //  if (modeFunc != FUNC_CAL)
@@ -216,7 +217,6 @@ void loop() {
 
 //    buttonMode.check();
     buttonBrightness.check();
-
 
 //    checkForTimeout();
 //   }

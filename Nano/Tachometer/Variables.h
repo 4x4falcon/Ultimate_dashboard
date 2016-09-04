@@ -78,6 +78,10 @@ volatile int eepromTachoMaximum;
 
 volatile int eepromTachoCalibrate;
 
+//EEPROM storage address for tacho debug
+
+volatile int eepromTachoDebug;
+
 // The soft serial for the speedometer display
 SoftwareSerial tachoSerial(pinSerialRX, pinTachoSerialTX);
 
@@ -100,5 +104,5 @@ volatile byte pixelBrightness = 3 * brightnessBoost;
 int passCode = 9009;
 String readString;
 
-
+byte debug = 0;
 

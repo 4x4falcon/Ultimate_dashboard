@@ -12,10 +12,6 @@
 *	
 */
 
-// echo to serial for debugging
-//#define ECHO_SERIAL 1
-//#define ECHO_SERIAL_1 1
-
 //library includes
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
@@ -44,7 +40,7 @@
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
@@ -58,10 +54,11 @@ void setup() {
   eepromTachoShift = EEPROM.getAddress(sizeof(int));
   eepromTachoMaximum = EEPROM.getAddress(sizeof(int));
   eepromTachoCalibrate = EEPROM.getAddress(sizeof(int));
+  eepromTachoDebug = EEPROM.getAddress(sizeof(byte));
 
   // Read ppr, redline and shift from EEPROM
   tachoPPR = EEPROM.readByte(eepromTachoPPR);
-  tachoType = EEPROM.readByte(eepromTachoPPR);
+  tachoType = EEPROM.readByte(eepromTachoType);
   tachoRedline = EEPROM.readInt(eepromTachoRedline);
   tachoShift = EEPROM.readInt(eepromTachoShift);
   tachoMaximum = EEPROM.readInt(eepromTachoMaximum);
@@ -69,22 +66,26 @@ void setup() {
   
   tachoStep = tachoMaximum / numTachoLeds;
 
-#ifdef ECHO_SERIAL
-  Serial.print("tachoPPR    ");
-  Serial.println(tachoPPR);
-  Serial.print("tachoType    ");
-  Serial.println(tachoType);
-  Serial.print("tachoRedline   ");
-  Serial.println(tachoRedline);
-  Serial.print("tachoShift    ");
-  Serial.println(tachoShift);
-  Serial.print("tachoMaximum    ");
-  Serial.println(tachoMaximum);
-  Serial.print("numTachoLeds    ");
-  Serial.println(numTachoLeds);
-  Serial.print("tachoStep    ");
-  Serial.println(tachoStep);
-#endif
+  debug = EEPROM.readByte(eepromTachoDebug);
+
+
+  if (debug == 1)
+   {
+    Serial.print(F("tachoPPR    "));
+    Serial.println(tachoPPR);
+    Serial.print(F("tachoType    "));
+    Serial.println(tachoType);
+    Serial.print(F("tachoRedline   "));
+    Serial.println(tachoRedline);
+    Serial.print(F("tachoShift    "));
+    Serial.println(tachoShift);
+    Serial.print(F("tachoMaximum    "));
+    Serial.println(tachoMaximum);
+    Serial.print(F("numTachoLeds    "));
+    Serial.println(numTachoLeds);
+    Serial.print(F("tachoStep    "));
+    Serial.println(tachoStep);
+   }
 
   // timer to update the tachometer display every 1000ms (1s)
   timer.every(updateTime, updateDisplay);
@@ -97,16 +98,19 @@ void setup() {
   buttonBrightness.setPressHandler(buttonBrightnessPressed);
   buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
 
-  //setup speedo and odo software serial baud
+  //setup tacho software serial baud
 
   tachoSerial.begin(9600);
   delay(500);
+
+  setBrightness();
+  
   tachoSerial.write(0x76);
   tachoPixels.begin();
 
-//  tachoSerial.print(" RPM");
+  tachoSerial.print(F(" RPN"));
 //  displayRpm(1101);
-//  delay(5000);
+  delay(1000);
   displayRpm(0);
 
   pinMode(tachoInterrupt, INPUT_PULLUP);
@@ -116,9 +120,6 @@ void setup() {
   pinMode(pinModeButton, INPUT_PULLUP);
   pinMode(pinBrightnessSw, INPUT_PULLUP);
 
-  pinMode(pinLightsOn, INPUT_PULLUP);
-
-  setBrightness();
 
   // Attach interrupt for the vehicle speed sensor
   attachInterrupt(tachoInterrupt, sensorTriggered, RISING);

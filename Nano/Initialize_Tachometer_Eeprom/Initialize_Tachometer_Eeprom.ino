@@ -13,16 +13,19 @@
 
 void setup () {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
   int eepromTachoTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
   int eepromTachoVersionHighAddress = EEPROM.getAddress(sizeof(byte));
   int eepromTachoVersionLowAddress = EEPROM.getAddress(sizeof(byte));
   int eepromTachoPPRAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
   int eepromTachoRedlineAddress = EEPROM.getAddress(sizeof(int));
   int eepromTachoShiftAddress = EEPROM.getAddress(sizeof(int));
   int eepromTachoMaximumAddress = EEPROM.getAddress(sizeof(int));
+  int eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(int));
+  int eepromTachoDebugAddress = EEPROM.getAddress(sizeof(byte));
 
   EEPROM.writeBlock(eepromTachoTitleAddress, title);
   EEPROM.writeByte(eepromTachoVersionHighAddress, versionHigh);
@@ -44,9 +47,12 @@ void setup () {
   //    calibration = 8
 
   EEPROM.writeByte(eepromTachoPPRAddress, 4);
+  EEPROM.writeByte(eepromTachoTypeAddress, 1);
   EEPROM.writeInt(eepromTachoRedlineAddress, 3300);
   EEPROM.writeInt(eepromTachoShiftAddress, 2800);
   EEPROM.writeInt(eepromTachoMaximumAddress, 4500);
+  EEPROM.writeInt(eepromTachoCalibrateAddress, 0);
+  EEPROM.writeByte(eepromTachoDebugAddress, 0);
   
   // confirm eeprom has been written to
 
@@ -74,6 +80,12 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readByte(eepromTachoPPRAddress));    
+  Serial.print("Tacho Type address = ");
+  Serial.print(eepromTachoTypeAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromTachoTypeAddress));    
+
   Serial.print("Tacho Redline address = ");
   Serial.print(eepromTachoRedlineAddress);
   Serial.print(" \t\t ");
@@ -89,7 +101,17 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readInt(eepromTachoMaximumAddress));
-  
+  Serial.print("Tacho Calibrate address = ");
+  Serial.print(eepromTachoCalibrateAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readInt(eepromTachoCalibrateAddress));
+
+  Serial.print("Tacho Debug address = ");
+  Serial.print(eepromTachoDebugAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromTachoDebugAddress));
 
 }
 

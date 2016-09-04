@@ -44,13 +44,13 @@ static const byte pinModeButton = 5;
 static const byte pinSerialRX = 6;
 
 // the odometer lcd serial pin
-static const byte pinOdoSerialTX = 15;
+static const byte pinOdoSerialTX = 7;
 
 // the speedo led serial pin
-static const byte pinSpeedoSerialTX = 16;
+static const byte pinSpeedoSerialTX = 8;
 
 // the speedo neopixel pin
-static const byte pinSpeedoNeopixel = 17;
+static const byte pinSpeedoNeopixel = 9;
 
 // timeout for setting to zero 1.5s
 static const int timeoutValue = 1500;
@@ -67,9 +67,9 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 static const char tripActive = B10100101;
 
 // digital inputs from 12V
-static const byte pinLightsOn = 8;		//	Lights on input
-static const byte pinBrightnessSw = 9;		//	Brightness switch
-static const byte pinIgnOn = 10;		//	Ignition on
+static const byte pinLightsOn = 10;		//	Lights on input
+static const byte pinBrightnessSw = 3;		//	Brightness switch
+static const byte pinIgnOn = 11;		//	Ignition on
 
 // The SPEEDO LED screen has 4 digits
 static const byte numSpeedoDigits = 4;
