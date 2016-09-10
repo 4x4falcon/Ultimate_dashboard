@@ -118,6 +118,9 @@ void setup() {
   eepromGaugesDebugAddress = EEPROM.getAddress(sizeof(byte));
   debug = EEPROM.readByte(eepromGaugesDebugAddress);
 
+  eepromGaugesDemoAddress = EEPROM.getAddress(sizeof(byte));
+  demo = EEPROM.readByte(eepromGaugesDemoAddress);
+
   // timer to update the gauges display every 5000ms (5s)
   timer.every(timeUpdate, updateDisplay);
 
@@ -211,15 +214,13 @@ void loop() {
 
   loopTime = millis();
 
-//  if (modeFunc != FUNC_CAL)
-//   {
-    timer.update();
+  timer.update();
 
-//    buttonMode.check();
-    buttonBrightness.check();
+  buttonBrightness.check();
 
-//    checkForTimeout();
-//   }
-
+  if (demo > 0)
+   {
+    gaugesDemo();
+   }
 }
 

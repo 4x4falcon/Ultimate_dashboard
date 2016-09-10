@@ -85,9 +85,10 @@ void updateDisplay () {
 
   float v = (val * 5.0) / (voltUpper - voltLower);
   float v2 = v / (r2 / (r1 + r2));
-  
+
+  voltVal = int(v * 10);
 //  sprintf(b, "%4d", int(v2 * 10));
-  sprintf(b, "%4d", int(v * 10));
+  sprintf(b, "%4d", voltVal);
 
   if (debug == 3)
    {
@@ -106,13 +107,15 @@ void updateDisplay () {
 
   v = (val * 5.0) / (oilUpper - oilLower);
 //  v2 = v / (r2 / (r1 + r2));
+  oilVal = int(v * 10);
 
-  sprintf(b, "%4d", int(v * 10));
+  sprintf(b, "%4d", oilVal);
 
   if (debug == 3)
    {
     Serial.println(b);
    }
+
   oilSerial.print(b);             // write the value to the display
   oilSerial.write(0x77);
   oilSerial.write(0b00000100);  // sets digit 3 decimal on
@@ -125,7 +128,10 @@ void updateDisplay () {
 
   v = (val * 5.0) / (tempUpper - tempLower);
 //  v2 = v / (r2 / (r1 + r2));
-  sprintf(b, "%4d", int(v * 10));
+
+  tempVal = int (v * 10);
+  
+  sprintf(b, "%4d", tempVal);
 
   if (debug == 3)
    {
@@ -144,7 +150,9 @@ void updateDisplay () {
 
   v = (val * 5.0) / (tempUpper - tempLower);
 //  v2 = v / (r2 / (r1 + r2));
-  sprintf(b, "%4d", int(v * 10));
+
+  fuelVal = int(v * 10);
+  sprintf(b, "%4d", fuelVal);
 
   if (debug == 3)
    {

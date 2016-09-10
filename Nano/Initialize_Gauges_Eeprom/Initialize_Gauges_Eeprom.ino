@@ -98,6 +98,9 @@ void setup () {
   int eepromGaugesDebugAddress = EEPROM.getAddress(sizeof(byte));
   EEPROM.writeByte(eepromGaugesDebugAddress, 0);
 
+  int eepromGaugesDemoAddress = EEPROM.getAddress(sizeof(byte));
+  EEPROM.writeByte(eepromGaugesDemoAddress, 0);
+
   // confirm eeprom has been written to
 
 
@@ -271,6 +274,11 @@ void setup () {
   Serial.print("value = ");
   Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
 
+  Serial.print("Gauges Demo address = ");
+  Serial.print(eepromGaugesDemoAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromGaugesDemoAddress));
 
 
 }

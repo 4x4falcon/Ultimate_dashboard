@@ -33,7 +33,29 @@ void doSerialCommand(String readString)
     Serial.print(F("($205)Tacho Calibrate = "));
     Serial.println(EEPROM.readInt(eepromTachoCalibrate));
     Serial.print(F("($910)Tacho Debug = "));
-    Serial.println(EEPROM.readInt(eepromTachoDebug));
+    Serial.println(EEPROM.readByte(eepromTachoDebug));
+    Serial.print(F("($930)Tacho Demo = "));
+    Serial.println(EEPROM.readByte(eepromTachoDemo));
+
+    Serial.println();
+    Serial.print(F("brightness = "));
+    sprintf(buffer, "%4d", brightnessBoost);
+    Serial.println(buffer);
+
+    Serial.println();
+    Serial.print(F("rpm = "));
+    sprintf(buffer, "%4d", rpm);
+    Serial.println(buffer);
+
+    Serial.println();
+    if (digitalRead(pinLightsOn))
+     {
+      Serial.println(F("Lights on"));
+     }
+    else
+     {
+      Serial.println(F("Lights off"));
+     }
 
    }
   else
@@ -161,6 +183,31 @@ void doSerialCommand(String readString)
                }
               break;
 
+            case 930:
+              if (parameter == "")
+               {
+                Serial.print(F("($930) demo value = "));
+                Serial.println(EEPROM.readByte(eepromTachoDemo));
+               }
+              else
+               {
+                p = parameter.toInt();
+                if (p < 6)
+                 {
+                  Serial.print(F("Setting ($930) demo value = "));
+                  Serial.println(parameter);
+                  EEPROM.writeByte(eepromTachoDemo, p);
+                  demo = p;
+                 }
+                else
+                 {
+                  Serial.println(F("Invalid value for demo parameter"));
+                  EEPROM.writeByte(eepromTachoDemo, 0);
+                  demo = 0;
+                 }
+               }
+              break;
+
             default:
               Serial.println(F("ERROR: Unknown setting"));
               break;
@@ -179,4 +226,33 @@ void doSerialCommand(String readString)
    }
  }
 
+
+void tachoDemo()
+ {
+
+  int rpm =  0;
+
+  while (rpm < (tachoRedline + 1500))
+   {
+    rpm += 100;
+
+    displayRpm(rpm);
+    delay(1000/demo);
+   }
+
+  delay(1000);
+
+  if (demo >= 4)
+   {
+    while (rpm > 0)
+     {
+      rpm -= 100;
+
+      displayRpm(rpm);
+      delay(1000/demo);
+     }
+
+   }
+  demo = 0;
+ }
 

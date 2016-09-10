@@ -100,9 +100,42 @@ void doSerialCommand(String readString)
       Serial.println(EEPROM.readInt(eepromFuelWarnLowAddress));
 */
 
-    Serial.print(F("($910)Gauges Debug = "));
-    Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
+      Serial.print(F("($910)Gauges Debug = "));
+      Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
 
+      Serial.print(F("($940)Gauges Demo = "));
+      Serial.println(EEPROM.readByte(eepromGaugesDemoAddress));
+      Serial.println();
+      Serial.print(F("brightness = "));
+      sprintf(buffer, "%4d", brightnessBoost);
+      Serial.println(buffer);
+
+      Serial.println();
+      Serial.print(F("Volt value = "));
+      sprintf(buffer, "%4d", voltVal);
+      Serial.println(buffer);
+      Serial.println();
+      Serial.print(F("Oil value = "));
+      sprintf(buffer, "%4d", oilVal);
+      Serial.println(buffer);
+      Serial.println();
+      Serial.print(F("Temp value = "));
+      sprintf(buffer, "%4d", tempVal);
+      Serial.println(buffer);
+      Serial.println();
+      Serial.print(F("Fuel value = "));
+      sprintf(buffer, "%4d", fuelVal);
+      Serial.println(buffer);
+
+      Serial.println();
+      if (digitalRead(pinLightsOn))
+       {
+        Serial.println(F("Lights on"));
+       }
+      else
+       {
+        Serial.println(F("Lights off"));
+       }
      }
     else
      {
@@ -495,6 +528,30 @@ void doSerialCommand(String readString)
                }
               break;
 
+            case 940:
+              if (para == "")
+               {
+                Serial.print(F("($940) demo value = "));
+                Serial.println(EEPROM.readByte(eepromGaugesDemoAddress));
+               }
+              else
+               {
+                p = para.toInt();
+                if (p < 6)
+                 {
+                  Serial.print(F("Setting ($940) demo value = "));
+                  Serial.println(para);
+                  EEPROM.writeByte(eepromGaugesDemoAddress, p);
+                  demo = p;
+                 }
+                else
+                 {
+                  Serial.println(F("Invalid value for demo parameter"));
+                  demo = 0;
+                 }
+               }
+              break;
+
               default:
                 Serial.println(F("ERROR: Unknown setting"));
                 break;
@@ -522,4 +579,174 @@ float fastMap(long x, long in_min, long in_max, long out_min, long out_max)
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
 
+
+
+#define DIGIT1  0x7B
+#define DIGIT2  0x7C
+#define DIGIT3  0x7D
+#define DIGIT4  0x7E
+
+#define SEGMENT1  0
+#define SEGMENT2  1
+#define SEGMENT3  2
+#define SEGMENT4  3
+#define SEGMENT5  4
+#define SEGMENT6  5
+#define SEGMENT7  6
+
+
+
+
+void gaugesDemo()
+ {
+
+  int rpm =  0;
+
+  if (demo == 1)     // display each decimal, apostrophe and colon
+   {
+    while (rpm < 64)
+     {
+      voltSerial.write(0x77);
+//      voltSerial.write(0b00000100);  // sets digit 3 decimal on
+      voltSerial.write(rpm);
+
+      tempSerial.write(0x77);
+      tempSerial.write(rpm);
+
+      oilSerial.write(0x77);
+      oilSerial.write(rpm);
+
+      fuelSerial.write(0x77);
+      fuelSerial.write(rpm);
+
+      if (rpm == 0)
+       {
+        rpm +=1;
+       }
+      rpm *= 2;
+      delay(1000);
+     }
+   }
+
+  if (demo == 2)       // display each segment
+   {
+    while (rpm < 128)
+     {
+      voltSerial.write(DIGIT1);
+      voltSerial.write(rpm);
+      voltSerial.write(DIGIT2);
+      voltSerial.write(rpm);
+      voltSerial.write(DIGIT3);
+      voltSerial.write(rpm);
+      voltSerial.write(DIGIT4);
+      voltSerial.write(rpm);
+
+      tempSerial.write(DIGIT1);
+      tempSerial.write(rpm);
+      tempSerial.write(DIGIT2);
+      tempSerial.write(rpm);
+      tempSerial.write(DIGIT3);
+      tempSerial.write(rpm);
+      tempSerial.write(DIGIT4);
+      tempSerial.write(rpm);
+
+      oilSerial.write(DIGIT1);
+      oilSerial.write(rpm);
+      oilSerial.write(DIGIT2);
+      oilSerial.write(rpm);
+      oilSerial.write(DIGIT3);
+      oilSerial.write(rpm);
+      oilSerial.write(DIGIT4);
+      oilSerial.write(rpm);
+
+      fuelSerial.write(DIGIT1);
+      fuelSerial.write(rpm);
+      fuelSerial.write(DIGIT2);
+      fuelSerial.write(rpm);
+      fuelSerial.write(DIGIT3);
+      fuelSerial.write(rpm);
+      fuelSerial.write(DIGIT4);
+      fuelSerial.write(rpm);
+
+      if (rpm == 0)
+       {
+        rpm +=1;
+       }
+      rpm *= 2;
+      delay(500);
+     }
+   }
+
+  if (demo == 3)      // random bits
+   {
+
+//Seed random generator with analog input - nothing needs to be connected to A7
+    randomSeed(analogRead(7));
+    
+    while (rpm < 64)
+     {
+
+      for(int x = 0 ; x < 4 ; x++)
+       {
+        byte randNumber = random(0, 127);    //Give me random number between 0 and 127
+        voltSerial.write(DIGIT1 + x);        //Control individual segments on a digit
+        voltSerial.write(randNumber);        //Turn on random segments
+
+        tempSerial.write(DIGIT1 + x);        //Control individual segments on a digit
+        tempSerial.write(randNumber);        //Turn on random segments
+
+        oilSerial.write(DIGIT1 + x);        //Control individual segments on a digit
+        oilSerial.write(randNumber);        //Turn on random segments
+
+        fuelSerial.write(DIGIT1 + x);        //Control individual segments on a digit
+        fuelSerial.write(randNumber);        //Turn on random segments
+       }
+
+      rpm += 1;
+      delay(500);
+     }
+   }
+
+  if (demo == 4)      // countdown predator
+   {
+
+    rpm = 127;
+
+    while (rpm >= 0)
+     {
+      tempSerial.write(DIGIT1);
+      tempSerial.write(rpm);
+      tempSerial.write(DIGIT2);
+      tempSerial.write(rpm);
+      tempSerial.write(DIGIT3);
+      tempSerial.write(rpm);
+      tempSerial.write(DIGIT4);
+      tempSerial.write(rpm);
+      
+      rpm -= 1;
+      delay(500);
+     }
+   }
+
+
+
+  delay(1000);
+
+  demo = 0;
+  voltSerial.write(0x76);
+  voltSerial.write(0x77);
+  voltSerial.write(0b00000100);  // sets digit 3 decimal on
+
+  tempSerial.write(0x76);
+  tempSerial.write(0x77);
+  tempSerial.write(0b00000100);  // sets digit 3 decimal on
+
+  oilSerial.write(0b00000100);   // sets digit 3 decimal on
+  oilSerial.write(0x77);
+  oilSerial.write(0x76);
+
+  fuelSerial.write(0b00000100);  // sets digit 3 decimal on
+  fuelSerial.write(0x77);
+  fuelSerial.write(0x76);
+ }
 

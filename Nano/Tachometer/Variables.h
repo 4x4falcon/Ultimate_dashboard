@@ -82,11 +82,15 @@ volatile int eepromTachoCalibrate;
 
 volatile int eepromTachoDebug;
 
+//EEPROM storage address for tacho debug
+
+volatile int eepromTachoDemo;
+
 // The soft serial for the speedometer display
 SoftwareSerial tachoSerial(pinSerialRX, pinTachoSerialTX);
 
 // When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
-Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds + pixelOffset, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
 
 // the led on pin 13
 volatile byte arduinoLed = LOW;
@@ -105,4 +109,10 @@ int passCode = 9009;
 String readString;
 
 byte debug = 0;
+byte demo = 0;
+
+// a buffer for the values
+char buffer[50];
+
+
 

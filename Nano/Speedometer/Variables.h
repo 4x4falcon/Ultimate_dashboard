@@ -49,6 +49,7 @@ volatile int calibrateCounter;
 
 volatile byte debug = 0;
 
+volatile byte demo = 0;
 
 // The last time the odometer value was written to memory
 volatile unsigned long lastOdometerWrite = 0;
@@ -89,6 +90,9 @@ volatile int eepromSpeedoCalibrate;
 
 volatile int eepromDebug;
 
+// EEPROM storage address for demo
+
+volatile int eepromDemo;
 
 // The distance travelled in one pulse from the vehicle speed sensor
 volatile float pulseDistance = 0.0;
@@ -102,7 +106,7 @@ SoftwareSerial odoSerial(pinSerialRX,pinOdoSerialTX);
 
 
 // When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
-Adafruit_NeoPixel speedoPixels = Adafruit_NeoPixel(numSpeedoLeds, pinSpeedoNeopixel, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel speedoPixels = Adafruit_NeoPixel(numSpeedoLeds + pixelOffset, pinSpeedoNeopixel, NEO_GRB + NEO_KHZ800);
 
 
 // the led on pin 13 state

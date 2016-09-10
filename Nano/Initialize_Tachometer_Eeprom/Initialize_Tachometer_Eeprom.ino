@@ -26,6 +26,7 @@ void setup () {
   int eepromTachoMaximumAddress = EEPROM.getAddress(sizeof(int));
   int eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(int));
   int eepromTachoDebugAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromTachoDemoAddress = EEPROM.getAddress(sizeof(byte));
 
   EEPROM.writeBlock(eepromTachoTitleAddress, title);
   EEPROM.writeByte(eepromTachoVersionHighAddress, versionHigh);
@@ -53,6 +54,7 @@ void setup () {
   EEPROM.writeInt(eepromTachoMaximumAddress, 4500);
   EEPROM.writeInt(eepromTachoCalibrateAddress, 0);
   EEPROM.writeByte(eepromTachoDebugAddress, 0);
+  EEPROM.writeByte(eepromTachoDemoAddress, 0);
   
   // confirm eeprom has been written to
 
@@ -112,6 +114,12 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readByte(eepromTachoDebugAddress));
+
+  Serial.print("Tacho Demo address = ");
+  Serial.print(eepromTachoDemoAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromTachoDemoAddress));
 
 }
 

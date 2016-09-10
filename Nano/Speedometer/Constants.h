@@ -75,7 +75,8 @@ static const byte pinIgnOn = 11;		//	Ignition on
 static const byte numSpeedoDigits = 4;
 // The SPEEDO LED arc has 15 leds
 static const byte numSpeedoLeds = 15;
-
+// start the pixel display further around the ring
+static const byte pixelOffset = 0;
 
 // The Odometer LCD screen has 16 digits by 2 lines
 static const byte numOdoDigits = 16;

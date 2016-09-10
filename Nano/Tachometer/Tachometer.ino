@@ -55,6 +55,7 @@ void setup() {
   eepromTachoMaximum = EEPROM.getAddress(sizeof(int));
   eepromTachoCalibrate = EEPROM.getAddress(sizeof(int));
   eepromTachoDebug = EEPROM.getAddress(sizeof(byte));
+  eepromTachoDemo = EEPROM.getAddress(sizeof(byte));
 
   // Read ppr, redline and shift from EEPROM
   tachoPPR = EEPROM.readByte(eepromTachoPPR);
@@ -67,6 +68,7 @@ void setup() {
   tachoStep = tachoMaximum / numTachoLeds;
 
   debug = EEPROM.readByte(eepromTachoDebug);
+  demo = EEPROM.readByte(eepromTachoDemo);
 
 
   if (debug == 1)
@@ -165,6 +167,11 @@ void loop() {
     buttonBrightness.check();
 
     checkForTimeout();
+
+    if (demo > 0)
+     {
+      tachoDemo();
+     }
 
    }
 

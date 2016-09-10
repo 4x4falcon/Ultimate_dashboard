@@ -36,7 +36,28 @@ void doSerialCommand(String readString)
 
       Serial.print(F("($910)debug value = "));
       Serial.println(EEPROM.readByte(eepromDebug));
-     
+      Serial.print(F("($920)demo value = "));
+      Serial.println(EEPROM.readByte(eepromDemo));
+
+      Serial.println();
+      Serial.print(F("brightness = "));
+      sprintf(buffer, "%4d", brightnessBoost);
+      Serial.println(buffer);
+
+      Serial.println();
+      Serial.print(F("speed = "));
+      sprintf(buffer, "%4d", speed);
+      Serial.println(buffer);
+
+      Serial.println();
+      if (digitalRead(pinLightsOn))
+       {
+        Serial.println(F("Lights on"));
+       }
+      else
+       {
+        Serial.println(F("Lights off"));
+       }
      }
     else
      {
@@ -123,6 +144,32 @@ void doSerialCommand(String readString)
                    }
                  }
                 break;
+
+              case 920:
+                if (parameter == "")
+                 {
+                  Serial.print(F("($920) demo value = "));
+                  Serial.println(EEPROM.readByte(eepromDemo));
+                 }
+                else
+                 {
+                  p = parameter.toInt();
+                  if (p < 6)
+                   {
+                    Serial.print(F("Setting ($920) demo value = "));
+                    Serial.println(parameter);
+                    EEPROM.writeByte(eepromDemo, p);
+                    demo = p;
+                   }
+                  else
+                   {
+                    Serial.println(F("Invalid value for demo parameter"));
+                    EEPROM.writeByte(eepromDemo, 0);
+                    demo = 0;
+                   }
+                 }
+                break;
+
               case 999:
                 if ((parameter == "") || (parameter.length() < 5))
                  {
@@ -164,8 +211,36 @@ void doSerialCommand(String readString)
        }
      }
 //    readString=""; //empty for next input
-
-  
  }
 
+
+
+void speedoDemo()
+ {
+
+  int rpm =  0;
+
+  while (rpm < 160)
+   {
+    rpm += 1;
+
+    displaySpeed(rpm);
+    delay(1000/demo);
+   }
+
+  delay(1000);
+
+  if (demo >= 4)
+   {
+    while (rpm > 0)
+     {
+      rpm -= 1;
+
+      displaySpeed(rpm);
+      delay(1000/demo);
+     }
+
+   }
+  demo = 0;
+ }
 

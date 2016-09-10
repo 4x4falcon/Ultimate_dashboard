@@ -8,13 +8,12 @@
 
 void setBrightness() {
 
-
    byte b = brightnessBoost;
 
    if (digitalRead(pinLightsOn))
     {
      b = 2 * brightnessBoost;
-     pixelBrightness = brightnessBoost;
+     pixelBrightness = int(0.5 * brightnessBoost);
      if (debug == 1)
       {
        Serial.print(F("Lights on  "));
@@ -23,8 +22,8 @@ void setBrightness() {
     }
    else
     {
-     b= 15 * brightnessBoost;
-     pixelBrightness = 3 * brightnessBoost;
+     b=50 * brightnessBoost;
+     pixelBrightness = int(1.5 * brightnessBoost);
      if (debug == 1)
       {
        Serial.print(F("Lights off  "));
@@ -33,20 +32,20 @@ void setBrightness() {
     }
 
     tachoSerial.write(0x7A);
-    tachoSerial.write(b);
+    tachoSerial.write((byte) b);
 
 }
 
 /*
  * Displays current rpm on 4 DIGIT LED
- * TODO display on 15 led 1/4 neo ring
+ * and neo ring
  */
 
 void displayRpm (int rpm) {
 
   char buffer[6];
-  byte pixels = rpm / tachoStep;                 // needs to be a function of max tacho reading
-  byte redLine = tachoRedline / tachoStep;
+  byte pixels = int (rpm / tachoStep) + pixelOffset;                 // needs to be a function of max tacho reading
+  byte redLine = int (tachoRedline / tachoStep) + pixelOffset;
 
   if (rpm > 9999)
    {
@@ -72,16 +71,16 @@ void displayRpm (int rpm) {
     Serial.println(tachoStep);
    }
 
-  for(byte i=0;i<pixels;i++)
+  for(byte i=pixelOffset;i<pixels;i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     tachoPixels.setPixelColor(i, tachoPixels.Color(0,0,pixelBrightness)); // blue color.
     if (i >= redLine)
      {
-      tachoPixels.setPixelColor(i, tachoPixels.Color(pixelBrightness*20,0,0)); // red color with blue due to blue perspex.
+      tachoPixels.setPixelColor(i, tachoPixels.Color(pixelBrightness*2,0,0)); // red color with blue due to blue perspex.
      }
    }
-  for(byte i=pixels;i<=numTachoLeds;i++)
+  for(byte i=pixels;i<=(numTachoLeds + pixelOffset);i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     tachoPixels.setPixelColor(i, tachoPixels.Color(0,0,0)); // blank the pixel

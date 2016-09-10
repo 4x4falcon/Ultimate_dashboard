@@ -53,6 +53,7 @@ void setup() {
   eepromModeFunc = EEPROM.getAddress(sizeof(byte));
 
   eepromDebug = EEPROM.getAddress(sizeof(byte));
+  eepromDemo = EEPROM.getAddress(sizeof(byte));
 
   // Read odometer value from flash memory
   totalOdometer = EEPROM.readLong(eepromOdo);
@@ -80,6 +81,10 @@ void setup() {
     dtostrf(pulseDistance, 20, 12, setupBuffer);
     Serial.println(setupBuffer);
    }
+
+  // get demo value
+
+  demo = EEPROM.readByte(eepromDemo);
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH
@@ -180,6 +185,11 @@ void loop() {
 
     checkForTimeout();
     checkForEepromWrite();
+
+    if (demo > 0)
+     {
+      speedoDemo();
+     }
    }
 }
 

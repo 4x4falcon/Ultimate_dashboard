@@ -12,7 +12,7 @@ void setBrightness()
     {
      b = 2 * brightnessBoost;
      b1 = 2 * brightnessBoost;
-     pixelBrightness = brightnessBoost;
+     pixelBrightness = int(0.5 * brightnessBoost);
      if (debug == 1)
       {
        Serial.print(F("Lights on  "));
@@ -23,7 +23,7 @@ void setBrightness()
     {
      b= 15 * brightnessBoost;
      b1 = 15 * brightnessBoost;
-     pixelBrightness = 3 * brightnessBoost;
+     pixelBrightness = int(1.5 * brightnessBoost);
      if (debug == 1)
       {
        Serial.print(F("Lights off  "));
@@ -77,18 +77,18 @@ void displaySpeed (int speed) {
     Serial.println(buffer);
    }
 
-  byte pixels = speed / 10;
+  byte pixels = int(speed / 10) + pixelOffset;
 
-  for(byte i=0;i<pixels;i++)
+  for(byte i=pixelOffset;i<pixels;i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,pixelBrightness)); // blue color.
-    if (i >= 11)
+    if (i >= (11 + pixelOffset))
      {
       speedoPixels.setPixelColor(i, speedoPixels.Color(pixelBrightness,0,0)); // red color.
      }
    }
-  for(byte i=pixels;i<=numSpeedoLeds;i++)
+  for(byte i=pixels;i<=(numSpeedoLeds + pixelOffset);i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,0)); // blank the pixel

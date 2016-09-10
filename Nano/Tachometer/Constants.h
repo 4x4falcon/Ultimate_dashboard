@@ -39,7 +39,9 @@ static int pulseMaxCount = 100;
 // The TACHO LED screen has 4 digits
 static const byte numTachoDigits = 4;
 // The TACHO LED arc has 16 leds
-static const byte numTachoLeds = 16;
+static const byte numTachoLeds = 17;
+// start the pixel display further around the ring
+static const byte pixelOffset = 5;
 
 // the tachometer sensor interrupt
 

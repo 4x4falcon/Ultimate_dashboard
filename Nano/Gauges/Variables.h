@@ -15,6 +15,7 @@ char buffer[50];
 
 
 byte debug = 0;
+byte demo = 0;
 
 // create a voltmeter
 //Gauge volt_meter(voltAnalogPin, voltSerialTX, serialRX, voltDisplayType, "FUEL");
@@ -89,6 +90,7 @@ volatile int eepromFuelWarnLowAddress = 0;
 volatile int eepromFuelSensorTypeAddress = 0;
 
 volatile int eepromGaugesDebugAddress = 0;
+volatile int eepromGaugesDemoAddress = 0;
 
 /* 
  *  meter calibration limits
@@ -141,5 +143,12 @@ volatile byte fuelSenderType = 0; // fuel sender type
 
 
 String readString;
+
+
+
+int voltVal = 0;
+int oilVal = 0;
+int tempVal = 0;
+int fuelVal = 0;
 
 

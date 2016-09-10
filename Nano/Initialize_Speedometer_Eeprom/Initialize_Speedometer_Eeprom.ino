@@ -29,6 +29,7 @@ void setup () {
   int eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
   int eepromDebugAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromDemoAddress = EEPROM.getAddress(sizeof(byte));
 
   EEPROM.writeBlock(eepromSpeedoTitleAddress, title);
   EEPROM.writeByte(eepromSpeedoVersionHighAddress, versionHigh);
@@ -73,6 +74,7 @@ void setup () {
   EEPROM.writeByte(eepromModeFuncAddress, 0);
 
   EEPROM.writeByte(eepromDebugAddress, 0);
+  EEPROM.writeByte(eepromDemoAddress, 0);
 
   // confirm eeprom has been written to
 
@@ -128,6 +130,12 @@ void setup () {
   Serial.print(" \t\t ");
   Serial.print("value = ");
   Serial.println(EEPROM.readByte(eepromDebugAddress));    
+
+  Serial.print("Speedo demo address = ");
+  Serial.print(eepromDemoAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromDemoAddress));    
 
 }
 
