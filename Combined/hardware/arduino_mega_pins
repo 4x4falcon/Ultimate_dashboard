@@ -1,0 +1,55 @@
+
+Analog
+
+mega	constant	note
+pin	
+
+A0	
+A1	
+A2	
+A3	
+A4	
+A5	
+A6	
+A7	
+A8	
+A9	
+A10	
+A11	
+A12	pinVoltInput	voltmeter analog input
+A13	pinOilInput	oil pressure sender input
+A14	pinTempInput	temperature sender input
+A15	pinFuelInput	fuel sender input
+
+
+
+
+
+
+
+Digital
+
+D0
+D1
+D2	intSpeedo		interrupt 0
+D3	intTach			interrupt 1
+D4
+D5
+D6
+D7	pinLightsOn		headlights on
+D8	pinBrightnessSw		brightness switch
+D9	pinIgnOn		ignition on
+D10	pinSpeedoModeButton	speedo mode button
+D11	pinTripButton		tripmeter reset button
+D12	pinTachoModeButton	Tacho Mode Button
+D13
+D14	pinTachoNeopixel	txdata to tacho neopixel
+D15
+D16	pinSpeedoNeopixel	tx data to speedo neopixel
+D17
+D18
+D19
+D20	pinSDA			i2c SDA
+D21	pinSCL			i2c SCL
+
+D22 - D53 n/c
