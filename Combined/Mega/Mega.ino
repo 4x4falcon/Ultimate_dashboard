@@ -8,18 +8,77 @@
 * 2015-05-23
 */
 
+#define MEGA
+
+/*
+ * what parts to inlcude
+ * 
+ * TODO setup the ifdefs throughout the remainder of the code
+ * 
+ */
+
+#define INCLUDE_SPEEDO
+#define INCLUDE_TACHO
+#define INCLUDE_GAUGES
+
+/*
+ * include bluetooth
+ */
+
 #define INCLUDE_BLUETOOTH
+
+/*
+ * include atitude heading reference system (AHRS)
+ */
+
 #define INCLUDE_AHRS
 
+/*
+ * include debugging code other than those set from serial command
+ */
+
+#define DEBUGGING
+
+// if using 16x2 lcd for odometer (preffered)
+#define ODOMETER_1602
+// if using 0.96 128x64 oled for odometer
+//#define ODOMETER_OLED_128x64
+
+#include "Arduino.h"
 
 //generic include files
 #include <Wire.h>
 #include <EEPROMex.h>
 #include <Adafruit_NeoPixel.h>
+#include <MicroLCD.h>
+
+
+#ifdef INCLUDE_BLUETOOTH
+#include "Bluetooth.h"
+#endif
+
+#ifdef INCLUDE_AHRS
+#include <Adafruit_Sensor.h>
+
+// adafruit adxl345 library for 3-axis accelerometer
+#include <Adafruit_ADXL345_U.h>
+
+// adafruit hmc5883 library for 3-axis magnetometer
+#include <Adafruit_HMC5883_U.h>
+
+// adafruit l3gd20 library for 3-axis gyroscope
+#include <Adafruit_L3GD20_U.h>
+
+// adafruit bmp085 library for barometer and temperature
+#include <Adafruit_BMP085.h>
+
+#include "Ahrs.h"
+#endif
+
 
 //program specific include files
 
-
+#include "Defines.h"
 #include "I2c.h"
 #include "Version.h"
 #include "Button.h"
@@ -33,15 +92,6 @@
 #include "Demo.h"
 #include "Eeprom.h"
 
-#ifdef INCLUDE_BLUETOOTH
-#include "Bluetooth.h"
-#endif
-
-#ifdef INCLUDE_AHRS
-#include "Ahrs.h"
-#endif
-
-
 
 /*
 * Initialization
@@ -50,7 +100,14 @@ void setup() {
   Serial.begin(9600);
 
   getEepromAddresses();
+
   getEepromValues();
+
+  Serial.println(title);
+  Serial.print("Version ");
+  Serial.print(versionHigh);
+  Serial.print(".");
+  Serial.println(versionLow);
 
   // set the brightness to be INPUT_PULLUP
   pinMode(pinBrightnessSw, INPUT_PULLUP);
@@ -79,27 +136,50 @@ void setup() {
   // Initialize the i2c communications
   Wire.begin();
 
+#ifdef ODOMETER_OLED_128x64
+  // Initialize the oled odometer if used
+  oledOdometer.begin();
+
+  oledOdometer.clear();
+  oledOdometer.setFontSize(FONT_SIZE_SMALL);
+  oledOdometer.println(title);
+  delay(500);
+  oledOdometer.clear();
+#endif
+
+
   // Initialize the neo pixels
   speedoPixels.begin();
   tachoPixels.begin();
 
-  // Update the speedo and odometer display every 101ms
-  timer.every(101, updateSpeedoDisplay);
+  // Update the speedo and odometer display every 100ms
+  timer.every(100, updateSpeedoDisplay);
 
-  // update the meters every second (1030ms)
-  timer2.every(1030, updateDisplay);
+  // update the meters every second (1000ms)
+  timer2.every(1000, updateDisplay);
+
+// TODO rename these for new button library
 
   // Set up trip button handlers
-  buttonTrip.setPressHandler(buttonTripPressed);
-  buttonTrip.setLongPressHandler(buttonTripLongPressed);
+//  buttonTrip.setPressHandler(buttonTripPressed);
+//  buttonTrip.setLongPressHandler(buttonTripLongPressed);
+  buttonTrip.pressHandler(buttonTripPressed);
+//  buttonTrip.releaseHandler(onRelease);
+  buttonTrip.holdHandler(buttonTripLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   // Set up speedo mode button handlers
-  buttonSpeedoMode.setPressHandler(buttonSpeedoModePressed);
-  buttonSpeedoMode.setLongPressHandler(buttonSpeedoModeLongPressed);
+//  buttonSpeedoMode.setPressHandler(buttonSpeedoModePressed);
+//  buttonSpeedoMode.setLongPressHandler(buttonSpeedoModeLongPressed);
+  buttonSpeedoMode.pressHandler(buttonSpeedoModePressed);
+//  buttonTrip.releaseHandler(onRelease);
+  buttonSpeedoMode.holdHandler(buttonSpeedoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   // Set up speedo mode button handlers
-  buttonTachoMode.setPressHandler(buttonTachoModePressed);
-  buttonTachoMode.setLongPressHandler(buttonTachoModeLongPressed);
+//  buttonTachoMode.setPressHandler(buttonTachoModePressed);
+//  buttonTachoMode.setLongPressHandler(buttonTachoModeLongPressed);
+  buttonSpeedoMode.pressHandler(buttonTachoModePressed);
+//  buttonTrip.releaseHandler(onRelease);
+  buttonSpeedoMode.holdHandler(buttonTachoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   setBrightness();
 
@@ -114,9 +194,11 @@ void setup() {
   // Initialize GAUGE displays
   setupMetersDisplay();
 
-  delay(1000);
+  delay(100);
 
   updateDisplay();
+
+// TODO see if this is necessary
   updateMetersDisplay();
 
 
@@ -129,15 +211,70 @@ void setup() {
 // Setup bluetooth
 #ifdef INCLUDE_BLUETOOTH
 
+  Serial1.begin(9600);
+  Serial1.print("AT");
+  if (Serial1.available() > 0)
+   {
+    Serial.println("bluetooth connected");
+
+    bluetoothAvailable = true;
+   }
+  else
+   {
+    bluetoothAvailable = false;
+   }
+
+
+
 #endif
+
+byte error = 0;
 
 // Setup AHRS
 #ifdef INCLUDE_AHRS
+  Wire.beginTransmission(I2C_ADDRESS_MAGNETOMETER);
+  error = Wire.endTransmission();
+
+  if (error == 0)
+   {
+    Serial.println("AHRS connected");
+
+    magnetometerAvailable = true;
+   }
+  else
+   {
+    magnetometerAvailable = false;
+   }
 
 #endif
 
+#ifndef ODOMETER_OLED_128x64
+// Setup oled diagnostics display
+  Wire.beginTransmission(I2C_ADDRESS_OLED);
+  error = Wire.endTransmission();
 
-}
+  if (error == 0)
+   {
+    Serial.println("oled connected");
+
+    oledDiagnostic.begin();
+
+    oledDiagnostic.clear();
+    oledDiagnostic.setFontSize(FONT_SIZE_SMALL);
+    oledDiagnostic.println(title);
+
+    delay(1000);
+    oledDiagnostic.clear();
+
+    oledAvailable = true;
+   }
+  else
+   {
+    oledAvailable = false;
+   }
+#endif
+
+ }
 
 /*
 * Main loop
@@ -159,21 +296,27 @@ void loop() {
     readString="";              //empty for next input
    } 
 
-  loopTime = millis();
+  loopTime = micros();
 
   if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))
    {
-    timer.update();
-    timer2.update();
+    timer.update();       // update speedo display
+    timer2.update();      // update tacho and meters display
 
-    buttonTrip.check();
-    buttonSpeedoMode.check();
-    buttonTachoMode.check();
+// TODO rename these for new library
+
+//    buttonTrip.check();
+//    buttonSpeedoMode.check();
+//    buttonTachoMode.check();
+    buttonTrip.process();
+    buttonSpeedoMode.process();
+    buttonTachoMode.process();
+
 
     writeOdometer();
 
-    checkForSpeedoTimeout();
-    checkForTachoTimeout();
+//    checkForSpeedoTimeout();
+//    checkForTachoTimeout();
    }
 
   if (demoGauges > 0)
@@ -212,13 +355,18 @@ void loop() {
      }
    }
 
-#ifdef INCLUDE_BLUETOOTH
-
-#endif
- 
 #ifdef INCLUDE_AHRS
-
+  if (magnetometerAvailable)
+   {
+    getAHRS();
+   }
 #endif
- 
+
+#ifdef INCLUDE_BLUETOOTH
+  if (bluetoothAvailable)
+   {
+    printBluetooth();
+   }
+#endif
  }
 

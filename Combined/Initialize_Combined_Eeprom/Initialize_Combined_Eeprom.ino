@@ -6,6 +6,8 @@
  *
  */
 
+#define INITIALIZE
+
 //#include <SoftwareSerial.h>
 #include <EEPROMex.h>
 #include <Adafruit_NeoPixel.h>
@@ -29,7 +31,8 @@ void setup () {
   eepromTrip1Address = EEPROM.getAddress(sizeof(long));
   eepromTrip2Address = EEPROM.getAddress(sizeof(long));
 
-  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
+//  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
+  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(long));
 
   eepromSpeedoModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
@@ -97,9 +100,9 @@ void setup () {
 
   // This is the distance per pulse in km
   // the value here is calculated from the following
-  // wheel/tyre combination is 33x12.5R15 or (318/72R5)
+  // wheel/tyre combination is 33x12.5R15 or (315/75R15)
   //
-  // pulses per revolution of vehicle speed sensor = ppr =	10
+  // pulses per revolution of vehicle speed sensor = ppr =	15
   // this needs to have hardware /10 circuit
   // circumference of wheel/tyre in meters = cir =		2.63144
   // final drive ratio of diff = ratio =			3.5
@@ -109,23 +112,23 @@ void setup () {
   // for each turn of the wheel the drive shaft turns ratio times
   // for each turn of the driveshaft there are ppr pulses
   // therefore for this tyre/wheel diff combo the result is:
-  // (1000/2.63144) * 3.5 * 10
+  // (1000/2.63144) * 3.5 * 15
   // equals
-  // 13300.7 pulses per kilometer
-  // 13293.0549211603
-  //
-  // this is
-  // 0.075227m per pulse
-  //
-  // to get odometer or trip reading multiply this by the number in eeprom
-  //
-  // 
-  //
-  // when calibrated in the speedo program it is for 1 kilometer or mile
+  // 19951.05 pulses per kilometer
+  // 19951.05341562
 
+  // this is then multiplied by 100 and stored as pulses per kilometer * 100
+  
   // NOTE if you are using a sensor that is on the wheel/tyre the final drive ratio is 1
 
-  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, 0.075227);  
+//  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, 0.0501227);
+  unsigned long speedoCalibrate = 19951.05 * SPEEDO_CALIBRATE_DIVIDER;
+  EEPROM.writeLong(eepromSpeedoCalibrateAddress, speedoCalibrate);
+
+  Serial.print("calibrate divider = ");
+  Serial.println(SPEEDO_CALIBRATE_DIVIDER);
+  Serial.print("calibrate = ");
+  Serial.println(speedoCalibrate);
 
   EEPROM.writeByte(eepromSpeedoModeFuncAddress, 0);
 
@@ -223,12 +226,13 @@ void setup () {
   Serial.print(eepromTrip2Address);
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
-  Serial.println(EEPROM.readLong(eepromTrip2Address));    
+  Serial.println(EEPROM.readLong(eepromTrip2Address));
+
   Serial.print(F("Calibration address = "));
   Serial.print(eepromSpeedoCalibrateAddress);
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
-  Serial.println(EEPROM.readFloat(eepromSpeedoCalibrateAddress));    
+  Serial.println(EEPROM.readLong(eepromSpeedoCalibrateAddress));    
 
 
   Serial.print(F("Tacho PPR address = "));

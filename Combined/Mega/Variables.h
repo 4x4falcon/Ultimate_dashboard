@@ -1,6 +1,6 @@
 // Variables.h
 
-// Current millis updated on each loop
+// Current micros updated on each loop
 unsigned long loopTime = 0;
 
 // Display variables
@@ -21,6 +21,7 @@ char buffer[20];
 // SPEEDO variables
 // speed
 volatile int speed = 0;
+volatile int previousSpeed = 0;
 
 // duration between max counts
 volatile unsigned long durationSpeedo = 0;
@@ -32,7 +33,7 @@ volatile byte pulseCount = 0;
 volatile byte doSpeed = 0;
 
 // timeout
-volatile unsigned long lastTrigger = 0;
+//volatile unsigned long lastTrigger = 0;
 
 // The last time the vss sensor was triggered
 volatile unsigned long lastVssTrigger = 0;
@@ -49,9 +50,14 @@ volatile byte odoNotSaved = 0;
 volatile byte tripNotSaved = 0;
 
 
+// speedo calibration =  pulses per kilometer / SPEEDO_CALIBRATE_DIVIDER
+// set in getEepromValues as pulses per kilometer * SPEEDO_CALIBRATE_DIVIDER
+volatile float speedoCalibrate = 0;
+
 // TACHO variables
 // rpm
 volatile int rpm = 0;
+volatile int previousRpm = 0;
 
 // duration between max counts
 volatile unsigned long durationTacho = 0;
@@ -103,15 +109,23 @@ volatile unsigned long lastOdometerWrite = 0;
 volatile byte lightsOn = 0;
 
 
+// TODO redo these for new library
 
 // Helper class for handling TRIP button presses
-Button buttonTrip = Button(pinTripButton, LOW, 3000);
+//Button buttonTrip = Button(pinTripButton, LOW, 3000);
+
+Button buttonTrip = Button(pinTripButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 // Helper class for handling MODE button presses
-Button buttonSpeedoMode = Button(pinSpeedoModeButton, LOW, 3000);
+//Button buttonSpeedoMode = Button(pinSpeedoModeButton, LOW, 3000);
+
+Button buttonSpeedoMode = Button(pinSpeedoModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 // Helper class for handling TACHO MODE button presses
-Button buttonTachoMode = Button(pinTachoModeButton, LOW, 3000);
+//Button buttonTachoMode = Button(pinTachoModeButton, LOW, 3000);
+
+Button buttonTachoMode = Button(pinTachoModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
+
 
 // Helper class for processing at intervals
 Timer timer = Timer();
@@ -126,7 +140,7 @@ volatile int eepromTrip2Address = 0;
 
 // EEPROM storage addresses for calibration data
 // SPEEDO
-volatile int eepromSpeedoCalibrateAddress;
+volatile int eepromSpeedoCalibrateAddress = 0;
 volatile int eepromSpeedoModeFuncAddress = 0;
 
 // TACHO
@@ -237,7 +251,7 @@ volatile byte fuelWarnLow = 1; // warn for fuel low
 
 
 // The distance travelled in one pulse from the vehicle speed sensor in km for miles multiply by .58 in display function
-volatile float pulseDistance = 0;
+volatile float pulseDistance = 0.0;
 
 volatile unsigned long calibrateCounter = 0;	// this permits pulse number up to 4,294,967,295
 
@@ -271,5 +285,29 @@ int voltVal = 0;
 int oilVal = 0;
 int tempVal = 0;
 int fuelVal = 0;
+
+// oled diagnostics screen
+
+#ifndef ODOMETER_OLED_128x64
+LCD_SSD1306 oledDiagnostic;                  // for SSD1306 OLED module
+bool oledAvailable = false;
+#endif
+
+#ifdef ODOMETER_1602
+byte odoAddress = I2C_ADDRESS_ODO_1602;
+#endif
+
+#ifdef ODOMETER_OLED_128x64
+byte odoAddress = I2C_ADDRESS_ODO_OLED;
+LCD_SSD1306 oledOdometer;                  // for SSD1306 OLED module
+#endif
+
+#ifdef INCLUDE_AHRS
+bool magnetometerAvailable = false;
+#endif
+
+#ifdef INCLUDE_BLUETOOTH
+bool bluetoothAvailable = false;
+#endif
 
 

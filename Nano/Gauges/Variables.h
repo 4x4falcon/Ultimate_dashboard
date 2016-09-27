@@ -19,22 +19,24 @@ byte demo = 0;
 
 // create a voltmeter
 //Gauge volt_meter(voltAnalogPin, voltSerialTX, serialRX, voltDisplayType, "FUEL");
-SoftwareSerial voltSerial(serialRX, voltSerialTX);
+//SoftwareSerial voltSerial(serialRX, voltSerialTX);
 
 // create an oil pressure gauge
-SoftwareSerial oilSerial(serialRX, oilSerialTX);
+//SoftwareSerial oilSerial(serialRX, oilSerialTX);
 
 // create a water temperature gauge
-SoftwareSerial tempSerial(serialRX, tempSerialTX);
+//SoftwareSerial tempSerial(serialRX, tempSerialTX);
 
 // create a fuel level guage
-SoftwareSerial fuelSerial(serialRX, fuelSerialTX);
+//SoftwareSerial fuelSerial(serialRX, fuelSerialTX);
 
 // Helper class for handling MODE button presses
 //Button buttonMode = Button(pinModeButton, LOW, 3000);
+Button buttonMode = Button(pinModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 // Helper class for handling MODE button presses
-Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+//Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+Button buttonBrightness = Button(pinBrightnessSw, BUTTON_PULLUP_INTERNAL, true, 50);
 
 volatile byte brightnessBoost = 5;
 
@@ -144,7 +146,8 @@ volatile byte fuelSenderType = 0; // fuel sender type
 
 String readString;
 
-
+volatile byte debugGauges = 0;
+volatile byte demoGauges = 0;
 
 int voltVal = 0;
 int oilVal = 0;

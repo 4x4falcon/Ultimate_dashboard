@@ -5,8 +5,14 @@
 * Checks the last time the sensor was trigerred. If it's over a given
 * duration, we assume the engine has stopped.
 */
+
+/*
+ * no longer required now in Display.h updateTachoDisplay
+ * here for reference only
+*/
+/*
 void checkForTachoTimeout() {
-  if ((loopTime - lastTrigger) > timeoutValue) {
+  if ((loopTime - lastTachoTrigger) > timeoutValue) {
     rpm = 0;
   }
 
@@ -17,9 +23,16 @@ void checkForTachoTimeout() {
 
     Serial.print(F("    lastTachoTrigger    "));
     Serial.println(lastTachoTrigger);
-   }
 
+    Serial.print(F("    timeoutValue    "));
+    Serial.println(timeoutValue);
+
+
+    Serial.print(F("checkForTachoTimeout rpm    "));
+    Serial.println(rpm);
+   }
 }
+*/
 
 /*
 * ISR attached to the vehicle tachometer for petrol engines
@@ -29,16 +42,16 @@ void checkForTachoTimeout() {
 
 void tachoTriggered() {
 
-  lastTrigger = millis();
+  unsigned long lastTrigger = micros();
   if (lastTrigger > lastTachoTrigger)
    {
     pulseCount++;
     if (pulseCount == pulseMaxCount)
      {
       pulseCount = 0UL;
-      durationTacho = millis() - lastTachoTrigger;
+      durationTacho = micros() - lastTachoTrigger;
       doTacho = !doTacho;
-      lastTachoTrigger = millis();
+      lastTachoTrigger = micros();
 
       if (debugAll > 0)
        {
@@ -52,21 +65,21 @@ void tachoTriggered() {
 
   // blink the led on pin 13 for debugging purposes
 
-  arduinoLed = !arduinoLed;
-  digitalWrite(13, arduinoLed);
+//  arduinoLed = !arduinoLed;
+//  digitalWrite(13, arduinoLed);
 
 }
 
 /*
 * mode button pressed
 */
-void buttonTachoModePressed() {
+void buttonTachoModePressed(Button& buttonTachoMode) {
 }
 
 /*
 * mode button long pressed
 */
-void buttonTachoModeLongPressed() {
+void buttonTachoModeLongPressed(Button& buttonTachoMode) {
 
 }
 

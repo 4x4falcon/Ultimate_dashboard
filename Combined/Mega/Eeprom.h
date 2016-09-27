@@ -9,12 +9,22 @@ void getEepromAddresses()
   eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
   eepromVersionLow = EEPROM.getAddress(sizeof(byte));
 
-  eepromOdoAddress = EEPROM.getAddress(sizeof(totalOdometer));
-  eepromTrip1Address = EEPROM.getAddress(sizeof(totalTrip_1));
-  eepromTrip2Address = EEPROM.getAddress(sizeof(totalTrip_2));
-  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
+  eepromOdoAddress = EEPROM.getAddress(sizeof(long));
+  eepromTrip1Address = EEPROM.getAddress(sizeof(long));
+  eepromTrip2Address = EEPROM.getAddress(sizeof(long));
+
+  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(long));
   eepromSpeedoModeFuncAddress = EEPROM.getAddress(sizeof(byte));
 
+/*
+#ifdef DEBUGGING
+  Serial.println("in getEepromAddresses");
+  sprintf(buffer, "%6d", eepromSpeedoCalibrateAddress);
+  Serial.print("eepromSpeedoCalibrateAddress = ");
+  Serial.println(buffer);
+  Serial.println("");
+#endif
+*/
   eepromTachoPPRAddress = EEPROM.getAddress(sizeof(byte));
   eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
   eepromTachoRedlineAddress = EEPROM.getAddress(sizeof(int));
@@ -72,9 +82,27 @@ void getEepromAddresses()
 
 void getEepromValues ()
  {
+  // title and version from eeprom
+
+  EEPROM.readBlock(eepromTitleAddress, title);
+  versionHigh = EEPROM.readByte(eepromVersionHigh);
+  versionLow = EEPROM.readByte(eepromVersionLow);
 
   // Read odometer value from flash memory
   totalOdometer = EEPROM.readLong(eepromOdoAddress);
+
+/*
+#ifdef DEBUGGING
+  Serial.println("in getEepromValues");
+  sprintf(buffer, "%20d", eepromOdoAddress);
+  Serial.print("eepromOdoAddress = ");
+  Serial.println(buffer);
+  sprintf(buffer, "%20d", totalOdometer);
+  Serial.print("totalOdometer = ");
+  Serial.println(buffer);
+  Serial.println("");
+#endif
+*/
 
   // Read tripmeter 1 value from flash memory
   totalTrip_1 = EEPROM.readLong(eepromTrip1Address);
@@ -82,13 +110,41 @@ void getEepromValues ()
   // Read tripmeter 2 value from flash memory
   totalTrip_2 = EEPROM.readLong(eepromTrip2Address);
 
+
+
   // calculate pulse distance
   // calibration is over 2 kilometers or miles but is stored as for 1 kilometer or mile
   // formula is 1 / (calibration value in eeprom)
   // this gives distance travelled in one pulse from the sensor
-  // as fraction of kilometer or mile
+  // in meters if kilometer or part of mile
 
-  pulseDistance = 1 / (EEPROM.readFloat(eepromSpeedoCalibrateAddress));
+/*
+#ifdef DEBUGGING
+  Serial.println("in getEepromValues");
+  sprintf(buffer, "%6d", eepromSpeedoCalibrateAddress);
+  Serial.print("before eepromSpeedoCalibrateAddress = ");
+  Serial.println(buffer);
+#endif
+*/
+
+  speedoCalibrate = (float)EEPROM.readLong(eepromSpeedoCalibrateAddress) / (float)SPEEDO_CALIBRATE_DIVIDER;
+
+  pulseDistance = 1000.0 / speedoCalibrate;
+
+/*
+#ifdef DEBUGGING
+  Serial.println("in get eeprom data");
+  sprintf(buffer, "%6d", eepromSpeedoCalibrateAddress);
+  Serial.print("eepromSpeedoCalibrateAddress = ");
+  Serial.println(buffer);
+  dtostrf(speedoCalibrate,9,3,buffer);
+  Serial.print("speedoCalibrate = ");
+  Serial.println(buffer);
+  dtostrf(pulseDistance,9,3,buffer);
+  Serial.print("pulseDistance = ");
+  Serial.println(buffer);
+#endif
+*/
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH

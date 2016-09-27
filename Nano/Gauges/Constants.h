@@ -54,4 +54,28 @@ static const byte pinLed = 13;
 static const unsigned long timeUpdate = 2000;
 
 
+/*
+ * defines
+ */
+
+
+#define I2C_ADDRESS_VOLT 0x63
+#define I2C_ADDRESS_OIL  0x61
+#define I2C_ADDRESS_TEMP 0x62
+#define I2C_ADDRESS_FUEL 0x60
+
+#define S7S_DIGIT_1_POINT 0b00000001
+#define S7S_DIGIT_2_POINT 0b00000010
+#define S7S_DIGIT_3_POINT 0b00000100
+#define S7S_DIGIT_4_POINT 0b00001000
+#define S7S_DIGIT_A_POINT 0b00001111
+
+#define S7S_DIGIT_COLON 0b00010000
+#define S7S_DIGIT_APOST 0b00100000
+
+#define DIGIT_1_CONTROL 0x7B
+#define DIGIT_2_CONTROL 0x7C
+#define DIGIT_3_CONTROL 0x7D
+#define DIGIT_4_CONTROL 0x7E
+
 

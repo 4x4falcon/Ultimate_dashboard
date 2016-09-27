@@ -28,7 +28,7 @@ static const byte TACHO_PETROL = 0;
 static const byte TACHO_DIESEL = 1;
 
 // EEPROM has a limited life span; be careful how often we write to it
-static const long odometerWriteFrequency = 60000;
+static const unsigned long odometerWriteFrequency = 60000000;
 // odometer write to eeprom timeout
 static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 
@@ -141,8 +141,9 @@ static const byte pinTachoNeopixel = 14;	//	Tacho neopixel tx
 // maximum number of counts for pulseCount
 static const byte pulseMaxCount = 100;
 
-// timeout for setting to zero 1.5s
-static const int timeoutValue = 1500;
+// timeout for setting to zero this is approximate needs to be tested in actual use
+// works fine with tester.ino
+static const unsigned long timeoutValue = 5000000;
 
 
 // The SPEEDO LED screen has 4 digits
@@ -206,6 +207,15 @@ static const char tripActive = B10100101;
 #define I2C_ADDRESS_OLED 0x3C
 
 
+
 #define SPEEDO_CALIBRATE_DIVIDER 100UL
+
+
+// oled odometer positions
+
+#define ODO_POSITION_01  0
+#define ODO_POSITION_02  45
+#define ODO_POSITION_03  ODO_POSITION_02 * 2
+
 
 

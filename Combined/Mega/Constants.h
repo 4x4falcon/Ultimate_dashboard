@@ -28,7 +28,7 @@ static const byte TACHO_PETROL = 0;
 static const byte TACHO_DIESEL = 1;
 
 // EEPROM has a limited life span; be careful how often we write to it
-static const long odometerWriteFrequency = 60000;
+static const unsigned long odometerWriteFrequency = 60000000;
 // odometer write to eeprom timeout
 static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 
@@ -141,8 +141,9 @@ static const byte pinTachoNeopixel = 14;	//	Tacho neopixel tx
 // maximum number of counts for pulseCount
 static const byte pulseMaxCount = 100;
 
-// timeout for setting to zero 1.5s
-static const int timeoutValue = 1500;
+// timeout for setting to zero this is approximate needs to be tested in actual use
+// works fine with tester.ino
+static const unsigned long timeoutValue = 5000000;
 
 
 // The SPEEDO LED screen has 4 digits
@@ -168,33 +169,4 @@ static const byte tachoPixelOffset = 5;
 static const char tripActive = B10100101;
 
 
-
-/*
- * defines
- */
-
-
-#define I2C_ADDRESS_VOLT 0x63
-#define I2C_ADDRESS_OIL  0x61
-#define I2C_ADDRESS_TEMP 0x62
-#define I2C_ADDRESS_FUEL 0x60
-
-#define I2C_ADDRESS_TACHO 0x40
-
-#define I2C_ADDRESS_SPEEDO 0x30
-#define I2C_ADDRESS_ODO    0x31
-
-#define S7S_DIGIT_1_POINT 0b00000001
-#define S7S_DIGIT_2_POINT 0b00000010
-#define S7S_DIGIT_3_POINT 0b00000100
-#define S7S_DIGIT_4_POINT 0b00001000
-#define S7S_DIGIT_A_POINT 0b00001111
-
-#define S7S_DIGIT_COLON 0b00010000
-#define S7S_DIGIT_APOST 0b00100000
-
-#define DIGIT_1_CONTROL 0x7B
-#define DIGIT_2_CONTROL 0x7C
-#define DIGIT_3_CONTROL 0x7D
-#define DIGIT_4_CONTROL 0x7E
 

@@ -6,13 +6,13 @@
 #include <Timer.h>
 
 // the speedo tone value
-volatile int toneSpeedoValue = 40;
-volatile int toneSpeedoStep = 10;
+volatile int toneSpeedoValue = 30;
+volatile int toneSpeedoStep = 1;
 const int toneSpeedoMax = 600;
-const int toneSpeedoMin = 40;
+const int toneSpeedoMin = 31;
 
 // the tacho tone value
-volatile int toneTachoValue = 50;
+volatile int toneTachoValue = 40;
 volatile int toneTachoStep = 10;
 const int toneTachoMax = 1000;
 const int toneTachoMin = 40;
@@ -131,6 +131,18 @@ void setup () {
   buttonMode.setLongPressHandler(buttonModeLongPressed);
 
   timer.every(updateTime, updateOutput);
+
+  Serial.print("Connect pin D");
+  Serial.print(pinVss);
+  Serial.println(" to input vss interrupt pin");
+  
+  Serial.println("");
+  Serial.print("Connect pin D");
+  Serial.print(pinTacho);
+  Serial.println(" to input tacho interrupt pin");
+
+  Serial.println("");
+  Serial.println("GND to GND");
 }
 
 /*

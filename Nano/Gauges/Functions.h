@@ -581,6 +581,8 @@ float fastMap(long x, long in_min, long in_max, long out_min, long out_max)
 
 
 
+
+/*
 #define DIGIT1  0x7B
 #define DIGIT2  0x7C
 #define DIGIT3  0x7D
@@ -749,4 +751,5 @@ void gaugesDemo()
   fuelSerial.write(0x77);
   fuelSerial.write(0x76);
  }
+*/
 
