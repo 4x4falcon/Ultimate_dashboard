@@ -101,20 +101,30 @@ void setupTachoDisplay() {
 
 void buttonBrightnessPressed() {
 
-  brightnessBoost++;
-  if (brightnessBoost > 5)
-   {
-    brightnessBoost = 1;
-   }
-  
+  buttonBrightnessLongPress = false;  
   Serial.println("Brightnes button pressed");
   
+}
+
+void buttonBrightnessReleased() {
+
+  if (!buttonBrightnessLongPress)
+   {
+    brightnessBoost++;
+    if (brightnessBoost > 5)
+     {
+      brightnessBoost = 1;
+     }
+   }
+  buttonBrightnessLongPress = false;
+  Serial.println("Brightnes button released");
+
 }
 
 void buttonBrightnessLongPressed() {
 
   brightnessBoost = 5;
-
+  buttonBrightnessLongPress = true;
   Serial.println("Brightness button long pressed");
 
 }

@@ -6,15 +6,15 @@ Digital pins
 0	
 1	
 2	tachoInterrupt		int.0 tacho input
-3	pinIgnOn		ignition on
+3	pinBrightness		brightness switch
 4
 5	pinModeButton		Mode Button
-6	pinSerialRX		soft serial rx (not actually used or wired)
+6								pinSerialRX		soft serial rx (not actually used or wired)
 7	
 8	pinTachoSerialTX	Tacho LED soft serial tx
 9	pinTachoNeopixel	Tacho neopixel tx	
-10	
-11	
+10	pinLightsOn		headlights on
+11	pinIgnOn		ignition on
 12	
 13	pinLed			led on arduino pin 13 toggled by vss irs value held in arduinoLed
 

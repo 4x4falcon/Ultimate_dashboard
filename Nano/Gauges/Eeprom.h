@@ -5,9 +5,9 @@
 void getEepromAddresses()
  {
   // Get eeprom storage addresses MUST be before anything else and in the same order
-  eepromTitle = EEPROM.getAddress(sizeof(char)*sizeof(title));
-  eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
-  eepromVersionLow = EEPROM.getAddress(sizeof(byte));
+  eepromTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
+  eepromVersionHighAddress = EEPROM.getAddress(sizeof(byte));
+  eepromVersionLowAddress = EEPROM.getAddress(sizeof(byte));
 
 // Voltmeter
   eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
@@ -48,6 +48,7 @@ void getEepromAddresses()
  }
 
 
+#ifdef GAUGES
 void getEepromValues()
  {
 
@@ -96,4 +97,5 @@ void getEepromValues()
 
   demo = EEPROM.readByte(eepromGaugesDemoAddress);
  }
+#endif
 

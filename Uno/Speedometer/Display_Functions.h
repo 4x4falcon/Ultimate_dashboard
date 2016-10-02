@@ -1,52 +1,49 @@
-//Display_Functions.h
+/*
+ * Display_Functions.h
+ */
 
 // set the display brightness depending on headlight state
 
 void setBrightness()
  {
-  byte b = 12 * brightnessBoost;
+  byte b = brightnessBoost;
   byte b1 = brightnessBoost;
   pixelBrightness = brightnessBoost;
-  if (digitalRead(pinLightsOn))
-   {
-#ifdef ECHO_SERIAL
-    Serial.println("Lights off");
-#endif
-    b = 51 * brightnessBoost;
-    b1 = 2 * brightnessBoost;
-    pixelBrightness = 3 * brightnessBoost;
-   }
 
-  odoSerial.write(0x7C);
-  odoSerial.write(byte(b));
+   if (digitalRead(pinLightsOn))
+    {
+     b = 2 * brightnessBoost;
+     b1 = 2 * brightnessBoost;
+     pixelBrightness = int(0.5 * brightnessBoost);
+     if (debugSpeedo == 1)
+      {
+       Serial.print(F("Lights on  "));
+       Serial.println(b);
+      }
+    }
+   else
+    {
+     b = 15 * brightnessBoost;
+     b1 = 15 * brightnessBoost;
+     pixelBrightness = int(1.5 * brightnessBoost);
+     if (debugSpeedo == 1)
+      {
+       Serial.print(F("Lights off  "));
+       Serial.println(b);
+      }
+    }
 
-  speedoSerial.write(0x7A);
-  speedoSerial.write(byte(b1));
+// TODO this requires hardware to be able to change the backlight brightness
+
+  odo1602.setBacklight(125);
+
+  i2c_s7s_SetDisplayBrightness(I2C_ADDRESS_SPEEDO, b1);
+
  }
-
-
-void odoDisplay(byte on)
- {
-  odoSerial.begin(9600);
-  delay(500);
-
-  if (!on)
-   {
-    odoSerial.write(0x7C);
-    odoSerial.write(128);
-   }
-  else
-   {
-    setBrightness();
-   }
- }
-
-
 
 
 /*
  * Displays current speed on 4 DIGIT LED
- * TODO display on 15 led 1/4 neo ring
  */
 
 void displaySpeed (int speed) {
@@ -54,28 +51,31 @@ void displaySpeed (int speed) {
 //  char buffer[10];
 
   sprintf(buffer, "%4d", speed);
-  speedoSerial.print(buffer);
 
-#ifdef ECHO_SERIAL
+//  speedoSerial.print(buffer);
 
-  Serial.print ("Speed    ");
-  Serial.println (speed);
-  Serial.print ("Speed buffer    ");
-  Serial.println(buffer);
-#endif
+  i2c_SendString_4(I2C_ADDRESS_SPEEDO, buffer);
 
-  byte pixels = speed / 10;
+  if (debugSpeedo == 1)
+   {
+    Serial.print (F("Speed    "));
+    Serial.println (speed);
+    Serial.print (F("Speed buffer    "));
+    Serial.println(buffer);
+   }
 
-  for(byte i=0;i<pixels;i++)
+  byte pixels = int(speed / 10) + pixelOffset;
+
+  for(byte i=pixelOffset;i<pixels;i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,pixelBrightness)); // blue color.
-    if (i >= 11)
+    if (i >= (11 + pixelOffset))
      {
       speedoPixels.setPixelColor(i, speedoPixels.Color(pixelBrightness,0,0)); // red color.
      }
    }
-  for(byte i=pixels;i<=numSpeedoLeds;i++)
+  for(byte i=pixels;i<=(numSpeedoLeds + pixelOffset);i++)
    {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,0)); // blank the pixel
@@ -93,31 +93,37 @@ void displaySpeed (int speed) {
  *
  */
 
-void displayOdometer () {
+void displayOdometer ()
+ {
 
-//  char buffer[17] = "";
-  
-  odoSerial.write(254);    // cursor to the first character of top row
-  odoSerial.write(128);
+#ifdef ODOMETER_1602
+  odo1602.setCursor(0, 0);
+  odo1602.print("KPH    0000000.0");
+  if (modeSpeedoFunc == FUNC_KPH)
+   {
+    odo1602.print(F("KPH"));
+   }
+  else if (modeSpeedoFunc == FUNC_MPH)
+   {
+    odo1602.print(F("MPH"));
+   }
+  else if (modeSpeedoFunc == FUNC_CAL)
+   {
+    odo1602.print(F("CAL"));
+   }
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
 
-  if (modeFunc == FUNC_KPH)
-   {
-    odoSerial.print("KPH");
-   }
-  else if (modeFunc == FUNC_MPH)
-   {
-    odoSerial.print("MPH");
-   }
-  else if (modeFunc == FUNC_CAL)
-   {
-    odoSerial.print("CAL");
-   }
 
 
 
 // cursor to eighth character of top line
-  odoSerial.write(254);
-  odoSerial.write(135);
+#ifdef ODOMETER_1602
+  odo1602.setCursor(7, 0);
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
 
   float odo = (totalOdometer * pulseDistance) / 1000.0;
 
@@ -130,13 +136,18 @@ void displayOdometer () {
 
   dtostrf(odo,9,1,buffer);
 
-  odoSerial.print(buffer);
-
-#ifdef ECHO_SERIAL
-  Serial.print ("Odo    ");
-  Serial.println (buffer);
+#ifdef ODOMETER_1602
+  odo1602.print(buffer);
 #endif
-}
+#ifdef ODOMETER_OLED_128X64
+#endif
+
+  if (debugSpeedo == 1)
+   {
+    Serial.print (F("Odo    "));
+    Serial.println (buffer);
+   }
+ }
 
 
 /*
@@ -147,12 +158,13 @@ void displayOdometer () {
 
 void displayTripmeter () {
 
-//  char buffer[6] = "";
-
 // cursor to third character of bottom line
 
-  odoSerial.write(254);
-  odoSerial.write(194);
+#ifdef ODOMETER_1602
+  odo1602.setCursor(2, 1);
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
 
   float odo = (totalTrip_1 * pulseDistance) / 1000.0;
   
@@ -163,17 +175,24 @@ void displayTripmeter () {
    }
 
   dtostrf(odo,5,1,buffer);
-  odoSerial.print(buffer);
-
-#ifdef ECHO_SERIAL
-  Serial.print ("Trip_1    ");
-  Serial.println (buffer);
+#ifdef ODOMETER_1602
+  odo1602.print(buffer);
+#endif
+#ifdef ODOMETER_OLED_128X64
 #endif
 
-// cursor to twelth character of bottom line
+  if (debugSpeedo == 1)
+   {
+    Serial.print (F("Trip_1    "));
+    Serial.println (buffer);
+   }
 
-  odoSerial.write(254);
-  odoSerial.write(203);
+// cursor to twelth character of bottom line
+#ifdef ODOMETER_1602
+  odo1602.setCursor(11, 1);
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
 
   odo = (totalTrip_2 * pulseDistance) / 1000.0;
   
@@ -185,34 +204,110 @@ void displayTripmeter () {
 
 
   dtostrf(odo,5,1,buffer);
-  odoSerial.print(buffer);
-
-#ifdef ECHO_SERIAL
-  Serial.print ("Trip_2    ");
-  Serial.println (buffer);
+#ifdef ODOMETER_1602
+  odo1602.print(buffer);
 #endif
+#ifdef ODOMETER_OLED_128X64
+#endif
+
+  if (debugSpeedo == 1)
+   {
+    Serial.print (F("Trip_2    "));
+    Serial.println (buffer);
+   }
 
   if (!modeTrip)
    {
-    odoSerial.write(254);
-    odoSerial.write(193);        // second character of bottom row
-    odoSerial.print(tripActive);
-    odoSerial.write(254);
-    odoSerial.write(202);        // eleventh character of bottom row
-    odoSerial.print(" ");
+#ifdef ODOMETER_1602
+    // second character of bottom row
+    odo1602.setCursor(1, 1);
+    odo1602.print(tripActive);
+
+    // eleventh character of bottom row
+    odo1602.setCursor(10, 1);
+    odo1602.print(" ");
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
    }
   else
    {
-    odoSerial.write(254);
-    odoSerial.write(193);        // second character of bottom row
-    odoSerial.print(" ");
-    odoSerial.write(254);
-    odoSerial.write(202);        // eleventh character of bottom row
-    odoSerial.print(tripActive);
-   }
+#ifdef ODOMETER_1602
+    // second character of bottom row
+    odo1602.setCursor(1, 1);
+    odo1602.print(tripActive);
 
+    // eleventh character of bottom row
+    odo1602.setCursor(10, 1);
+    odo1602.print(" ");
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
+   }
 }
 
+
+
+// SPEEDO display
+void updateSpeedoDisplay() {
+  if ( (loopTime - lastVssTrigger) > timeoutValue )
+   {
+    speed = 0;
+   }
+
+  if ((doSpeed) || (speed == 0))
+   {
+    doSpeed = !doSpeed;
+
+    if (debugSpeedo == 10)
+     {
+      Serial.print(F("durationSpeedo   "));
+      Serial.println(durationSpeedo);
+      Serial.print(F("pulseMaxCount   "));
+      Serial.println(pulseMaxCount);
+      Serial.print(F("pulseDistance   "));
+      Serial.println(pulseDistance);
+     }
+
+//    speed = int(((((1000.0 * float(pulseMaxCount)) / float(durationSpeedo)) * pulseDistance) * 3600.0) / 1000.0);
+
+// This is pulses per second * distance per pulse in metres = metres per second
+// * 3600 = metres per hour
+// / 1000 = km per hour
+// calculation is done in kph then converted in display if mph function is set
+    
+    if ( (loopTime - lastVssTrigger) < timeoutValue )
+     {
+      speed = int((((1000000.0 / (float(durationSpeedo) / float(pulseMaxCount))) * pulseDistance) * 3600.0) / 1000.0);
+     }
+
+// TODO
+// This is (pulses * durationSpeedo) / speedoCalibrate = km per microsecond
+// * 1000 = km per second
+// * 3600 = km per hour
+// calculation is done in kph then converted in display if mph function is set
+
+
+    if (debugSpeedo == 11)
+     {
+      Serial.print(F("speed   "));
+      Serial.println(speed);
+     }
+    displaySpeed(speed);
+
+   }
+}
+
+
+/*
+ * setup the speedo display
+ */
+
+void setupSpeedoDisplay()
+ {
+  i2c_s7s_ClearDisplay(I2C_ADDRESS_SPEEDO);
+  i2c_SendString_4(I2C_ADDRESS_SPEEDO, "SPED");
+ }
 
 
 
@@ -222,15 +317,18 @@ void displayTripmeter () {
  */
 
 
-void setupOdometerDisplay() {
+void setupOdometerDisplay()
+ {
 
 // top line shows current function mode setting (KPH, MPH or CAL)
 // cursor to the first character of the top line
 
-  odoSerial.write(254);
-  odoSerial.write(128);
-
-  odoSerial.write("KPH    0000000.0");
+#ifdef ODOMETER_1602
+  odo1602.setCursor(0, 0);
+  odo1602.print("KPH    0000000.0");
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
 
 // display current Odometer reading  
   displayOdometer();
@@ -238,10 +336,13 @@ void setupOdometerDisplay() {
 // bottom line shows tripmeters with current one highlighted
 // cursor to first character of bottom line
 
-  odoSerial.write(254);
-  odoSerial.write(192);
-  
-  odoSerial.write("1 000.0  2 000.0");
+#ifdef ODOMETER_1602
+  odo1602.setCursor(0, 1);
+  odo1602.print("1 000.0  2 000.0");
+#endif
+#ifdef ODOMETER_OLED_128X64
+
+#endif
 
   displayTripmeter();
 
@@ -255,19 +356,19 @@ void buttonBrightnessPressed() {
    {
     brightnessBoost = 1;
    }
-#ifdef ECHO_SERIAL
-  Serial.println("Brightnes button pressed");
-#endif
-
+  if (debugSpeedo == 1)
+   {
+    Serial.println(F("Brightnes button pressed"));
+   }
 }
 
 void buttonBrightnessLongPressed() {
 
   brightnessBoost = 5;
 
-#ifdef ECHO_SERIAL
-  Serial.println("Brightness button long pressed");
-#endif
-
+  if (debugSpeedo == 1)
+   {
+    Serial.println(F("Brightness button long pressed"));
+   }
 }
 

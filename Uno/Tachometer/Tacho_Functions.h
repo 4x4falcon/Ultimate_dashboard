@@ -4,23 +4,24 @@
 * Checks the last time the sensor was trigerred. If it's over a given
 * duration, we assume the engine has stopped.
 */
-void checkForTimeout() {
-  if ((loopTime - lastTrigger) > timeoutValue) {
+void checkForTimeout()
+ {
+  if ((loopTime - lastTrigger) > timeoutValue)
+   {
     rpm = 0;
     displayRpm(rpm);
-  }
+   }
 
-#ifdef ECHO_SERIAL_1
+  if (debug == 2)
+   {
 
-  Serial.print("loopTime    ");
-  Serial.print(loopTime);
+    Serial.print(F("loopTime    "));
+    Serial.print(loopTime);
   
-  Serial.print("    lastTachoTrigger    ");
-  Serial.println(lastTachoTrigger);
-
-#endif
-
-}
+    Serial.print(F("    lastTachoTrigger    "));
+    Serial.println(lastTachoTrigger);
+   }
+ }
 
 /*
 * ISR attached to the vehicle tachometer for petrol engines
@@ -41,12 +42,13 @@ void sensorTriggered() {
        doTacho = !doTacho;
        lastTachoTrigger = millis();
 
-#ifdef ECHO_SERIAL_1
-       Serial.print("duration     ");
+     if (debug == 2)
+      {
+       Serial.print(F("duration     "));
        Serial.println(duration);
-       Serial.print("lastTachoTrigger    ");
+       Serial.print(F("lastTachoTrigger    "));
        Serial.println(lastTachoTrigger);
-#endif
+      }
 
      }
    }
@@ -68,7 +70,7 @@ void sensorTriggered() {
 */
 void updateDisplay() {
 
-  if (doTacho)
+//  if (doTacho)
    {
     doTacho = !doTacho;
     rpm = 1101;
@@ -79,15 +81,14 @@ void updateDisplay() {
 
     rpm = int( ((1000.0 / v1) * 60) / tachoPPR );
 
-#ifdef ECHO_SERIAL
+     if (debug == 1)
+      {
+       Serial.print("v1      ");
+       Serial.println(v1);
 
-    Serial.print("v1      ");
-    Serial.println(v1);
-
-    Serial.print("rpm     ");
-    Serial.println(rpm);
-
-#endif
+       Serial.print("rpm     ");
+       Serial.println(rpm);
+      }
 
     setBrightness();
     displayRpm(rpm);
@@ -99,6 +100,17 @@ void updateDisplay() {
 * mode button pressed
 */
 void buttonModePressed() {
+  buttonModeLongPress = false;
+}
+
+/*
+* mode button released
+*/
+void buttonModeReleased() {
+  if (!buttonModeLongPress)
+   {
+    buttonModeLongPress = false;
+   }
 }
 
 /*
@@ -106,6 +118,7 @@ void buttonModePressed() {
 */
 void buttonModeLongPressed() {
 
+  buttonModeLongPress = true;
 }
 
 

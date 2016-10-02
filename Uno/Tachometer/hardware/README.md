@@ -1,2 +1,2 @@
-#Ultimate Dashboard - Tachometer - hardware
+#Ultimate Dashboard - Speedometer - hardware
 

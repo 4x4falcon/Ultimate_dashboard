@@ -9,28 +9,22 @@
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
 
-#include "Version.h";
+#include "Defines.h"
+#include "Variables.h"
+#include "Version.h"
+#include "Eeprom.h"
 
 void setup () {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
-  int eepromTachoTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
-  int eepromTachoVersionHighAddress = EEPROM.getAddress(sizeof(byte));
-  int eepromTachoVersionLowAddress = EEPROM.getAddress(sizeof(byte));
 
-  int eepromOdoAddress = EEPROM.getAddress(sizeof(long));
-  int eepromTrip1Address = EEPROM.getAddress(sizeof(long));
-  int eepromTrip2Address = EEPROM.getAddress(sizeof(long));
+  getEepromAddresses();
 
-  int eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
-
-  int eepromModeFuncAddress = EEPROM.getAddress(sizeof(byte));
-
-  EEPROM.writeBlock(eepromTachoTitleAddress, title);
-  EEPROM.writeByte(eepromTachoVersionHighAddress, versionHigh);
-  EEPROM.writeByte(eepromTachoVersionLowAddress, versionLow);
+  EEPROM.writeBlock(eepromTitleAddress, title);
+  EEPROM.writeByte(eepromVersionHighAddress, versionHigh);
+  EEPROM.writeByte(eepromVersionLowAddress, versionLow);
 
   EEPROM.writeLong(eepromOdoAddress, 0UL);
   EEPROM.writeLong(eepromTrip1Address, 0UL);
@@ -39,58 +33,56 @@ void setup () {
 
   // This is the distance per pulse in km
   // the value here is calculated from the following
-  // wheel/tyre combination is 33x12.5R15 or (318/72R5)
+  // wheel/tyre combination is 33x12.5R15 or (315/75R15)
   //
-  // pulses per revolution of vehicle speed sensor = ppr =	10
+  // pulses per revolution of vehicle speed sensor = ppr =  15
   // this needs to have hardware /10 circuit
-  // circumference of wheel/tyre in meters = cir =		2.63144
-  // final drive ratio of diff = ratio =			3.5
+  // circumference of wheel/tyre in meters = cir =    2.63144
+  // final drive ratio of diff = ratio =      3.5
   // formula is
   // (1000m/cir) * ratio * ppr
   // for each kilometer there are (1000/cir) turns of the wheel
   // for each turn of the wheel the drive shaft turns ratio times
   // for each turn of the driveshaft there are ppr pulses
   // therefore for this tyre/wheel diff combo the result is:
-  // (1000/2.63144) * 3.5 * 10
+  // (1000/2.63144) * 3.5 * 15
   // equals
-  // 13300.7 pulses per kilometer
-  // 13293.0549211603
-  //
-  // this is
-  // 0.075227m per pulse
-  //
-  // to get odometer or trip reading multiply this by the number in eeprom
-  //
-  // 
-  //
-  // when calibrated in the speedo program it is for 1 kilometer or mile
+  // 19951.05 pulses per kilometer
+  // 19951.05341562
 
+  // this is then multiplied by 100 and stored as pulses per kilometer * 100
+  
   // NOTE if you are using a sensor that is on the wheel/tyre the final drive ratio is 1
 
-  EEPROM.writeFloat(eepromSpeedoCalibrateAddress, 0.075227);  
+  unsigned long speedoCalibrate = 19951.05 * SPEEDO_CALIBRATE_DIVIDER;
 
-  EEPROM.writeByte(eepromModeFuncAddress, 0);
+  EEPROM.writeLong(eepromSpeedoCalibrateAddress, speedoCalibrate);
+
+  EEPROM.writeByte(eepromSpeedoModeFuncAddress, 0);
+
+  EEPROM.writeByte(eepromDebugSpeedoAddress, 0);
+  EEPROM.writeByte(eepromDemoSpeedoAddress, 0);
 
   // confirm eeprom has been written to
 
   Serial.print("Speedo title address = ");
-  Serial.print(eepromTachoTitleAddress);
+  Serial.print(eepromTitleAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  EEPROM.readBlock(eepromTachoTitleAddress, title);
+  EEPROM.readBlock(eepromTitleAddress, title);
   Serial.println(title);
 
   Serial.print("Speedo Version High address = ");
-  Serial.print(eepromTachoVersionHighAddress);
+  Serial.print(eepromVersionHighAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromTachoVersionHighAddress));    
+  Serial.println(EEPROM.readByte(eepromVersionHighAddress));    
 
-  Serial.print("Speedo Version High address = ");
-  Serial.print(eepromTachoVersionLowAddress);
+  Serial.print("Speedo Version Low address = ");
+  Serial.print(eepromVersionLowAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromTachoVersionLowAddress));    
+  Serial.println(EEPROM.readByte(eepromVersionLowAddress));    
 
   Serial.println();
   Serial.print("Odometer address = ");
@@ -112,7 +104,25 @@ void setup () {
   Serial.print(eepromSpeedoCalibrateAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readFloat(eepromSpeedoCalibrateAddress));    
+  Serial.println(EEPROM.readLong(eepromSpeedoCalibrateAddress));    
+
+  Serial.print("Speedo Mode address = ");
+  Serial.print(eepromSpeedoModeFuncAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromSpeedoModeFuncAddress));    
+
+  Serial.print("Speedo debug address = ");
+  Serial.print(eepromDebugSpeedoAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromDebugSpeedoAddress));    
+
+  Serial.print("Speedo demo address = ");
+  Serial.print(eepromDemoSpeedoAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromDemoSpeedoAddress));    
 
 }
 

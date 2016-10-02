@@ -7,21 +7,6 @@
 */
 void checkForTimeout() {
 
-/*
-if ((loopTime - lastTachoTrigger) > timeoutValue) {
-    pps = 0.0;
-  }
-
-#ifdef ECHO_SERIAL
-
-  Serial.print("loopTime    ");
-  Serial.print(loopTime);
-  
-  Serial.print("    lastTachoTrigger    ");
-  Serial.println(lastTachoTrigger);
-
-#endif
-*/
 
 }
 

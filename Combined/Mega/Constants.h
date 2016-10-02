@@ -1,6 +1,11 @@
-// Constants.h
-// Constant values
+/*
+ * Constants.h
+ *
+ *
+ * Constant values
+ */
 
+/*
 
 // these are the trip button constants
 
@@ -27,6 +32,8 @@ static const byte FUNC_TACHO_CAL = 1;
 static const byte TACHO_PETROL = 0;
 static const byte TACHO_DIESEL = 1;
 
+*/
+
 // EEPROM has a limited life span; be careful how often we write to it
 static const unsigned long odometerWriteFrequency = 60000000;
 // odometer write to eeprom timeout
@@ -41,7 +48,7 @@ D2	 pinSpeedoInterrupt   speedoInterrupt = 0	 Vehicle Speed sensor
 D3	 pinTachoInterrupt	  tachoInterrupt =  1	 Tacho input
 D4
 D5
-D6
+D6   pinBacklight         1602 lcd backlightbrightness control
 D7	 pinLightsOn         Lights on input         
 D8	 pinBrigthnessSw     Brightness switch       
 D9   pinIgnOn            Ignition on             
@@ -84,6 +91,7 @@ A15     pinFuelInput    fuel sender input
 
 // INPUTS
 
+/*
 // vss interrupt pin
 static const byte pinSpeedoInterrupt = 2;
 static const byte speedoInterrupt = 0;
@@ -102,14 +110,20 @@ static const byte pinLightsOn = 7;		//	Lights on input
 static const byte pinBrightnessSw = 8;		//	Brightness switch
 static const byte pinIgnOn = 9;		//	Ignition on
 
+// digital output to control lcd backlight brightness
+static const byte pinBacklight = 6;
+
 // Voltmeter
 
 static const byte voltAnalogPin = 12;
+*/
+
 // values of resistors in divider network on voltAnalogPin
+
 static const float r1 = 100000.0;
 static const float r2 = 10000.0;
 
-
+/*
 // Oil pressure meter
 
 static const byte oilAnalogPin = 13;
@@ -134,10 +148,11 @@ static const byte pinSpeedoNeopixel =  16;	//	Speedo neopixel tx
 
 // tachometer
 static const byte pinTachoNeopixel = 14;	//	Tacho neopixel tx
-
+*/
 
 // SPEEDO constants
 
+/*
 // maximum number of counts for pulseCount
 static const byte pulseMaxCount = 100;
 
@@ -159,6 +174,7 @@ static const byte numTachoDigits = 4;
 static const byte numTachoLeds = 18;
 // start the pixel display further around the ring
 static const byte tachoPixelOffset = 5;
+*/
 
 
 

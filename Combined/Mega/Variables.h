@@ -1,11 +1,14 @@
-// Variables.h
+/* 
+ * Variables.h
+ */
 
+#ifdef MEGA
 // Current micros updated on each loop
 unsigned long loopTime = 0;
 
 // Display variables
 // Helper class for handling MODE button presses
-Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+Button buttonBrightness = Button(pinBrightnessSw, BUTTON_PULLUP_INTERNAL, true, 50);
 
 volatile byte brightnessBoost = 5;
 
@@ -90,7 +93,11 @@ volatile int tachoCalibrate;
 // these are a count of pulses for fast math
 // distance is determined in display function
 // Odometer value, incremented by the ISR
-volatile unsigned long totalOdometer = 0;
+volatile union
+ {
+  unsigned long totalOdometer = 0;
+  byte extEepromTotalOdometer[4];
+ } extEepromOdometer;
 
 // TripMeter 1 value
 volatile unsigned long totalTrip_1 = 0;
@@ -109,8 +116,6 @@ volatile unsigned long lastOdometerWrite = 0;
 volatile byte lightsOn = 0;
 
 
-// TODO redo these for new library
-
 // Helper class for handling TRIP button presses
 //Button buttonTrip = Button(pinTripButton, LOW, 3000);
 
@@ -127,9 +132,88 @@ Button buttonSpeedoMode = Button(pinSpeedoModeButton, BUTTON_PULLUP_INTERNAL, tr
 Button buttonTachoMode = Button(pinTachoModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 
+bool buttonTripLongPress = false;
+bool buttonSpeedoModeLongPress = false;
+bool buttonTachoModeLongPress = false;
+
+
 // Helper class for processing at intervals
 Timer timer = Timer();
 Timer timer2 = Timer();
+
+// The distance travelled in one pulse from the vehicle speed sensor in km for miles multiply by .58 in display function
+volatile float pulseDistance = 0.0;
+
+volatile unsigned long calibrateCounter = 0;  // this permits pulse number up to 4,294,967,295
+
+// The neopixel for the speedo display
+// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
+Adafruit_NeoPixel speedoPixels = Adafruit_NeoPixel(numSpeedoLeds, pinSpeedoNeopixel, NEO_GRB + NEO_KHZ800);
+
+// The neopixel for the tacho display
+// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
+Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds + tachoPixelOffset, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
+
+// external i2c linked eeprom
+extEEPROM speedoEeprom(kbits_256, 2, 64, I2C_ADDRESS_EXT_EEPROM);
+
+bool extEepromAvailable = true;
+
+// the state of the arduino led on pin 13
+volatile byte arduinoLed = 0;
+
+int passCode = 9009;
+String readString;
+
+volatile byte debugAll = 0;
+volatile byte debugSpeedo = 0;
+volatile byte debugTacho = 0;
+volatile byte debugGauges = 0;
+
+volatile byte demoAll = 0;
+volatile byte demoSpeedo = 0;
+volatile byte demoTacho = 0;
+volatile byte demoGauges = 0;
+
+
+// for future use to output to bluetooth
+int voltVal = 0;
+int oilVal = 0;
+int tempVal = 0;
+int fuelVal = 0;
+
+
+// oled diagnostics screen
+
+#ifndef ODOMETER_OLED_128x64
+LCD_SSD1306 oledDiagnostic;                  // for SSD1306 OLED module
+bool oledAvailable = false;
+#endif
+
+#ifdef ODOMETER_1602
+byte odoAddress = I2C_ADDRESS_ODO_1602;
+
+// Set the pins on the I2C chip used for LCD connections:
+//                    addr, en,rw,rs,d4,d5,d6,d7,bl,blpol
+LiquidCrystal_I2C odo1602(I2C_ADDRESS_ODO_1602, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
+
+#endif
+
+#ifdef ODOMETER_OLED_128x64
+byte odoAddress = I2C_ADDRESS_ODO_OLED;
+LCD_SSD1306 oledOdometer;                  // for SSD1306 OLED module
+#endif
+
+#ifdef INCLUDE_AHRS
+bool magnetometerAvailable = false;
+#endif
+
+#ifdef INCLUDE_BLUETOOTH
+bool bluetoothAvailable = false;
+#endif
+
+#endif                                     // ifdef MEGA
+
 
 
 // EEPROM storage addresses for odometer and tripmeters
@@ -249,65 +333,5 @@ volatile int fuelMax = 100;    // 100%
 volatile int fuelWarn = 5;     // warn when below this
 volatile byte fuelWarnLow = 1; // warn for fuel low
 
-
-// The distance travelled in one pulse from the vehicle speed sensor in km for miles multiply by .58 in display function
-volatile float pulseDistance = 0.0;
-
-volatile unsigned long calibrateCounter = 0;	// this permits pulse number up to 4,294,967,295
-
-// The neopixel for the speedo display
-// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
-Adafruit_NeoPixel speedoPixels = Adafruit_NeoPixel(numSpeedoLeds, pinSpeedoNeopixel, NEO_GRB + NEO_KHZ800);
-
-// The neopixel for the tacho display
-// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
-Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds + tachoPixelOffset, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
-
-// the state of the arduino led on pin 13
-volatile byte arduinoLed = 0;
-
-int passCode = 9009;
-String readString;
-
-volatile byte debugAll = 0;
-volatile byte debugSpeedo = 0;
-volatile byte debugTacho = 0;
-volatile byte debugGauges = 0;
-
-volatile byte demoAll = 0;
-volatile byte demoSpeedo = 0;
-volatile byte demoTacho = 0;
-volatile byte demoGauges = 0;
-
-
-// for future use to output to bluetooth
-int voltVal = 0;
-int oilVal = 0;
-int tempVal = 0;
-int fuelVal = 0;
-
-// oled diagnostics screen
-
-#ifndef ODOMETER_OLED_128x64
-LCD_SSD1306 oledDiagnostic;                  // for SSD1306 OLED module
-bool oledAvailable = false;
-#endif
-
-#ifdef ODOMETER_1602
-byte odoAddress = I2C_ADDRESS_ODO_1602;
-#endif
-
-#ifdef ODOMETER_OLED_128x64
-byte odoAddress = I2C_ADDRESS_ODO_OLED;
-LCD_SSD1306 oledOdometer;                  // for SSD1306 OLED module
-#endif
-
-#ifdef INCLUDE_AHRS
-bool magnetometerAvailable = false;
-#endif
-
-#ifdef INCLUDE_BLUETOOTH
-bool bluetoothAvailable = false;
-#endif
 
 

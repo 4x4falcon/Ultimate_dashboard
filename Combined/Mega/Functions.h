@@ -14,16 +14,16 @@ void goToSleep() {
 
   // write the odometer to EEPROM
 
-  if (totalOdometer > EEPROM.readLong(eepromOdoAddress))
+  if (extEepromOdometer.totalOdometer > EEPROM.readLong(eepromOdoAddress))
   {
     if (debugAll > 0)
     {
       Serial.print(F("Saving odometer to EEPROM    "));
-      Serial.println (totalOdometer);
+      Serial.println (extEepromOdometer.totalOdometer);
     }
     else
     {
-      EEPROM.writeLong(eepromOdoAddress, totalOdometer);
+      EEPROM.writeLong(eepromOdoAddress, extEepromOdometer.totalOdometer);
     }
   }
 
@@ -260,14 +260,14 @@ void doSerialCommand(String readString)
       else
       {
         if (readString.startsWith("$0"))
-        {
+         {
           Serial.println(F("Resetting EEPROM except for odometer"));
 
           //TODO
 
-        }
+         }
         else
-        {
+         {
           int pos = readString.indexOf("=");
           if (pos > 0)
           {

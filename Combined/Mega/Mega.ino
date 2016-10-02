@@ -50,7 +50,9 @@
 #include <Wire.h>
 #include <EEPROMex.h>
 #include <Adafruit_NeoPixel.h>
+#include <LiquidCrystal_I2C.h>
 #include <MicroLCD.h>
+#include <extEEPROM.h>
 
 
 #ifdef INCLUDE_BLUETOOTH
@@ -103,6 +105,19 @@ void setup() {
 
   getEepromValues();
 
+  if ( speedoEeprom.begin(twiClock400kHz) != 0 )
+   {
+    //there was a problem
+    Serial.println("No external Eeprom");
+
+    extEepromAvailable = false;
+   }
+
+  if (extEepromAvailable)
+   {
+    getExtEepromValues();
+   }
+
   Serial.println(title);
   Serial.print("Version ");
   Serial.print(versionHigh);
@@ -146,7 +161,19 @@ void setup() {
   delay(500);
   oledOdometer.clear();
 #endif
+#ifdef ODOMETER_1602
+  // Initialize the 1602 lcd odometer
+  odo1602.begin(16,2);
+  odo1602.noBacklight();                             // backlight off
 
+// NOTE: Cursor Position: (CHAR, LINE) start at 0  
+  odo1602.setCursor(0,0);                            //Start at character 0 on line 0
+  odo1602.print(title);
+  odo1602.backlight();                               // backlight on
+  delay(500);
+  odo1602.clear();
+//  Serial.println("Writing to odo1602");
+#endif
 
   // Initialize the neo pixels
   speedoPixels.begin();
@@ -161,25 +188,19 @@ void setup() {
 // TODO rename these for new button library
 
   // Set up trip button handlers
-//  buttonTrip.setPressHandler(buttonTripPressed);
-//  buttonTrip.setLongPressHandler(buttonTripLongPressed);
   buttonTrip.pressHandler(buttonTripPressed);
-//  buttonTrip.releaseHandler(onRelease);
-  buttonTrip.holdHandler(buttonTripLongPressed, 3000); // must be held for at least 3000 ms to trigger
+  buttonTrip.releaseHandler(buttonTripReleased);
+  buttonTrip.holdHandler(buttonTripLongPressed, 1000); // must be held for at least 3000 ms to trigger
 
   // Set up speedo mode button handlers
-//  buttonSpeedoMode.setPressHandler(buttonSpeedoModePressed);
-//  buttonSpeedoMode.setLongPressHandler(buttonSpeedoModeLongPressed);
   buttonSpeedoMode.pressHandler(buttonSpeedoModePressed);
-//  buttonTrip.releaseHandler(onRelease);
+//  buttonSpeedoMode.releaseHandler(onRelease);
   buttonSpeedoMode.holdHandler(buttonSpeedoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   // Set up speedo mode button handlers
-//  buttonTachoMode.setPressHandler(buttonTachoModePressed);
-//  buttonTachoMode.setLongPressHandler(buttonTachoModeLongPressed);
-  buttonSpeedoMode.pressHandler(buttonTachoModePressed);
-//  buttonTrip.releaseHandler(onRelease);
-  buttonSpeedoMode.holdHandler(buttonTachoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
+  buttonTachoMode.pressHandler(buttonTachoModePressed);
+//  buttonTachoMode.releaseHandler(buttonTachoModeReleased);
+  buttonTachoMode.holdHandler(buttonTachoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   setBrightness();
 
@@ -281,6 +302,8 @@ byte error = 0;
 */
 void loop() {
 
+// TODO look for serial commands from bluetooth
+
   // see if there are serial commands
   while ((Serial.available() >0) && (speed == 0))
    {
@@ -288,6 +311,7 @@ void loop() {
     readString += c;            //makes the string readString
     delay(2);                   //slow looping to allow buffer to fill with next character
    }
+
 
   // act on serial commands
   if (readString.length() >0)
@@ -303,20 +327,11 @@ void loop() {
     timer.update();       // update speedo display
     timer2.update();      // update tacho and meters display
 
-// TODO rename these for new library
-
-//    buttonTrip.check();
-//    buttonSpeedoMode.check();
-//    buttonTachoMode.check();
     buttonTrip.process();
     buttonSpeedoMode.process();
     buttonTachoMode.process();
 
-
     writeOdometer();
-
-//    checkForSpeedoTimeout();
-//    checkForTachoTimeout();
    }
 
   if (demoGauges > 0)
@@ -362,11 +377,5 @@ void loop() {
    }
 #endif
 
-#ifdef INCLUDE_BLUETOOTH
-  if (bluetoothAvailable)
-   {
-    printBluetooth();
-   }
-#endif
  }
 

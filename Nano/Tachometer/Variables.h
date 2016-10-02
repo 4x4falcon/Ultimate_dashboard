@@ -45,7 +45,9 @@ volatile int tachoStep;
 
 
 // Helper class for handling MODE button presses
-Button buttonMode = Button(pinModeButton, LOW, 3000);
+Button buttonMode = Button(pinModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
+
+bool buttonModeLongPress = false;
 
 // Helper class for processing at intervals
 Timer timer = Timer();
@@ -97,7 +99,9 @@ volatile byte arduinoLed = LOW;
 
 
 // Helper class for handling MODE button presses
-Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+Button buttonBrightness = Button(pinBrightnessSw, BUTTON_PULLUP_INTERNAL, true, 50);
+
+bool buttonBrightnessLongPress = false;
 
 volatile byte brightnessBoost = 5;
 

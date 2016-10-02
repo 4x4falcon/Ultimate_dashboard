@@ -73,14 +73,25 @@ void tachoTriggered() {
 /*
 * mode button pressed
 */
-void buttonTachoModePressed(Button& buttonTachoMode) {
-}
+void buttonTachoModePressed(Button& buttonTachoMode)
+ {
+  buttonTachoModeLongPress = false;
+ }
+
+/*
+* mode button pressed
+*/
+void buttonTachoModeReleased(Button& buttonTachoMode)
+ {
+  buttonTachoModeLongPress = false;
+ }
 
 /*
 * mode button long pressed
 */
-void buttonTachoModeLongPressed(Button& buttonTachoMode) {
-
-}
+void buttonTachoModeLongPressed(Button& buttonTachoMode)
+ {
+  buttonTachoModeLongPress = true;
+ }
 
 

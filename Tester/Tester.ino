@@ -48,22 +48,38 @@ Timer timer = Timer();
 static long updateTime = 5000;
 
 // Helper class for handling MODE button presses
-Button buttonMode = Button(pinModeButton, LOW, 3000);
+Button buttonMode = Button(pinModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
+
+bool buttonModeLongPress = false;
+
 
 void buttonModePressed() {
 
-  modeFunction = !modeFunction;
-  digitalWrite(pinModeLed, modeFunction);
-  toneSpeedoValue = toneSpeedoMin;
-  toneTachoValue = toneTachoMin;
+  buttonModeLongPress = false;
+  Serial.println("button pressed");
 }
 
-void buttonModeLongPressed() {
+void buttonModeReleased()
+ {
+  if (!buttonModeLongPress)
+   {
+    modeFunction = !modeFunction;
+    digitalWrite(pinModeLed, modeFunction);
+    toneSpeedoValue = toneSpeedoMin;
+    toneTachoValue = toneTachoMin;
+    Serial.println("button released");
+   }
+  buttonModeLongPress = false;
+ }
 
-//  modeFunction = !modeFunction;
+void buttonModeLongPressed()
+ {
   digitalWrite(pinModeLed, modeFunction);
   toneSpeedoValue = toneSpeedoMax;
   toneTachoValue = toneTachoMax;
+  buttonModeLongPress = true;
+  Serial.println("button long press");
+  buttonModeLongPress = true;
 }
 
 
@@ -126,9 +142,9 @@ void setup () {
   pinMode(pinModeButton, INPUT_PULLUP);
 
   // Set up mode button handlers
-  buttonMode.setPressHandler(buttonModePressed);
-
-  buttonMode.setLongPressHandler(buttonModeLongPressed);
+  buttonMode.pressHandler(buttonModePressed);
+  buttonMode.releaseHandler(buttonModeReleased);
+  buttonMode.holdHandler(buttonModeLongPressed, 1000);
 
   timer.every(updateTime, updateOutput);
 
@@ -151,7 +167,7 @@ void setup () {
 
 void loop () {
 
-  buttonMode.check();
+  buttonMode.process();
   timer.update();
 }
 

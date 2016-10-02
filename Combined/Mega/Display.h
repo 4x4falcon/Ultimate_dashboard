@@ -4,16 +4,16 @@
 
 void setBrightness()
  {
-  byte b = brightnessBoost;
-  byte b1 = brightnessBoost;
-  byte b2 = brightnessBoost;
+  byte b = brightnessBoost;           // tacho and gauges for 7mm opensegment
+  byte b1 = brightnessBoost;          // odometer for 16x02 lcd
+  byte b2 = brightnessBoost;          // speedo for 20mm opensegment
   pixelBrightness = brightnessBoost;
 
   if (digitalRead(pinLightsOn))      // confirm that this is low when completing circuit
    {
 // set brightness to mid range when headlights are on
     b = 2 * brightnessBoost;
-    b1 = 2 * brightnessBoost;
+    b1 = 15 * brightnessBoost;
     b2 = int(0.5 * brightnessBoost);
     pixelBrightness = int(0.5 * brightnessBoost);
 
@@ -31,7 +31,7 @@ void setBrightness()
    {
 // set brightness to full on when headlights are off
     b= 15 * brightnessBoost;
-    b1 = 15 * brightnessBoost;
+    b1 = 50 * brightnessBoost;
     b2 = int(0.9 * brightnessBoost);
     pixelBrightness = int(1.5 * brightnessBoost);
 
@@ -56,8 +56,7 @@ void setBrightness()
   i2c_s7s_SetDisplayBrightness(I2C_ADDRESS_SPEEDO, b2);
 
 #ifdef ODOMETER_1602
-// TODO set brightness on 1602 lcd displays via I2C
-//  i2c_serlcd_SetDisplayBrightness(I2C_ADDRESS_ODO, b1);
+  analogWrite(pinBacklight, b1);
 #endif
 }
 
@@ -278,38 +277,34 @@ void displayOdometer () {
 
 #ifdef ODOMETER_1602
   // cursor to the first character of top row
-
-  i2c_serlcd_SendCursorControl(odoAddress, 128);
+  odo1602.setCursor(0,0);
 
   if (modeSpeedoFunc == FUNC_KPH)
    {
-    i2c_SendString_4(odoAddress, "KPH ");
+    odo1602.print("KPH");
    }
   else if (modeSpeedoFunc == FUNC_MPH)
    {
-    i2c_SendString_4(odoAddress, "MPH ");
+    odo1602.print("MPH");
    }
   else if (modeSpeedoFunc == FUNC_CAL)
    {
-    i2c_SendString_4(odoAddress, "CAL ");
+    odo1602.print("CAL");
    }
 
 // cursor to eighth character of top line
+  odo1602.setCursor(7, 0);
 
-  i2c_serlcd_SendCursorControl(odoAddress, 135);
-
-  float odo = (totalOdometer * pulseDistance) / 1000.0;
-
+  float odo = (extEepromOdometer.totalOdometer * pulseDistance) / 1000.0;
   if (odo > 999999.9)
    {
      odo = 0.0;
-     totalOdometer = 0;
+     extEepromOdometer.totalOdometer = 0;
    }
 
-
   dtostrf(odo,9,1,buffer);
+  odo1602.print(buffer);
 
-  i2c_SendString(odoAddress, buffer);
   if (debugSpeedo == 3)
    {
     Serial.print(F("1602 Odo    "));
@@ -340,14 +335,14 @@ void displayOdometer () {
   oledOdometer.setCursor(ODO_POSITION_02, 2);
   oledOdometer.setFontSize(FONT_SIZE_XLARGE);
   
-  float odo = (float)totalOdometer / speedoCalibrate;
+  float odo = (float)extEepromOdometer.totalOdometer / speedoCalibrate;
 
 //  odo = 999999.8;
 
   if (odo > 999999.9)
    {
      odo = 0.0;
-     totalOdometer = 0;
+     extEepromOdometer.totalOdometer = 0;
    }
 
   dtostrf(odo,9,1,buffer);
@@ -358,8 +353,8 @@ void displayOdometer () {
     Serial.print(F("oled Odo    "));
     Serial.println (buffer);
 
-    sprintf(buffer, "%20d", totalOdometer);
-    Serial.print(F("oled totalOdometer    "));
+    sprintf(buffer, "%20d", extEepromOdometer.totalOdometer);
+    Serial.print(F("oled extEepromOdometer.totalOdometer    "));
     Serial.println (buffer);
 
     dtostrf(pulseDistance,9,1,buffer);
@@ -380,16 +375,15 @@ void displayTripmeter () {
 
   char buffer[6] = "";
 
-// cursor to the first character of bottom line  192
+// cursor to the first character of bottom line
 
 #ifdef ODOMETER_1602
-  i2c_serlcd_SendCursorControl(odoAddress, 192);
+//  odo1602.setCursor(0,0);
+//  i2c_serlcd_SendCursorControl(odoAddress, 192);
+//  i2c_SendString(odoAddress, (char *)F("1        2      "));
 
-  i2c_SendString(odoAddress, (char *)F("1        2      "));
-
-// cursor to third character of bottom line  194
-
-  i2c_serlcd_SendCursorControl(odoAddress, 194);
+// cursor to third character of bottom line
+  odo1602.setCursor(2, 1);
 
   float odo = (totalTrip_1 * pulseDistance) / 1000.0;
   
@@ -400,8 +394,7 @@ void displayTripmeter () {
    }
 
   dtostrf(odo,5,1,buffer);
-
-  i2c_SendString(odoAddress, buffer);
+  odo1602.print(buffer);
 
   if (debugSpeedo == 1)
    {
@@ -411,7 +404,8 @@ void displayTripmeter () {
 
 // cursor to twelth character of bottom line    203
 
-  i2c_serlcd_SendCursorControl(odoAddress, 203);
+//  i2c_serlcd_SendCursorControl(odoAddress, 203);
+  odo1602.setCursor(11, 1);
 
   odo = (totalTrip_2 * pulseDistance) / 1000.0;
   
@@ -423,8 +417,7 @@ void displayTripmeter () {
 
 
   dtostrf(odo,5,1,buffer);
-  i2c_SendString(odoAddress, buffer);
-
+  odo1602.print(buffer);
   if (debugSpeedo == 1)
    {
     Serial.print(F("Trip_2    "));
@@ -434,22 +427,22 @@ void displayTripmeter () {
   if (!modeTrip)
    {
     // second character of bottom row        193
-    i2c_serlcd_SendCursorControl(odoAddress, 193);
-    i2c_SendString(odoAddress, (char *)tripActive);   
+    odo1602.setCursor(1, 1);
+    odo1602.print(tripActive);
 
     // eleventh character of bottom row
-    i2c_serlcd_SendCursorControl(odoAddress, 202);
-    i2c_SendString(odoAddress, " ");
+    odo1602.setCursor(10, 1);
+    odo1602.print(" ");
    }
   else
    {
     // second character of bottom row        193
-    i2c_serlcd_SendCursorControl(odoAddress, 193);
-    i2c_SendString(odoAddress, " ");
+    odo1602.setCursor(1, 1);
+    odo1602.print(" ");
 
     // eleventh character of bottom row
-    i2c_serlcd_SendCursorControl(odoAddress, 202);
-    i2c_SendString(odoAddress, (char *)tripActive);
+    odo1602.setCursor(10, 1);
+    odo1602.print(tripActive);
    }
 #endif
 
@@ -561,17 +554,14 @@ void setupOdometerDisplay() {
 
   // cursor to the first character of top row
 
-//  i2c_serlcd_SendCursorControl(odoAddress, 128);
-//  i2c_SendString_16(odoAddress, (char *)F("KPH    0000000.0"));
-
-// display current Odometer reading  
-//  displayOdometer();
+  odo1602.setCursor(0, 0);
+  odo1602.print(F("KPH    0000000.0"));
 
 // bottom line shows tripmeters with current one highlighted
 // cursor to first character of bottom line
 
-//  i2c_serlcd_SendCursorControl(odoAddress, 192);
-//  i2c_SendString_16(odoAddress, (char *)F("1 000.0  2 000.0"));
+  odo1602.setCursor(0, 1);
+  odo1602.print(F("1 000.0  2 000.0"));
 
 //#endif
 //#ifdef ODOMETER_OLED_128x64
@@ -831,9 +821,21 @@ void updateDisplay() {
    }
 #endif
 
+
+#ifdef INCLUDE_BLUETOOTH
+  if (bluetoothAvailable)
+   {
+    printBluetooth();
+   }
+#endif
+
+
+
 // toggle pin 13 led for  debugging
     arduinoLed = !arduinoLed;
     digitalWrite(13, arduinoLed);
+
+
 
 }
 

@@ -36,59 +36,87 @@ volatile int calibrateCounter;
 // PPR = pulses per revolution
 
 volatile byte tachoPPR;
+volatile byte tachoType;
 volatile int tachoRedline;
 volatile int tachoShift;
 volatile int tachoMaximum;
+volatile int tachoCalibrate;
 volatile int tachoStep;
 
 
 // Helper class for handling MODE button presses
-Button buttonMode = Button(pinModeButton, LOW, 3000);
+Button buttonMode = Button(pinModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
+
+bool buttonModeLongPress = false;
 
 // Helper class for processing at intervals
 Timer timer = Timer();
 
 // EEPROM storage address for title, version high and low
 
-volatile int eepromTitleAddress;
-volatile int eepromVersionHighAddress;
-volatile int eepromVersionLowAddress;
+volatile int eepromTitle;
+volatile int eepromVersionHigh;
+volatile int eepromVersionLow;
 
 // EEPROM storage addresses for calibration data
 // PPR = pulses per revolution
 
-volatile int eepromTachoPPRAddress;
+volatile int eepromTachoPPR;
+volatile int eepromTachoType;
 
 // EEPROM storage address for redline
 
-volatile int eepromTachoRedlineAddress;
+volatile int eepromTachoRedline;
 
 // EEPROM storage address for shift light
 
-volatile int eepromTachoShiftAddress;
+volatile int eepromTachoShift;
 
-//EEPROM storage address for tacho maximump
+//EEPROM storage address for tacho maximum
 
-volatile int eepromTachoMaximumAddress;
+volatile int eepromTachoMaximum;
+
+//EEPROM storage address for tacho calibration
+
+volatile int eepromTachoCalibrate;
+
+//EEPROM storage address for tacho debug
+
+volatile int eepromTachoDebug;
+
+//EEPROM storage address for tacho debug
+
+volatile int eepromTachoDemo;
 
 // The soft serial for the speedometer display
 SoftwareSerial tachoSerial(pinSerialRX, pinTachoSerialTX);
 
 // When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
-Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds + pixelOffset, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
 
 // the led on pin 13
 volatile byte arduinoLed = LOW;
 
 
 // Helper class for handling MODE button presses
-Button buttonBrightness = Button(pinBrightnessSw, LOW, 3000);
+Button buttonBrightness = Button(pinBrightnessSw, BUTTON_PULLUP_INTERNAL, true, 50);
+
+bool buttonBrightnessLongPress = false;
 
 volatile byte brightnessBoost = 5;
 
 
 // the brightness of the pixels initially set to daytime 15
 volatile byte pixelBrightness = 3 * brightnessBoost;
+
+int passCode = 9009;
+String readString;
+
+byte debug = 0;
+byte demo = 0;
+
+// a buffer for the values
+char buffer[50];
 
 
 

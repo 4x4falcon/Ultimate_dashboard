@@ -6,70 +6,101 @@
  *
  */
 
+#define INITIALIZE_GAUGES
+
+
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
 
-#include "Version.h";
+#include "Variables.h"
+#include "Version.h"
+#include "Eeprom.h"
 
 void setup () {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
+/*
   // Get eeprom storage addresses MUST be before anything else and in the same order
   int eepromGaugesTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
   int eepromGaugesVersionHighAddress = EEPROM.getAddress(sizeof(byte));
   int eepromGaugesVersionLowAddress = EEPROM.getAddress(sizeof(byte));
 
-  EEPROM.writeBlock(eepromGaugesTitleAddress, title);
-  EEPROM.writeByte(eepromGaugesVersionHighAddress, versionHigh);
-  EEPROM.writeByte(eepromGaugesVersionLowAddress, versionLow);
-
 // Voltmeter
-  int eepromGaugesVoltLowAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesVoltLowerAddress = EEPROM.getAddress(sizeof(int));
   int eepromGaugesVoltHighAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesVoltLowWarnAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesVoltHighWarnAddress = EEPROM.getAddress(sizeof(int));
-
-  EEPROM.writeInt(eepromGaugesVoltLowAddress, 0);
-  EEPROM.writeInt(eepromGaugesVoltHighAddress, 1023);
-  EEPROM.writeInt(eepromGaugesVoltLowWarnAddress, 102);
-  EEPROM.writeInt(eepromGaugesVoltHighWarnAddress, 921);
-
+  int eepromGaugesVoltMinAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesVoltMaxAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesVoltWarnAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesVoltWarnLowAddress = EEPROM.getAddress(sizeof(byte));
 
 // Oil pressure meter  
-  int eepromGaugesOilLowAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesOilLowerAddress = EEPROM.getAddress(sizeof(int));
   int eepromGaugesOilHighAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesOilLowWarnAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesOilHighWarnAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesOilMinAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesOilMaxAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesOilWarnAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesOilWarnLowAddress = EEPROM.getAddress(sizeof(byte));
 
-  EEPROM.writeInt(eepromGaugesOilLowAddress, 0);
-  EEPROM.writeInt(eepromGaugesOilHighAddress, 1023);
-  EEPROM.writeInt(eepromGaugesOilLowWarnAddress, 102);
-  EEPROM.writeInt(eepromGaugesOilHighWarnAddress, 921);
 
 // Water Temperature meter
-  int eepromGaugesTempLowAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesTempLowerAddress = EEPROM.getAddress(sizeof(int));
   int eepromGaugesTempHighAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesTempLowWarnAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesTempHighWarnAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesTempMinAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesTempMaxAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesTempWarnAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesTempWarnLowAddress = EEPROM.getAddress(sizeof(byte));
 
-  EEPROM.writeInt(eepromGaugesTempLowAddress, 0);
-  EEPROM.writeInt(eepromGaugesTempHighAddress, 0);
-  EEPROM.writeInt(eepromGaugesTempLowWarnAddress, -1);
-  EEPROM.writeInt(eepromGaugesTempHighWarnAddress, 921);
 
 // Fuel level meter
-  int eepromGaugesFuelLowAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesFuelLowerAddress = EEPROM.getAddress(sizeof(int));
   int eepromGaugesFuelHighAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesFuelLowWarnAddress = EEPROM.getAddress(sizeof(int));
-  int eepromGaugesFuelHighWarnAddress = EEPROM.getAddress(sizeof(int));
+  int eepromGaugesFuelMinAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesFuelMaxAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesFuelWarnAddress = EEPROM.getAddress(sizeof(byte));
+  int eepromGaugesFuelWarnLowAddress = EEPROM.getAddress(sizeof(byte));
   int eepromGaugesFuelSensorTypeAddress = EEPROM.getAddress(sizeof(byte));
 
-  EEPROM.writeInt(eepromGaugesFuelLowAddress, 0);
-  EEPROM.writeInt(eepromGaugesFuelHighAddress, 1023);
-  EEPROM.writeInt(eepromGaugesFuelLowWarnAddress, 102);
-  EEPROM.writeInt(eepromGaugesFuelHighWarnAddress, -1);
-  EEPROM.writeByte(eepromGaugesFuelSensorTypeAddress, 0);
+  int eepromGaugesDebugAddress = EEPROM.getAddress(sizeof(byte));
+
+  int eepromGaugesDemoAddress = EEPROM.getAddress(sizeof(byte));
+
+*/
+
+  getEepromAddresses();
+
+  EEPROM.writeBlock(eepromTitleAddress, title);
+  EEPROM.writeByte(eepromVersionHighAddress, versionHigh);
+  EEPROM.writeByte(eepromVersionLowAddress, versionLow);
+
+  EEPROM.writeInt(eepromVoltLowerAddress, 0);
+  EEPROM.writeInt(eepromVoltUpperAddress, 1023);
+  EEPROM.writeByte(eepromVoltMinAddress, 8);
+  EEPROM.writeByte(eepromVoltMaxAddress, 16);
+  EEPROM.writeByte(eepromVoltWarnAddress, 11);
+  EEPROM.writeByte(eepromVoltWarnLowAddress, 1);
+
+  EEPROM.writeInt(eepromOilLowerAddress, 0);
+  EEPROM.writeInt(eepromOilUpperAddress, 1023);
+  EEPROM.writeByte(eepromOilMinAddress, 0);
+  EEPROM.writeByte(eepromOilMaxAddress, 100);
+  EEPROM.writeByte(eepromOilWarnAddress, 60);
+  EEPROM.writeByte(eepromOilWarnLowAddress, 1);
+
+  EEPROM.writeInt(eepromTempLowerAddress, 0);
+  EEPROM.writeInt(eepromTempUpperAddress, 1023);
+  EEPROM.writeByte(eepromTempMinAddress, 40);
+  EEPROM.writeByte(eepromTempMaxAddress, 200);
+  EEPROM.writeByte(eepromTempWarnAddress, 110);
+  EEPROM.writeByte(eepromTempWarnLowAddress, 0);
+
+  EEPROM.writeInt(eepromFuelLowerAddress, 0);
+  EEPROM.writeInt(eepromFuelUpperAddress, 1023);
+  EEPROM.writeByte(eepromFuelMinAddress, 0);
+  EEPROM.writeByte(eepromFuelMaxAddress, 100);
+  EEPROM.writeByte(eepromFuelWarnAddress, 10);
+  EEPROM.writeByte(eepromFuelWarnLowAddress, 1);
+  EEPROM.writeByte(eepromFuelSensorTypeAddress, 0);
 
 								// This is
 								// type	empty	full	description
@@ -79,131 +110,189 @@ void setup () {
 								//
 								//
 
+  EEPROM.writeByte(eepromGaugesDebugAddress, 0);
+
+  EEPROM.writeByte(eepromGaugesDemoAddress, 0);
+
   // confirm eeprom has been written to
 
+
   Serial.print("Gauges title address = ");
-  Serial.print(eepromGaugesTitleAddress);
+  Serial.print(eepromTitleAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  EEPROM.readBlock(eepromGaugesTitleAddress, title);
+  EEPROM.readBlock(eepromTitleAddress, title);
   Serial.println(title);
 
   Serial.print("Gauges Version High address = ");
-  Serial.print(eepromGaugesVersionHighAddress);
+  Serial.print(eepromVersionHighAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromGaugesVersionHighAddress));    
+  Serial.println(EEPROM.readByte(eepromVersionHighAddress));    
 
-  Serial.print("Gauges Version High address = ");
-  Serial.print(eepromGaugesVersionLowAddress);
+  Serial.print("Gauges Version Low address = ");
+  Serial.print(eepromVersionLowAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromGaugesVersionLowAddress));    
+  Serial.println(EEPROM.readByte(eepromVersionLowAddress));    
 
 // Voltmeter
   Serial.println();
   Serial.println("Voltmeter");
   Serial.println();
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesVoltLowAddress);
+  Serial.print(eepromVoltLowerAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesVoltLowAddress));    
+  Serial.println(EEPROM.readInt(eepromVoltLowerAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesVoltHighAddress);
+  Serial.print(eepromVoltUpperAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesVoltHighAddress));    
+  Serial.println(EEPROM.readInt(eepromVoltUpperAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesVoltLowWarnAddress);
+  Serial.print(eepromVoltMinAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesVoltLowWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromVoltMinAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesVoltHighWarnAddress);
+  Serial.print(eepromVoltMaxAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesVoltHighWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromVoltMaxAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromVoltWarnAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromVoltWarnAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromVoltWarnLowAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromVoltWarnLowAddress));    
 
 // Oil Pressure Meter
   Serial.println();
-  Serial.println("Oil Pressure meter");
+  Serial.println("Oil Pressure");
   Serial.println();
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesOilLowAddress);
+  Serial.print(eepromOilLowerAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesOilLowAddress));    
+  Serial.println(EEPROM.readInt(eepromOilLowerAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesOilHighAddress);
+  Serial.print(eepromOilUpperAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesOilHighAddress));    
+  Serial.println(EEPROM.readInt(eepromOilUpperAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesOilLowWarnAddress);
+  Serial.print(eepromOilMinAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesOilLowWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromOilMinAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesOilHighWarnAddress);
+  Serial.print(eepromOilMaxAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesOilHighWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromOilMaxAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromOilWarnAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromOilWarnAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromOilWarnLowAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromOilWarnLowAddress));    
 
 // Water Temperature Meter
   Serial.println();
-  Serial.println("Water Temperature meter");
+  Serial.println("Water Temperature");
   Serial.println();
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesTempLowAddress);
+  Serial.print(eepromTempLowerAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesTempLowAddress));    
+  Serial.println(EEPROM.readInt(eepromTempLowerAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesTempHighAddress);
+  Serial.print(eepromTempUpperAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesTempHighAddress));    
+  Serial.println(EEPROM.readInt(eepromTempUpperAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesTempLowWarnAddress);
+  Serial.print(eepromTempMinAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesTempLowWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromTempMinAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesTempHighWarnAddress);
+  Serial.print(eepromTempMaxAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesTempHighWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromTempMaxAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromTempWarnAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromTempWarnAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromTempWarnLowAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromTempWarnLowAddress));    
 
 // Fuel Level Meter
   Serial.println();
-  Serial.println("Fuel Level meter");
+  Serial.println("Fuel Level");
   Serial.println();
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesFuelLowAddress);
+  Serial.print(eepromFuelLowerAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesFuelLowAddress));    
+  Serial.println(EEPROM.readInt(eepromFuelLowerAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesFuelHighAddress);
+  Serial.print(eepromFuelUpperAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesFuelHighAddress));    
+  Serial.println(EEPROM.readInt(eepromFuelUpperAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesFuelLowWarnAddress);
+  Serial.print(eepromFuelMinAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesFuelLowWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromFuelMinAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesFuelHighWarnAddress);
+  Serial.print(eepromFuelMaxAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readInt(eepromGaugesFuelHighWarnAddress));    
+  Serial.println(EEPROM.readByte(eepromFuelMaxAddress));    
   Serial.print(" Address = ");
-  Serial.print(eepromGaugesFuelSensorTypeAddress);
+  Serial.print(eepromFuelWarnAddress);
   Serial.print(" \t\t ");
   Serial.print("value = ");
-  Serial.println(EEPROM.readByte(eepromGaugesFuelSensorTypeAddress));
+  Serial.println(EEPROM.readByte(eepromFuelWarnAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromFuelWarnLowAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromFuelWarnLowAddress));    
+  Serial.print(" Address = ");
+  Serial.print(eepromFuelSensorTypeAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromFuelSensorTypeAddress));
+
+  Serial.print("Gauges Debug address = ");
+  Serial.print(eepromGaugesDebugAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromGaugesDebugAddress));
+
+  Serial.print("Gauges Demo address = ");
+  Serial.print(eepromGaugesDemoAddress);
+  Serial.print(" \t\t ");
+  Serial.print("value = ");
+  Serial.println(EEPROM.readByte(eepromGaugesDemoAddress));
+
 
 }
 

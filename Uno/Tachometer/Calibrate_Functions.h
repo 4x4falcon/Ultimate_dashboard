@@ -9,7 +9,7 @@
 
 void storeCalibrateSpeed() {
 
-  EEPROM.writeFloat(eepromTachoPPRAddress, float(calibrateCounter));
+  EEPROM.writeFloat(eepromTachoPPR, float(calibrateCounter));
 
 }
 

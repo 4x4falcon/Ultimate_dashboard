@@ -14,10 +14,21 @@
 * Using Arduino Nano
 */
 
+#define NANO
+
+//#define DEBUGGING
+
+#define ODOMETER_1602
+//#define ODOMETER_OLED_128X64
+
+
 //library includes
 #include <SoftwareSerial.h>
 #include <EEPROMex.h>
 #include <Adafruit_NeoPixel.h>
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
 
 
 //local includes for helpers
@@ -25,11 +36,15 @@
 #include <Timer.h>
 
 //local includes for global constants and variables
+#include "Defines.h"
 #include "Constants.h"
 #include "Variables.h"
 
+
 //local includes for functions
 #include "Version.h"
+#include "Eeprom.h"
+#include "I2c.h"
 #include "Display_Functions.h"
 #include "Speedo_Functions.h"
 #include "Functions.h"
@@ -39,99 +54,61 @@ void setup() {
   Serial.begin(9600);
 
   // Get eeprom storage addresses MUST be before anything else and in the same order
+
+  getEepromAddresses();
   
-  eepromTitle = EEPROM.getAddress(sizeof(title));
-  eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
-  eepromVersionLow = EEPROM.getAddress(sizeof(byte));
-
-  eepromOdo = EEPROM.getAddress(sizeof(long));
-  eepromTrip1 = EEPROM.getAddress(sizeof(long));
-  eepromTrip2 = EEPROM.getAddress(sizeof(long));
-
-  eepromSpeedoCalibrate = EEPROM.getAddress(sizeof(float));
-
-  eepromModeFunc = EEPROM.getAddress(sizeof(byte));
-
-  eepromDebug = EEPROM.getAddress(sizeof(byte));
-  eepromDemo = EEPROM.getAddress(sizeof(byte));
-
-  // Read odometer value from flash memory
-  totalOdometer = EEPROM.readLong(eepromOdo);
-
-  // Read tripmeter 1 value from flash memory
-  totalTrip_1 = EEPROM.readLong(eepromTrip1);
-
-  // Read tripmeter 2 value from flash memory
-  totalTrip_2 = EEPROM.readLong(eepromTrip2);
-
-  // pulse distance
-  // calibration is over 2 kilometers or miles but is stored as for 1 kilometer or mile
-  // this gives distance travelled in one pulse
-
-  pulseDistance = EEPROM.readFloat(eepromSpeedoCalibrate);
-
-  // get debug value
-
-  debug = EEPROM.readByte(eepromDebug);
-
-  if (debug == 1)
-   {
-    Serial.print(F("setup pulseDistance =   "));
-    char setupBuffer[25];
-    dtostrf(pulseDistance, 20, 12, setupBuffer);
-    Serial.println(setupBuffer);
-   }
-
-  // get demo value
-
-  demo = EEPROM.readByte(eepromDemo);
-
-  // get mode function set this should only be FUNC_KPH or FUNC_MPH
-  // if set to FUNC_CAL then reset to FUNC_KPH
-  modeFunc = EEPROM.readByte(eepromModeFunc);
-  if (modeFunc == FUNC_CAL)
-   {
-    modeFunc = FUNC_KPH;
-   }
-
+  getEepromValues();
 
   // timer to update the speedo and odometer display every 100ms
-  timer.every(updateTime, updateDisplay);
-
-  // Set up trip button handlers
-  buttonTrip.setPressHandler(buttonTripPressed);
-  buttonTrip.setLongPressHandler(buttonTripLongPressed);
-
-  // Set up mode button handlers
-  buttonMode.setPressHandler(buttonModePressed);
-  buttonMode.setLongPressHandler(buttonModeLongPressed);
-
-  // Set up brightness button handlers
-  buttonBrightness.setPressHandler(buttonBrightnessPressed);
-  buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
-
-  pinMode(pinOdoSerialTX, OUTPUT);
-  pinMode(pinSpeedoSerialTX, OUTPUT);
-  pinMode(pinSpeedoNeopixel, OUTPUT);
-
-  //setup speedo and odo software serial baud
-
-  speedoSerial.begin(9600);
-  odoSerial.begin(9600);
-  speedoPixels.begin(); // This initializes the NeoPixel library.
-  delay(500);
+  timer.every(updateTime, updateSpeedoDisplay);
 
   setBrightness();
 
-  // 
-  speedoSerial.write(0x76);
-  speedoSerial.print("SPED");
-  // Initialize ODOMETER and TRIPMETER(s) display
-  setupOdometerDisplay();
-  displayOdometer();
-  delay(1000);
+  // Set up trip button handlers
+  buttonTrip.pressHandler(buttonTripPressed);
+  buttonTrip.releaseHandler(buttonTripReleased);
+  buttonTrip.holdHandler(buttonTripLongPressed, 1000); // must be held for at least 1000 ms to trigger
+
+  // Set up speedo mode button handlers
+  buttonSpeedoMode.pressHandler(buttonSpeedoModePressed);
+  buttonSpeedoMode.releaseHandler(buttonSpeedoModeReleased);
+  buttonSpeedoMode.holdHandler(buttonSpeedoModeLongPressed, 1000); // must be held for at least 1000 ms to trigger
+
+  pinMode(pinSpeedoNeopixel, OUTPUT);
+
+  // Initialize the i2c communications
+  Wire.begin();
+
+//  speedoSerial.begin(9600);
+  speedoPixels.begin(); // This initializes the NeoPixel library.
+  delay(500);
+
+#ifdef ODOMETER_1602
+  // Initialize the 1602 lcd odometer
+  odo1602.begin(16,2);
+  odo1602.noBacklight();                             // backlight off
+  delay(500);
+
+// NOTE: Cursor Position: (CHAR, LINE) start at 0  
+  odo1602.setCursor(0,0);                            //Start at character 0 on line 0
+  odo1602.print(title);
+  odo1602.backlight();                               // backlight on
+  delay(500);
+  odo1602.clear();
+#endif
+#ifdef ODOMETER_OLED_128X64
+#endif
+
+  //setup speedo
+  setupSpeedoDisplay();
 
   displaySpeed(0);
+
+  //setup odometer
+  setupOdometerDisplay();
+  displayOdometer();
+
+  delay(1000);
   
   // set the led on pin 13 to off
   pinMode(pinLed, OUTPUT);
@@ -173,22 +150,22 @@ void loop() {
   
   loopTime = millis();
 
-  if (modeFunc != FUNC_CAL)
+  if (modeSpeedoFunc != FUNC_CAL)
    {
     timer.update();
 
-    buttonTrip.check();
-    buttonMode.check();
-    buttonBrightness.check();
+    buttonTrip.process();
+    buttonSpeedoMode.process();
+    buttonBrightness.process();
 
     writeOdometer();
 
-    checkForTimeout();
+//    checkForTimeout();
     checkForEepromWrite();
 
-    if (demo > 0)
+    if (demoSpeedo > 0)
      {
-      speedoDemo();
+      demoSpeedo = speedoDemo(demoSpeedo);
      }
    }
 }

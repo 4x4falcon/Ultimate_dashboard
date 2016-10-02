@@ -93,12 +93,14 @@ void setup() {
   timer.every(updateTime, updateDisplay);
 
   // Set up mode button handlers
-  buttonMode.setPressHandler(buttonModePressed);
-  buttonMode.setLongPressHandler(buttonModeLongPressed);
+  buttonMode.pressHandler(buttonModePressed);
+  buttonMode.releaseHandler(buttonModeReleased);
+  buttonMode.holdHandler(buttonModeLongPressed);
 
   // Set up brightness button handlers
-  buttonBrightness.setPressHandler(buttonBrightnessPressed);
-  buttonBrightness.setLongPressHandler(buttonBrightnessLongPressed);
+  buttonBrightness.pressHandler(buttonBrightnessPressed);
+  buttonBrightness.releaseHandler(buttonBrightnessReleased);
+  buttonBrightness.holdHandler(buttonBrightnessLongPressed);
 
   //setup tacho software serial baud
 
@@ -163,8 +165,8 @@ void loop() {
    {
     timer.update();
 
-    buttonMode.check();
-    buttonBrightness.check();
+    buttonMode.process();
+    buttonBrightness.process();
 
     checkForTimeout();
 

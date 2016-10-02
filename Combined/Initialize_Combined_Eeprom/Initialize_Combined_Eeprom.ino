@@ -6,23 +6,27 @@
  *
  */
 
-#define INITIALIZE
+#define INITIALIZE_COMBINED_EEPROM
 
 //#include <SoftwareSerial.h>
 #include <EEPROMex.h>
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
 
-#include "Button.h"
-#include "Timer.h"
-#include "Constants.h";
-#include "Version.h";
-#include "Variables.h";
+//#include "Button.h"
+//#include "Timer.h"
+#include "Constants.h"
+#include "Version.h"
+#include "Variables.h"
+#include "Eeprom.h"
+#include "Defines.h"
 
 void setup () {
 
   Serial.begin(9600);
 
-  // Get eeprom storage addresses MUST be before anything else and in the same order
+/*  
+ *
+ // Get eeprom storage addresses MUST be before anything else and in the same order
   eepromTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
   eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
   eepromVersionLow = EEPROM.getAddress(sizeof(byte));
@@ -86,6 +90,9 @@ void setup () {
   eepromDemoTachoAddress = EEPROM.getAddress(sizeof(byte));
   eepromDemoGaugesAddress = EEPROM.getAddress(sizeof(byte));
   eepromDemoAllAddress = EEPROM.getAddress(sizeof(byte));
+*/
+
+  getEepromAddresses();
 
   EEPROM.writeBlock(eepromTitleAddress, title);
   EEPROM.writeByte(eepromVersionHigh, versionHigh);

@@ -100,6 +100,17 @@ void updateDisplay() {
 * mode button pressed
 */
 void buttonModePressed() {
+  buttonModeLongPress = false;
+}
+
+/*
+* mode button released
+*/
+void buttonModeReleased() {
+  if (!buttonModeLongPress)
+   {
+    buttonModeLongPress = false;
+   }
 }
 
 /*
@@ -107,6 +118,7 @@ void buttonModePressed() {
 */
 void buttonModeLongPressed() {
 
+  buttonModeLongPress = true;
 }
 
 

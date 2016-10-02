@@ -75,7 +75,7 @@ void getEepromAddresses()
 
  }
 
-
+#ifdef MEGA
 /*
  * read values stored in eeprom and calculate values based on these
  */
@@ -89,7 +89,7 @@ void getEepromValues ()
   versionLow = EEPROM.readByte(eepromVersionLow);
 
   // Read odometer value from flash memory
-  totalOdometer = EEPROM.readLong(eepromOdoAddress);
+  extEepromOdometer.totalOdometer = EEPROM.readLong(eepromOdoAddress);
 
 /*
 #ifdef DEBUGGING
@@ -206,5 +206,24 @@ void getEepromValues ()
   demoTacho = EEPROM.readByte(eepromDemoTachoAddress);
   demoGauges = EEPROM.readByte(eepromDemoGaugesAddress);
 
+ }
+#endif
+
+
+bool getExtEepromValues()
+ {
+
+// TODO
+  
+  Serial.println("bytes ");
+  Serial.print(extEepromOdometer.extEepromTotalOdometer[3], HEX);
+  Serial.print(" ");
+  Serial.print(extEepromOdometer.extEepromTotalOdometer[2], HEX);
+  Serial.print(" ");
+  Serial.print(extEepromOdometer.extEepromTotalOdometer[1], HEX);
+  Serial.print(" ");
+  Serial.print(extEepromOdometer.extEepromTotalOdometer[0], HEX);
+  Serial.print(" ");
+  Serial.println();
  }
 

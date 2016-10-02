@@ -1,8 +1,11 @@
-// Variables.h
+/*
+ * Variables.h
+ */
 
+
+#ifdef GAUGES
 // Current millis updated on each loop
 unsigned long loopTime = 0;
-
 
 // Current function mode
 volatile byte modeFunc = FUNC_NORMAL;
@@ -48,12 +51,76 @@ Timer timer = Timer();
 
 volatile byte arduinoLed = LOW;
 
+/* 
+ *  meter calibration limits
+ *  these are the values from the adc on the analog pins
+ *  if inverted (Lower>Higher) then this will work with negative coefficent sensors
+ *  Min is minimum of the gauge (this allows for expanded scale meters
+ *  Max is the full scale of the gauge
+ *  Warn is the warning level trigger
+ *  WarnLow determines if to check for below Warn (Warn=1) or above Warn (Warn=0)
+ *  
+ */
+
+volatile int voltLower = 0;
+volatile int voltUpper = 1023;
+volatile byte voltMin = 0;      // 0 volts
+volatile byte voltMax = 16;     // 16 volts
+volatile byte voltWarn = 11;    // 11 volts warn when below this
+volatile byte voltWarnLow = 1;  // warn for volts low
+
+volatile int oilLower = 0;
+volatile int oilUpper = 1023;
+volatile byte oilMin = 0;       // 0 psi
+volatile byte oilMax = 200;     // 200 psi
+volatile byte oilWarn = 20;     // 20 psi warn when below this
+volatile byte oilWarnLow = 1;   // warn for oil pressure low
+
+
+volatile int tempLower = 0;
+volatile int tempUpper = 1023;
+volatile byte tempMin = 0;      // 0deg C
+volatile byte tempMax = 150;    // 150deg C
+volatile byte tempWarn = 100;   // 100deg C warn when above this
+volatile byte tempWarnLow = 0;  // warn for temp high
+
+volatile int fuelLower = 0;
+volatile int fuelUpper = 1023;
+volatile byte fuelMin = 0;        // 0%
+volatile byte fuelMax = 100;      // 100%
+volatile byte fuelWarn = 10;      // warn when below this
+volatile byte fuelWarnLow = 1;    // warn for fuel low
+volatile byte fuelSenderType = 0; // fuel sender type 
+
+						// This is
+						// type	empty	full	description
+						// 0	70	10	Ford pre 1986
+						// 1	10	180	
+						//
+						//
+						// 99
+
+
+String readString;
+
+volatile byte debugGauges = 0;
+volatile byte demoGauges = 0;
+
+int voltVal = 0;
+int oilVal = 0;
+int tempVal = 0;
+int fuelVal = 0;
+
+#endif
+
+
+
 
 // EEPROM storage address for title, version high and low
 
-volatile int eepromTitle;
-volatile int eepromVersionHigh;
-volatile int eepromVersionLow;
+volatile int eepromTitleAddress = 0;
+volatile int eepromVersionHighAddress = 0;
+volatile int eepromVersionLowAddress = 0;
 
 
 // VOLTMETER
@@ -93,65 +160,5 @@ volatile int eepromFuelSensorTypeAddress = 0;
 
 volatile int eepromGaugesDebugAddress = 0;
 volatile int eepromGaugesDemoAddress = 0;
-
-/* 
- *  meter calibration limits
- *  these are the values from the adc on the analog pins
- *  if inverted (Lower>Higher) then this will work with negative coefficent sensors
- *  Min is minimum of the gauge (this allows for expanded scale meters
- *  Max is the full scale of the gauge
- *  Warn is the warning level trigger
- *  WarnLow determines if to check for below Warn (Warn=1) or above Warn (Warn=0)
- *  
- */
-
-volatile int voltLower = 0;
-volatile int voltUpper = 1023;
-volatile byte voltMin = 0;      // 0 volts
-volatile byte voltMax = 16;     // 16 volts
-volatile byte voltWarn = 11;    // 11 volts warn when below this
-volatile byte voltWarnLow = 1;  // warn for volts low
-
-volatile int oilLower = 0;
-volatile int oilUpper = 1023;
-volatile byte oilMin = 0;       // 0 psi
-volatile byte oilMax = 200;     // 200 psi
-volatile byte oilWarn = 20;     // 20 psi warn when below this
-volatile byte oilWarnLow = 1;   // warn for oil pressure low
-
-
-volatile int tempLower = 0;
-volatile int tempUpper = 1023;
-volatile byte tempMin = 0;      // 0deg C
-volatile byte tempMax = 150;    // 150deg C
-volatile byte tempWarn = 100;   // 100deg C warn when above this
-volatile byte tempWarnLow = 0;  // warn for temp high
-
-volatile int fuelLower = 0;
-volatile int fuelUpper = 1023;
-volatile byte fuelMin = 0;      // 0%
-volatile byte fuelMax = 100;    // 100%
-volatile byte fuelWarn = 10;     // warn when below this
-volatile byte fuelWarnLow = 1; // warn for fuel low
-volatile byte fuelSenderType = 0; // fuel sender type 
-
-						// This is
-						// type	empty	full	description
-						// 0	70	10	Ford pre 1986
-						// 1	10	180	
-						//
-						//
-						// 99
-
-
-String readString;
-
-volatile byte debugGauges = 0;
-volatile byte demoGauges = 0;
-
-int voltVal = 0;
-int oilVal = 0;
-int tempVal = 0;
-int fuelVal = 0;
 
 
