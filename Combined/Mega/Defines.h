@@ -158,7 +158,7 @@ A15     pinFuelInput    fuel sender input
 // The tacho led screen has 4 digits
 #define numTachoDigits 4
 // The tacho led arc has 16 leds
-#define numTachoLeds 18
+#define numTachoLeds 16
 // start the pixel display further around the ring
 #define tachoPixelOffset 5
 

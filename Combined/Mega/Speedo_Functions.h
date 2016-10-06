@@ -173,7 +173,10 @@ void sensorTriggered_2() {
        }
      }
 
-    extEepromOdometer.totalOdometer++;   // += pulseDistance;			// Increment odometer
+//    extEepromOdometer.totalOdometer++;   // += pulseDistance;			// Increment odometer
+
+    odometerCounter++;
+
     totalTrip_1++;       // += pulseDistance;                     // Increment tripmeter 1
     totalTrip_2++;       // += pulseDistance;                     // Increment tripmeter 2
     tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM

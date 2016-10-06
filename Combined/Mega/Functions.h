@@ -875,7 +875,7 @@ void doSerialCommand(String readString)
                 else
                 {
                   p = parameter.toInt();
-                  if (p < 11)
+                  if ((p < 11) || (p ==20))
                   {
                     Serial.print(F("Setting ($920) demo speedo value = "));
                     Serial.println(parameter);

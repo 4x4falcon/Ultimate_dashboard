@@ -99,6 +99,8 @@ volatile union
   byte extEepromTotalOdometer[4];
  } extEepromOdometer;
 
+volatile unsigned long odometerCounter = 0;
+
 // TripMeter 1 value
 volatile unsigned long totalTrip_1 = 0;
 

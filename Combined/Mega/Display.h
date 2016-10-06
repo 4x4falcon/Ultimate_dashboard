@@ -295,11 +295,16 @@ void displayOdometer () {
 // cursor to eighth character of top line
   odo1602.setCursor(7, 0);
 
-  float odo = (extEepromOdometer.totalOdometer * pulseDistance) / 1000.0;
+//  float odo = (extEepromOdometer.totalOdometer * pulseDistance) / 1000.0;
+  float odo = (float)(extEepromOdometer.totalOdometer) / 10 + (float)(odometerCounter * pulseDistance) / 1000.0;
   if (odo > 999999.9)
    {
      odo = 0.0;
      extEepromOdometer.totalOdometer = 0;
+   }
+  else
+   {
+    extEepromOdometer.totalOdometer = extEepromOdometer.totalOdometer + (int)((float)odometerCounter * pulseDistance / 100);
    }
 
   dtostrf(odo,9,1,buffer);
@@ -339,7 +344,7 @@ void displayOdometer () {
 
 //  odo = 999999.8;
 
-  if (odo > 999999.9)
+  if ((odo > 999999.9) && (demoSpeedo == 0))
    {
      odo = 0.0;
      extEepromOdometer.totalOdometer = 0;

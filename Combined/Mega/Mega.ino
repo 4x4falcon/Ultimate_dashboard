@@ -344,11 +344,20 @@ void loop() {
     tachoDemo(demoTacho);
     demoTacho = 0;
    }
-  if (demoSpeedo > 0)
+  if ((demoSpeedo > 0) && (demoSpeedo < 20))
    {
     speedoDemo(demoSpeedo);
     demoSpeedo = 0;
    }
+
+  if (demoSpeedo == 20)
+   {
+    odometerDemo(demoSpeedo);
+    demoSpeedo = 0;
+    
+   }
+
+  
   if (demoAll > 0)
    {
     gaugesDemo(10);
