@@ -9,19 +9,19 @@ void setBrightness()
   byte b2 = brightnessBoost;          // speedo for 20mm opensegment
   pixelBrightness = brightnessBoost;
 
-  if (!digitalRead(pinLightsOn))      // low when lights are on
+  if (digitalRead(pinLightsOn))      // confirm that this is low when completing circuit
    {
 // set brightness to mid range when headlights are on
-    b = int(2.5 * brightnessBoost);
+    b = 2 * brightnessBoost;
     b1 = 15 * brightnessBoost;
-    b2 = int(0.1 * brightnessBoost);
+    b2 = int(0.5 * brightnessBoost);
     pixelBrightness = int(0.5 * brightnessBoost);
 
 #ifdef ODOMETER_OLED_128x64
     oledOdometer.setContrast(0);
 #endif
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugAll > 0)
      {
       Serial.println(F("Lights on"));
@@ -40,14 +40,13 @@ void setBrightness()
 #ifdef ODOMETER_OLED_128x64
     oledOdometer.setContrast(255);
 #endif
-
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugAll > 0)
      {
       Serial.println(F("Lights off"));
      }
 #endif
-
+   
    }
 // set brightness on 7 segment displays via I2C
 
@@ -74,13 +73,13 @@ void displaySpeed (int speed)
  {
 //  if ( (speed < (previousSpeed * 1.1)) && (speed > (previousSpeed * 0.9)) )
    {
-// TODO convert to mph if mode is FUNC_MPH  this is probably not necessary once calibrated have to confirm
+// TODO convert to mph if mode is FUNC_MPH
 
     sprintf(buffer, "%4d", speed);
 
     i2c_SendString_4(I2C_ADDRESS_SPEEDO, buffer);
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugSpeedo == 1)
      {
       Serial.print(F("Speed    "));
@@ -98,7 +97,7 @@ void displaySpeed (int speed)
       speedoPixels.setPixelColor(i, speedoPixels.Color(0,0,pixelBrightness)); // blue color.
       if (i >= 11)
        {
-        speedoPixels.setPixelColor(i, speedoPixels.Color(pixelBrightness,0,0)); // red color.
+        speedoPixels.setPixelColor(i, speedoPixels.Color(pixelBrightness * 50,0,0)); // red color.
        }
      }
     for(byte i=pixels;i<=numSpeedoLeds;i++)
@@ -112,10 +111,7 @@ void displaySpeed (int speed)
    previousSpeed = speed;
   }
 
-
-/* SPEEDO display
- *  
- */
+// SPEEDO display
 void updateSpeedoDisplay() {
   if ( (loopTime - lastVssTrigger) > timeoutValue )
    {
@@ -126,7 +122,7 @@ void updateSpeedoDisplay() {
    {
     doSpeed = !doSpeed;
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugSpeedo == 10)
      {
       Serial.print(F("durationSpeedo   "));
@@ -150,11 +146,20 @@ void updateSpeedoDisplay() {
       speed = int((((1000000.0 / (float(durationSpeedo) / float(pulseMaxCount))) * pulseDistance) * 3600.0) / 1000.0);
      }
 
+// TODO
+// This is (pulses * durationSpeedo) / speedoCalibrate = km per microsecond
+// * 1000 = km per second
+// * 3600 = km per hour
+// calculation is done in kph then converted in display if mph function is set
+
+#ifdef INCLUDE_DEBUG
     if (debugSpeedo == 11)
      {
       Serial.print(F("speed   "));
       Serial.println(speed);
      }
+#endif
+
     displaySpeed(speed);
 
    }
@@ -204,7 +209,7 @@ void displayTachoPixels (int rpm)
 
   tachoPixels.show(); // This sends the updated pixel color to the hardware.
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugTacho == 5)
    {
     Serial.print(F("redLine  "));
@@ -213,9 +218,7 @@ void displayTachoPixels (int rpm)
     Serial.println(pixels);
    }
 #endif
-
- }
-
+}
 
 
 void updateTachoDisplay() {
@@ -238,7 +241,7 @@ void updateTachoDisplay() {
       rpm = int( ((1000000.0 / v1) * 60) / tachoPPR );
      }
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugTacho == 2)
      {
       Serial.print(F("v1      "));
@@ -263,7 +266,7 @@ void updateTachoDisplay() {
 
     displayTachoPixels (rpm);
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugTacho == 3)
      {
       Serial.print(F("updateTachoDisplay RPM      "));
@@ -307,28 +310,23 @@ void displayOdometer () {
 // cursor to eighth character of top line
   odo1602.setCursor(7, 0);
 
-//  float odo = (extEepromOdometer.totalOdometer * pulseDistance) / 1000.0;
-  float odo = (float)(extEepromOdometer.totalOdometer) / 10 + (float)(odometerCounter * pulseDistance) / 1000.0;
+  float odo = (extEepromOdometer.totalOdometer * pulseDistance) / 1000.0;
   if (odo > 999999.9)
    {
      odo = 0.0;
      extEepromOdometer.totalOdometer = 0;
    }
-  else
-   {
-    extEepromOdometer.totalOdometer = extEepromOdometer.totalOdometer + (int)((float)odometerCounter * pulseDistance / 100);
-   }
 
   dtostrf(odo,9,1,buffer);
   odo1602.print(buffer);
 
-#ifdef SERIAL_DEBUG
+  #ifdef INCLUDE_DEBUG
   if (debugSpeedo == 3)
    {
     Serial.print(F("1602 Odo    "));
     Serial.println (buffer);
    }
-#endif
+  #endif
 #endif
 
 
@@ -354,12 +352,11 @@ void displayOdometer () {
   oledOdometer.setCursor(ODO_POSITION_02, 2);
   oledOdometer.setFontSize(FONT_SIZE_XLARGE);
   
-  float odo = (float)(extEepromOdometer.totalOdometer) / 10 + (float)(odometerCounter * pulseDistance) / 1000.0;
-//  float odo = (float)extEepromOdometer.totalOdometer / speedoCalibrate;
+  float odo = (float)extEepromOdometer.totalOdometer / speedoCalibrate;
 
 //  odo = 999999.8;
 
-  if ((odo > 999999.9) && (demoSpeedo == 0))
+  if (odo > 999999.9)
    {
      odo = 0.0;
      extEepromOdometer.totalOdometer = 0;
@@ -368,7 +365,7 @@ void displayOdometer () {
   dtostrf(odo,9,1,buffer);
   oledOdometer.print(buffer);
 
-#ifdef SERIAL_DEBUG
+  #ifdef INCLUDE_DEBUG
   if (debugSpeedo == 3)
    {
     Serial.print(F("oled Odo    "));
@@ -382,8 +379,9 @@ void displayOdometer () {
     Serial.print(F("oled pulseDistance    "));
     Serial.println (buffer);
    }
+  #endif
+
 #endif
-#endif  // oled
 
  }
 
@@ -397,23 +395,13 @@ void displayTripmeter () {
 
   char buffer[6] = "";
 
-// cursor to the first character of bottom line
-
 #ifdef ODOMETER_1602
-
-// cursor to first character of bottom line
-  odo1602.setCursor(0, 1);
-  odo1602.print(F("1"));
-// cursor to tenth character of bottom line
-  odo1602.setCursor(9, 1);
-  odo1602.print(F("2"));
 
 // cursor to third character of bottom line
   odo1602.setCursor(2, 1);
 
-  float odo = (float)(totalTrip_1) / 10 + (float)(odometerCounter * pulseDistance) / 1000.0;
-//  float odo = (totalTrip_1 * pulseDistance) / 1000.0;
-
+  float odo = (totalTrip_1 * pulseDistance) / 1000.0;
+  
   if (odo > 999.9)
    {
      odo = 0.0;
@@ -423,7 +411,7 @@ void displayTripmeter () {
   dtostrf(odo,5,1,buffer);
   odo1602.print(buffer);
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugSpeedo == 1)
    {
     Serial.print(F("Trip_1    "));
@@ -431,12 +419,11 @@ void displayTripmeter () {
    }
 #endif
 
-// cursor to twelth character of bottom line    203
+// cursor to twelth character of bottom line
 
   odo1602.setCursor(11, 1);
 
-  odo = (float)(totalTrip_2) / 10 + (float)(odometerCounter * pulseDistance) / 1000.0;
-//  odo = (totalTrip_2 * pulseDistance) / 1000.0;
+  odo = (totalTrip_2 * pulseDistance) / 1000.0;
   
   if (odo > 999.9)
    {
@@ -448,7 +435,7 @@ void displayTripmeter () {
   dtostrf(odo,5,1,buffer);
   odo1602.print(buffer);
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugSpeedo == 1)
    {
     Serial.print(F("Trip_2    "));
@@ -458,7 +445,7 @@ void displayTripmeter () {
 
   if (!modeTrip)
    {
-    // second character of bottom row        193
+    // second character of bottom row
     odo1602.setCursor(1, 1);
     odo1602.print(tripActive);
 
@@ -468,7 +455,7 @@ void displayTripmeter () {
    }
   else
    {
-    // second character of bottom row        193
+    // second character of bottom row
     odo1602.setCursor(1, 1);
     odo1602.print(" ");
 
@@ -507,7 +494,7 @@ void displayTripmeter () {
   oledOdometer.setCursor(ODO_POSITION_01 + 15, 6);
   oledOdometer.print(buffer);
   
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugSpeedo == 3)
    {
     Serial.print(F("Trip_1    "));
@@ -540,17 +527,18 @@ void displayTripmeter () {
   oledOdometer.setFontSize(FONT_SIZE_LARGE);
   oledOdometer.setCursor(ODO_POSITION_03-7, 6);
   oledOdometer.print(buffer);
-  
-#ifdef SERIAL_DEBUG
+
+  #ifdef INCLUDE_DEBUG
   if (debugSpeedo == 3)
    {
     Serial.print(F("Trip_2    "));
     Serial.println (buffer);
    }
+  #endif
 #endif
-#endif  // oled
 
- }
+
+}
 
 /*
  * setup the speedo display
@@ -586,16 +574,16 @@ void setupOdometerDisplay() {
 // top line shows current function mode setting (KPH, MPH or CAL)
 // cursor to the first character of the top line
 
-// cursor to the first character of top row
+  // cursor to the first character of top row
 
-//  odo1602.setCursor(0, 0);
-//  odo1602.print(F("KPH    0000000.0"));
+  odo1602.setCursor(0, 0);
+  odo1602.print(F("KPH    0000000.0"));
 
 // bottom line shows tripmeters with current one highlighted
 // cursor to first character of bottom line
 
-//  odo1602.setCursor(0, 1);
-//  odo1602.print(F("1 000.0  2 000.0"));
+  odo1602.setCursor(0, 1);
+  odo1602.print(F("1 000.0  2 000.0"));
 
 //#endif
 //#ifdef ODOMETER_OLED_128x64
@@ -620,15 +608,15 @@ void setupMetersDisplay() {
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_OIL);
   i2c_SendString_4(I2C_ADDRESS_OIL, "OIL ");
-//  i2c_s7s_SendDecimalControl(I2C_ADDRESS_OIL, S7S_DIGIT_3_POINT);
+  i2c_s7s_SendDecimalControl(I2C_ADDRESS_OIL, S7S_DIGIT_3_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_TEMP);
   i2c_SendString_4(I2C_ADDRESS_TEMP, "TENP");
-//  i2c_s7s_SendDecimalControl(I2C_ADDRESS_TEMP, S7S_DIGIT_3_POINT);
+  i2c_s7s_SendDecimalControl(I2C_ADDRESS_TEMP, S7S_DIGIT_3_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_FUEL);
   i2c_SendString_4(I2C_ADDRESS_FUEL, "FUEL");
-//  i2c_s7s_SendDecimalControl(I2C_ADDRESS_FUEL, S7S_DIGIT_3_POINT);
+  i2c_s7s_SendDecimalControl(I2C_ADDRESS_FUEL, S7S_DIGIT_3_POINT);
 
 }
 
@@ -640,7 +628,7 @@ void updateMetersDisplay() {
   float v = 0.0;
   float v2 = 0.0;
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugGauges > 0)
    {
     Serial.println(F("Updating display voltmeter, oil pressure gauge, water temperature gauge, fuel level gauge"));
@@ -659,10 +647,11 @@ void updateMetersDisplay() {
 //  v2 = v / (r2 / (r1 + r2));        // TODO uncomment this and change below to v2 when hardware complete
 
   voltVal = int(v * 10);
+//  voltVal = int(v);
 
   sprintf(buffer, "%4d", voltVal);  // setup as integer
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugGauges > 0)
    {
     Serial.println(buffer);
@@ -675,45 +664,11 @@ void updateMetersDisplay() {
 // check for voltage warning
   if (voltWarnLow)
    {
-    if (v <= voltWarn)
-     {
-      if (voltColonOn)
-       {
-        voltColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        voltColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, (byte) S7S_DIGIT_COLON | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      voltColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
   else
    {
-    if (v > voltWarn)
-     {
-      if (voltColonOn)
-       {
-        voltColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        voltColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, (byte) S7S_DIGIT_COLON | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      voltColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
 
 // oil pressure meter
@@ -724,7 +679,7 @@ void updateMetersDisplay() {
   v = (val * 5.0) / 1024;
 //  v2 = v / (r2 / (r1 + r2));
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugGauges > 0)
    {
     dtostrf(v2, 4, 1, buffer);
@@ -732,138 +687,56 @@ void updateMetersDisplay() {
    }
 #endif
 
-//  oilVal = int(v * 10);        // setup as integer
-
-  oilVal = v;
-
+  oilVal = int(v * 10);        // setup as integer
   sprintf(buffer, "%4d", oilVal);
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_OIL, buffer);
 
-// check for oil warning
+// check for voltage warning
   if (oilWarnLow)
    {
-    if (v <= oilWarn)
-     {
-      if (oilColonOn)
-       {
-        oilColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_OIL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        oilColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_OIL, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      oilColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_OIL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
   else
    {
-    if (v > oilWarn)
-     {
-      if (oilColonOn)
-       {
-        oilColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_OIL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        oilColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_OIL, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      oilColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
-
-
-/*
- * water temperature meter
- */
- 
+  
+// water temperature meter
   val = 0.0;
   for (int i=0; i< SAMPLES ; i++) val += analogRead(tempAnalogPin);
   val /= SAMPLES;
 
   v = (val * 5.0) / 1024;
 //  v2 = v / (r2 / (r1 + r2));
+
+#ifdef INCLUDE_DEBUG
   if (debugGauges > 0)
    {
     dtostrf(v2, 4, 1, buffer);
     Serial.println(buffer);
    }
+#endif
 
-  if (v < 40)
-   {
-    v = 40;
-   }
-
-//  tempVal = int(v * 10);            // setup as integer
-
-  tempVal = v;
+  tempVal = int(v * 10);            // setup as integer
 
   sprintf(buffer, "%4d", tempVal);
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_TEMP, buffer);
   
-// check for temperature warning
+// check for voltage warning
   if (tempWarnLow)
    {
-    if (v <= tempWarn)
-     {
-      if (tempColonOn)
-       {
-        tempColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        tempColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      tempColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
   else
    {
-    if (v > tempWarn)
-     {
-      if (tempColonOn)
-       {
-        tempColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        tempColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      tempColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
 
-/* 
- * fuel level meter display
- */
-
+// fuel level meter display
   val = 0.0;
   for (int i=0; i< SAMPLES ; i++) val += analogRead(fuelAnalogPin);
   val /= SAMPLES;
@@ -871,7 +744,7 @@ void updateMetersDisplay() {
   v = (val * 5.0) / 1024;
 //  v2 = v / (r2 / (r1 + r2));
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugGauges > 0)
    {
     dtostrf(v2, 4, 1, buffer);
@@ -879,57 +752,20 @@ void updateMetersDisplay() {
    }
 #endif
 
-//  fuelVal = int(v * 10);             // setup as integer
-
-  fuelVal = v;
-
+  fuelVal = int(v * 10);             // setup as integer
   sprintf(buffer, "%4d", fuelVal);
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_FUEL, buffer);
 
-// check for fuel level warning
+// check for voltage warning
   if (fuelWarnLow)
    {
-    if (v <= fuelWarn)
-     {
-      if (fuelColonOn)
-       {
-        fuelColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        fuelColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      fuelColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
   else
    {
-    if (v > fuelWarn)
-     {
-      if (fuelColonOn)
-       {
-        fuelColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-       }
-      else
-       {
-        fuelColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
-       }
-     }
-    else
-     {
-      fuelColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
-     }
+    
    }
   
 }
@@ -937,12 +773,7 @@ void updateMetersDisplay() {
 #define POSITION_01 0
 #define POSITION_02 100
 
-
-#ifndef ODOMETER_OLED_128x64
-
-/*
- * print readings to diagnostics oled display if connected
- */
+#if !defined(ODOMETER_OLED_128x64) && defined(INCLUDE_DIAGNOSTIC_OLED)
 
 void printDiagnostics()
  {
@@ -957,6 +788,12 @@ void printDiagnostics()
   oledDiagnostic.print("RPM ");
   oledDiagnostic.setCursor(POSITION_02-12, 1);
   oledDiagnostic.print(buffer);
+
+/*  
+
+  Serial.print("diagnostics rpm = ");
+  Serial.println(rpm);
+*/
 
   dtostrf(float(voltVal)/10, 4, 1, buffer);
   oledDiagnostic.setCursor(POSITION_01, 4);
@@ -1011,7 +848,7 @@ void updateDisplay() {
 
   updateMetersDisplay();
 
-#ifndef ODOMETER_OLED_128x64
+#if !defined(ODOMETER_OLED_128x64) && defined(INCLUDE_DIAGNOSTIC_OLED)
   if (oledAvailable)
    {
     printDiagnostics();

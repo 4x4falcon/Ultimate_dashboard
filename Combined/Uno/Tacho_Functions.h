@@ -1,7 +1,5 @@
-/* Tacho_Functions.h
- *
- * Tacho Functions
- */
+// Tacho_Functions.h
+// Tacho Functions
 
 /*
 * Checks the last time the sensor was trigerred. If it's over a given
@@ -13,14 +11,11 @@
  * here for reference only
 */
 /*
-void checkForTachoTimeout()
- {
-  if ((loopTime - lastTachoTrigger) > timeoutValue)
-   {
+void checkForTachoTimeout() {
+  if ((loopTime - lastTachoTrigger) > timeoutValue) {
     rpm = 0;
-   }
+  }
 
-#ifdef SERIAL_DEBUG
   if (debugTacho == 1 )
    {
     Serial.print(F("loopTime    "));
@@ -36,9 +31,7 @@ void checkForTachoTimeout()
     Serial.print(F("checkForTachoTimeout rpm    "));
     Serial.println(rpm);
    }
-#endif
-
- }
+}
 */
 
 /*
@@ -47,8 +40,8 @@ void checkForTachoTimeout()
 * triggered on every pulse
 */
 
-void tachoTriggered()
- {
+void tachoTriggered() {
+
   unsigned long lastTrigger = micros();
   if (lastTrigger > lastTachoTrigger)
    {
@@ -60,7 +53,7 @@ void tachoTriggered()
       doTacho = !doTacho;
       lastTachoTrigger = micros();
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
       if (debugAll > 0)
        {
         Serial.print(F("durationTacho     "));
@@ -69,22 +62,21 @@ void tachoTriggered()
         Serial.println(lastTachoTrigger);
        }
 #endif
-
      }
    }
- }
+
+  // blink the led on pin 13 for debugging purposes
+
+//  arduinoLed = !arduinoLed;
+//  digitalWrite(13, arduinoLed);
+
+}
 
 /*
 * mode button pressed
 */
 void buttonTachoModePressed(Button& buttonTachoMode)
  {
-#ifdef DEBUGGING
-  Serial.println();
-  Serial.print("Tacho mode button pressed");
-  Serial.println();
-#endif
-
   buttonTachoModeLongPress = false;
  }
 
@@ -93,12 +85,6 @@ void buttonTachoModePressed(Button& buttonTachoMode)
 */
 void buttonTachoModeReleased(Button& buttonTachoMode)
  {
-#ifdef DEBUGGING
-  Serial.println();
-  Serial.print("Tacho mode button released");
-  Serial.println();
-#endif
-
   buttonTachoModeLongPress = false;
  }
 
@@ -107,13 +93,6 @@ void buttonTachoModeReleased(Button& buttonTachoMode)
 */
 void buttonTachoModeLongPressed(Button& buttonTachoMode)
  {
-#ifdef DEBUGGING
-  Serial.println();
-  Serial.print("Tacho mode button long pressed");
-  Serial.println();
-#endif
-
-
   buttonTachoModeLongPress = true;
  }
 

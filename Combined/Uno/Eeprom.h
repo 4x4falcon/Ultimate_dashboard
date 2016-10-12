@@ -75,7 +75,8 @@ void getEepromAddresses()
 
  }
 
-#ifdef MEGA
+#if defined(MEGA) || defined(UNO)
+
 /*
  * read values stored in eeprom and calculate values based on these
  */
@@ -91,6 +92,19 @@ void getEepromValues ()
   // Read odometer value from flash memory
   extEepromOdometer.totalOdometer = EEPROM.readLong(eepromOdoAddress);
 
+/*
+#ifdef DEBUGGING
+  Serial.println("in getEepromValues");
+  sprintf(buffer, "%20d", eepromOdoAddress);
+  Serial.print("eepromOdoAddress = ");
+  Serial.println(buffer);
+  sprintf(buffer, "%20d", totalOdometer);
+  Serial.print("totalOdometer = ");
+  Serial.println(buffer);
+  Serial.println("");
+#endif
+*/
+
   // Read tripmeter 1 value from flash memory
   totalTrip_1 = EEPROM.readLong(eepromTrip1Address);
 
@@ -105,9 +119,33 @@ void getEepromValues ()
   // this gives distance travelled in one pulse from the sensor
   // in meters if kilometer or part of mile
 
+/*
+#ifdef DEBUGGING
+  Serial.println("in getEepromValues");
+  sprintf(buffer, "%6d", eepromSpeedoCalibrateAddress);
+  Serial.print("before eepromSpeedoCalibrateAddress = ");
+  Serial.println(buffer);
+#endif
+*/
+
   speedoCalibrate = (float)EEPROM.readLong(eepromSpeedoCalibrateAddress) / (float)SPEEDO_CALIBRATE_DIVIDER;
 
   pulseDistance = 1000.0 / speedoCalibrate;
+
+/*
+#ifdef DEBUGGING
+  Serial.println("in get eeprom data");
+  sprintf(buffer, "%6d", eepromSpeedoCalibrateAddress);
+  Serial.print("eepromSpeedoCalibrateAddress = ");
+  Serial.println(buffer);
+  dtostrf(speedoCalibrate,9,3,buffer);
+  Serial.print("speedoCalibrate = ");
+  Serial.println(buffer);
+  dtostrf(pulseDistance,9,3,buffer);
+  Serial.print("pulseDistance = ");
+  Serial.println(buffer);
+#endif
+*/
 
   // get mode function set this should only be FUNC_KPH or FUNC_MPH
   // if set to FUNC_CAL then reset to FUNC_KPH
@@ -117,12 +155,14 @@ void getEepromValues ()
     modeSpeedoFunc = FUNC_KPH;
    }
 
+
   tachoPPR = EEPROM.readByte(eepromTachoPPRAddress);
   tachoType = EEPROM.readByte(eepromTachoTypeAddress);
   tachoRedline = EEPROM.readInt(eepromTachoRedlineAddress);
   tachoShift = EEPROM.readInt(eepromTachoShiftAddress);
   tachoMaximum = EEPROM.readInt(eepromTachoMaximumAddress);
   tachoCalibrate = EEPROM.readInt(eepromTachoCalibrateAddress);
+
 
   tachoStep = tachoMaximum / numTachoLeds;
 
@@ -168,23 +208,13 @@ void getEepromValues ()
   demoGauges = EEPROM.readByte(eepromDemoGaugesAddress);
 
  }
-#endif
 
-
-/*
- * get odometer reading from external eeprom
- */
 
 bool getExtEepromValues()
  {
-  if (extEepromAvailable)
-   {
-    speedoEeprom.read(EXT_EEPROM_ADDRESS_ODOMETER, (byte *)&extEepromOdometer.extEepromTotalOdometer, 4); 
 
-   
-   }
-
-#ifdef DEBUGGING
+// TODO
+  
   Serial.println("bytes ");
   Serial.print(extEepromOdometer.extEepromTotalOdometer[3], HEX);
   Serial.print(" ");
@@ -195,7 +225,8 @@ bool getExtEepromValues()
   Serial.print(extEepromOdometer.extEepromTotalOdometer[0], HEX);
   Serial.print(" ");
   Serial.println();
-#endif
-
  }
+
+#endif // MEGA or UNO
+
 

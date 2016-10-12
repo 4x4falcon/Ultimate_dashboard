@@ -8,7 +8,8 @@
 * 2015-05-23
 */
 
-#define MEGA
+#define UNO
+
 
 /*
  * what parts to inlcude
@@ -34,14 +35,15 @@
 #define INCLUDE_AHRS
 
 /*
- * include debugging code other than those set from serial command
+ * include diagnostic oled display
  */
-//#define DEBUGGING
+//#define INLCUDE_DIAGNOSTIC_OLED
 
 /*
- * include serial debugging code
+ * include debugging code other than those set from serial command
  */
-#define SERIAL_DEBUG
+
+//#define DEBUGGING
 
 // if using 16x2 lcd for odometer (preffered)
 #define ODOMETER_1602
@@ -54,8 +56,15 @@
 #include <Wire.h>
 #include <EEPROMex.h>
 #include <Adafruit_NeoPixel.h>
+
+#ifdef ODOMETER_1602
 #include <LiquidCrystal_I2C.h>
+#endif
+
+#if defined(MEGA) || defined(ODOMETER_OLED_128X64) || defined (INCLUDE_DIAGNOSTIC_OLED)
 #include <MicroLCD.h>
+#endif
+
 #include <extEEPROM.h>
 
 
@@ -63,7 +72,7 @@
 #include "Bluetooth.h"
 #endif
 
-#ifdef INCLUDE_AHRS
+#if defined(INCLUDE_AHRS) && defined(MEGA)
 #include <Adafruit_Sensor.h>
 
 // adafruit adxl345 library for 3-axis accelerometer
@@ -79,7 +88,7 @@
 #include <Adafruit_BMP085.h>
 
 #include "Ahrs.h"
-#endif
+#endif  // MEGA && INLCUDE_AHRS
 
 
 //program specific include files
@@ -94,9 +103,9 @@
 #include "Display.h"
 #include "Speedo_Functions.h"
 #include "Tacho_Functions.h"
-#include "Eeprom.h"
 #include "Functions.h"
 #include "Demo.h"
+#include "Eeprom.h"
 
 
 /*
@@ -189,6 +198,8 @@ void setup() {
   // update the meters every second (1000ms)
   timer2.every(1000, updateDisplay);
 
+// TODO rename these for new button library
+
   // Set up trip button handlers
   buttonTrip.pressHandler(buttonTripPressed);
   buttonTrip.releaseHandler(buttonTripReleased);
@@ -196,13 +207,13 @@ void setup() {
 
   // Set up speedo mode button handlers
   buttonSpeedoMode.pressHandler(buttonSpeedoModePressed);
-  buttonSpeedoMode.releaseHandler(buttonSpeedoModeReleased);
-  buttonSpeedoMode.holdHandler(buttonSpeedoModeLongPressed, 1000); // must be held for at least 1000 ms to trigger
+//  buttonSpeedoMode.releaseHandler(onRelease);
+  buttonSpeedoMode.holdHandler(buttonSpeedoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   // Set up speedo mode button handlers
   buttonTachoMode.pressHandler(buttonTachoModePressed);
-  buttonTachoMode.releaseHandler(buttonTachoModeReleased);
-  buttonTachoMode.holdHandler(buttonTachoModeLongPressed, 1000); // must be held for at least 1000 ms to trigger
+//  buttonTachoMode.releaseHandler(buttonTachoModeReleased);
+  buttonTachoMode.holdHandler(buttonTachoModeLongPressed, 3000); // must be held for at least 3000 ms to trigger
 
   setBrightness();
 
@@ -217,7 +228,7 @@ void setup() {
   // Initialize GAUGE displays
   setupMetersDisplay();
 
-  delay(1000);
+  delay(100);
 
   updateDisplay();
 
@@ -232,9 +243,9 @@ void setup() {
 
 
 // Setup bluetooth
-#ifdef INCLUDE_BLUETOOTH
+#if defined(INCLUDE_BLUETOOTH)  && defined(MEGA)
 
-  Serial1.begin(9600);
+Serial1.begin(9600);
   Serial1.print("AT");
   if (Serial1.available() > 0)
    {
@@ -246,7 +257,10 @@ void setup() {
    {
     bluetoothAvailable = false;
    }
+#endif
 
+#if defined(INCLUDE_BLUETOOTH)  && defined(UNO)
+// uno only has one uart so need to create a software serial for it to use bluetooth
 
 
 #endif
@@ -254,7 +268,7 @@ void setup() {
 byte error = 0;
 
 // Setup AHRS
-#ifdef INCLUDE_AHRS
+#if defined(INCLUDE_AHRS) && defined(MEGA)
   Wire.beginTransmission(I2C_ADDRESS_MAGNETOMETER);
   error = Wire.endTransmission();
 
@@ -268,10 +282,9 @@ byte error = 0;
    {
     magnetometerAvailable = false;
    }
-
 #endif
 
-#ifndef ODOMETER_OLED_128x64
+#if !defined(ODOMETER_OLED_128x64) && defined(INCLUDE_DIAGNOSTIC_OLED)
 // Setup oled diagnostics display
   Wire.beginTransmission(I2C_ADDRESS_OLED);
   error = Wire.endTransmission();
@@ -324,7 +337,7 @@ void loop() {
 
   loopTime = micros();
 
-//  if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))
+  if ((modeSpeedoFunc != FUNC_CAL) && (modeTachoFunc != FUNC_TACHO_CAL))
    {
     timer.update();       // update speedo display
     timer2.update();      // update tacho and meters display
@@ -346,20 +359,11 @@ void loop() {
     tachoDemo(demoTacho);
     demoTacho = 0;
    }
-  if ((demoSpeedo > 0) && (demoSpeedo < 20))
+  if (demoSpeedo > 0)
    {
     speedoDemo(demoSpeedo);
     demoSpeedo = 0;
    }
-
-  if (demoSpeedo == 20)
-   {
-    odometerDemo(demoSpeedo);
-    demoSpeedo = 0;
-    
-   }
-
-  
   if (demoAll > 0)
    {
     gaugesDemo(10);
@@ -381,7 +385,7 @@ void loop() {
      }
    }
 
-#ifdef INCLUDE_AHRS
+#if defined(INCLUDE_AHRS) && defined(MEGA)
   if (magnetometerAvailable)
    {
     getAHRS();

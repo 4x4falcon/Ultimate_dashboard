@@ -1,8 +1,5 @@
-/* 
- * Speedo_Functions.h 
- * 
- * Speedo Functions
- */
+// Speedo_Functions.h
+// Speedo Functions
 
 /*
 * Checks the last time the sensor was trigerred. If it's over a given
@@ -24,16 +21,13 @@ void checkForSpeedoTimeout()
     speed = 0;
     displaySpeed (speed);
 
-#ifdef SERIAL_DEBUG
     if (debugSpeedo == 1)
      {
       Serial.print(F("pulseCount    "));
       Serial.println(pulseCount);
      }
-#endif
    }
 
-#ifdef SERIAL_DEBUG
   if (debugSpeedo == 2)
    {
     Serial.print(F("timeout looptime    "));
@@ -45,13 +39,12 @@ void checkForSpeedoTimeout()
     Serial.print(F("timeout speed = "));
     Serial.println(speed);
    }
-#endif
  }
 */
 
 void checkForEepromWrite() {
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
   if (debugAll > 0)
    {
     Serial.print(F("odoTimeout     "));
@@ -64,8 +57,7 @@ void checkForEepromWrite() {
     lastOdometerWrite = millis();
     if (odoNotSaved)
      {
-
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
       if (debugAll > 0)
        {
         Serial.print(F("Timeout Saving odometer to EEPROM    "));
@@ -80,8 +72,7 @@ void checkForEepromWrite() {
      }
     if (tripNotSaved)
      {
-
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
       if (debugAll > 0)
        {
         Serial.print(F("Timeout Saving Trip_1 to EEPROM    "));
@@ -91,7 +82,6 @@ void checkForEepromWrite() {
        }
       else
 #endif
-
        {
         EEPROM.writeLong(eepromTrip1Address,totalTrip_1);
         EEPROM.writeLong(eepromTrip2Address,totalTrip_2);
@@ -101,6 +91,33 @@ void checkForEepromWrite() {
   }
 }
 
+/*
+* Writes odometer total to EEPROM
+* only if it's been longer than write frequency and totalOdometer is greater than what is currently stored
+* maybe if vehicle is only moving to0
+* this helps protect EEPROM from excessive writes
+*/
+void writeOdometer() {
+
+  if ((loopTime - lastOdometerWrite) > odometerWriteFrequency)
+   {
+    if (extEepromOdometer.totalOdometer > EEPROM.readLong(eepromOdoAddress))
+     {
+#ifdef INCLUDE_DEBUG
+      if (debugAll > 0)
+       {
+        Serial.print(F("Saving odometer to EEPROM    "));
+        Serial.println(extEepromOdometer.totalOdometer);
+       }
+      else
+#endif
+       {
+        EEPROM.writeLong(eepromOdoAddress, extEepromOdometer.totalOdometer);
+       }
+      lastOdometerWrite = loopTime;
+     }
+   }
+}
 
 /*
 * write tripmeters to EEPROM
@@ -116,8 +133,7 @@ void writeTripmeter() {
 
   if ((speed == 0) && (tripNotSaved))
    {
-
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
     if (debugAll > 0)
      {
       Serial.print(F("Saving Trip_1 to EEPROM    "));
@@ -127,7 +143,6 @@ void writeTripmeter() {
      }
     else
 #endif
-
      {
       EEPROM.writeLong(eepromTrip1Address,totalTrip_1);
       EEPROM.writeLong(eepromTrip2Address,totalTrip_2);
@@ -136,46 +151,9 @@ void writeTripmeter() {
    }
   else
    {
-    tripNotSaved = true;
+    tripNotSaved = 1;
    }
 }
-
-
-/*
-* Writes odometer total to EEPROM
-* only if it's been longer than write frequency and totalOdometer is greater than what is currently stored
-* maybe if vehicle is only moving to0
-* this helps protect EEPROM from excessive writes
-*/
-void writeOdometer() {
-
-  if ((loopTime - lastOdometerWrite) > odometerWriteFrequency)
-   {
-    if (extEepromOdometer.totalOdometer > EEPROM.readLong(eepromOdoAddress))
-     {
-
-#ifdef SERIAL_DEBUG
-      if (debugAll > 0)
-       {
-        Serial.print(F("Saving odometer to EEPROM    "));
-        Serial.println(extEepromOdometer.totalOdometer);
-       }
-      else
-#endif
-
-       {
-        EEPROM.writeLong(eepromOdoAddress, extEepromOdometer.totalOdometer);
-        if (extEepromAvailable)
-         {
-          speedoEeprom.write(EXT_EEPROM_ADDRESS_ODOMETER, (byte *)&extEepromOdometer.extEepromTotalOdometer, 4);
-         }
-       }
-      writeTripmeter();
-      lastOdometerWrite = loopTime;
-     }
-   }
-}
-
 
 /*
  *
@@ -196,7 +174,7 @@ void sensorTriggered_2() {
       doSpeed = !doSpeed;
       lastVssTrigger = micros();
 
-#ifdef SERIAL_DEBUG
+#ifdef INCLUDE_DEBUG
       if (debugSpeedo == 5)
        {
         Serial.print(F("durationSpeedo     "));
@@ -205,11 +183,9 @@ void sensorTriggered_2() {
         Serial.println(lastVssTrigger);
        }
 #endif
-
      }
 
-    odometerCounter++;
-
+    extEepromOdometer.totalOdometer++;   // += pulseDistance;			// Increment odometer
     totalTrip_1++;       // += pulseDistance;                     // Increment tripmeter 1
     totalTrip_2++;       // += pulseDistance;                     // Increment tripmeter 2
     tripNotSaved = 1;                                 // tripmeters can be saved to EEPROM
@@ -228,6 +204,7 @@ void buttonTripPressed(Button& buttonTrip) {
 #endif
 
   buttonTripLongPress = false;
+//  modeTrip = !modeTrip;
 }
 
 
@@ -257,23 +234,19 @@ void buttonTripLongPressed(Button& buttonTrip) {
   if (modeTrip == MODE_TRIPMETER_1)
    {
     totalTrip_1 = 0;
-    EEPROM.writeLong(eepromTrip1Address,totalTrip_1);
    }
   if (modeTrip == MODE_TRIPMETER_2)
    {
     totalTrip_2 = 0;
-    EEPROM.writeLong(eepromTrip2Address,totalTrip_2);
    }
-  buttonTripLongPress = true;
-
-//  tripNotSaved = true;
 
 #ifdef DEBUGGING
   Serial.println();
   Serial.print("Trip mode button long pressed");
   Serial.println();
+  buttonTripLongPress = true;
 #endif
-
+  
 }
 
 /*
@@ -288,8 +261,6 @@ void countCalibrate () {
 }
 
 void doCalibrate() {
-
-  startCalibrateSpeed = true;
 
   byte tempMode = EEPROM.readByte(eepromSpeedoModeFuncAddress);
   
@@ -315,12 +286,7 @@ void doCalibrate() {
    }
 #endif
 #ifdef ODOMETER_OLED_128X64
-
-//TODO
-
 #endif  
-
-  delay(5000);
 
 // wait for button press
   do
@@ -333,17 +299,14 @@ void doCalibrate() {
 
 #ifdef ODOMETER_1602
 // show message start driving and press button at end
+//  i2c_SendString_16(odoAddress, (char *)F("start driving   "));
+//  i2c_SendString_16(odoAddress, (char *)F("press mode @ end"));
   odo1602.clear();
   odo1602.print(F("start driving   "));
   odo1602.print(F("press mode @ end"));
 #endif
-
-
 #ifdef ODOMETER_OLED_128X64
-
-//TODO
-
-#endif
+#endif  
 
   delay(1000);
   do
@@ -358,31 +321,20 @@ void doCalibrate() {
     odo1602.print(buffer);
 #endif
 #ifdef ODOMETER_OLED_128X64
-
-//TODO
-
 #endif  
     delay(100);
    }
   while (digitalRead(pinSpeedoModeButton));
 
+// save calibrate data to eeprom{
+  EEPROM.writeLong(eepromSpeedoCalibrateAddress, float(calibrateCounter/2));
+
   detachInterrupt(speedoInterrupt);
-
-  if (calibrateCounter > 0)
-   {
-
-// save calibrate data to eeprom
-    EEPROM.writeLong(eepromSpeedoCalibrateAddress, float(calibrateCounter/2));
-   }
 
   attachInterrupt(speedoInterrupt, sensorTriggered_2, FALLING);
   
   // return to default mode
   modeSpeedoFunc = tempMode;
-
-  startCalibrateSpeed = false;
-  endCalibrateSpeed = true;
-
   setupOdometerDisplay();
 }
 
@@ -394,18 +346,20 @@ void doCalibrate() {
 */
 void buttonSpeedoModePressed(Button& buttonSpeedoMode)
  {
- #ifdef DEBUGGING
-    Serial.println();
-    Serial.print("Speedo mode button pressed");
-    Serial.println();
-#endif
+/*  
 
+  modeSpeedoFunc++;
+  if (modeSpeedoFunc > FUNC_CAL)
+   {
+    modeSpeedoFunc = FUNC_KPH;
+   }
+*/
   buttonSpeedoModeLongPress = false;
  }
 
 void buttonSpeedoModeReleased(Button& buttonSpeedoMode)
  {
-  if ((!buttonSpeedoModeLongPress) && (!startCalibrateSpeed) && (!endCalibrateSpeed))
+  if (!buttonSpeedoModeLongPress)
    {
     modeSpeedoFunc++;
     if (modeSpeedoFunc > FUNC_CAL)
@@ -414,16 +368,6 @@ void buttonSpeedoModeReleased(Button& buttonSpeedoMode)
      }
    }
   buttonSpeedoModeLongPress = false;
-  endCalibrateSpeed = false;
-
- #ifdef DEBUGGING
-    Serial.println();
-    Serial.print("Speedo mode button released");
-    Serial.println();
-    Serial.print("modeSpeedoFunc = ");
-    Serial.println(modeSpeedoFunc);
-#endif
-
  }
 
 /*
@@ -431,14 +375,7 @@ void buttonSpeedoModeReleased(Button& buttonSpeedoMode)
 */
 
 void buttonSpeedoModeLongPressed(Button& buttonSpeedoMode) {
-
- #ifdef DEBUGGING
-    Serial.println();
-    Serial.print("Speedo mode button long pressed");
-    Serial.println();
-#endif
-
-  if ((speed ==  0) && (modeSpeedoFunc == FUNC_CAL) && (!startCalibrateSpeed))                              // only enter calibration if stationary and already selected calibrate
+  if ((speed ==  0) && (modeSpeedoFunc == FUNC_CAL))                              // only enter calibration if stationary and already selected calibrate
    {
     doCalibrate();
    }

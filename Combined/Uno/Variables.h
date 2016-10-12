@@ -2,7 +2,8 @@
  * Variables.h
  */
 
-#ifdef MEGA
+#if defined(MEGA) || defined(UNO)
+
 // Current micros updated on each loop
 unsigned long loopTime = 0;
 
@@ -47,12 +48,10 @@ volatile byte modeSpeedoFunc = FUNC_KPH;
 // Current calibrate function mode
 volatile byte modeSpeedoCalibrate = FUNC_CAL_SPD;
 
+volatile byte startCalibrateSpeed = 0;
 
-volatile bool startCalibrateSpeed = false;
-volatile bool endCalibrateSpeed = false;
-
-volatile bool odoNotSaved = false;
-volatile bool tripNotSaved = false;
+volatile byte odoNotSaved = 0;
+volatile byte tripNotSaved = 0;
 
 
 // speedo calibration =  pulses per kilometer / SPEEDO_CALIBRATE_DIVIDER
@@ -92,13 +91,14 @@ volatile int tachoCalibrate;
 
 
 // ODOMETER variables
-union
+// these are a count of pulses for fast math
+// distance is determined in display function
+// Odometer value, incremented by the ISR
+volatile union
  {
   unsigned long totalOdometer = 0;
   byte extEepromTotalOdometer[4];
  } extEepromOdometer;
-
-volatile unsigned long odometerCounter = 0;
 
 // TripMeter 1 value
 volatile unsigned long totalTrip_1 = 0;
@@ -112,19 +112,18 @@ volatile byte modeTrip = MODE_TRIPMETER_1;
 // The last time the odometer value was written to memory
 volatile unsigned long lastOdometerWrite = 0;
 
+
 // lights on
 volatile byte lightsOn = 0;
 
-// Helper class for handling TRIP button presses
 
+// Helper class for handling TRIP button presses
 Button buttonTrip = Button(pinTripButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 // Helper class for handling MODE button presses
-
 Button buttonSpeedoMode = Button(pinSpeedoModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 // Helper class for handling TACHO MODE button presses
-
 Button buttonTachoMode = Button(pinTachoModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 
@@ -155,7 +154,6 @@ extEEPROM speedoEeprom(kbits_256, 2, 64, I2C_ADDRESS_EXT_EEPROM);
 
 bool extEepromAvailable = true;
 
-
 // the state of the arduino led on pin 13
 volatile byte arduinoLed = 0;
 
@@ -182,7 +180,7 @@ int fuelVal = 0;
 
 // oled diagnostics screen
 
-#ifndef ODOMETER_OLED_128x64
+#if !defined(ODOMETER_OLED_128x64) && defined(INCLUDE_DIAGNOSTIC_OLED)
 LCD_SSD1306 oledDiagnostic;                  // for SSD1306 OLED module
 bool oledAvailable = false;
 #endif
@@ -209,13 +207,8 @@ bool magnetometerAvailable = false;
 bool bluetoothAvailable = false;
 #endif
 
-#endif                                     // ifdef MEGA
+#endif                                     // ifdef MEGA or UNO
 
-
-// EEPROM storage addresses
-volatile int eepromTitleAddress = 0;
-volatile int eepromVersionHigh = 0;
-volatile int eepromVersionLow = 0;
 
 
 // EEPROM storage addresses for odometer and tripmeters
@@ -316,28 +309,24 @@ volatile int voltMin = 0;      // 0 volts
 volatile int voltMax = 16;		 // 16 volts
 volatile int voltWarn = 11;		 // 11 volts warn when below this
 volatile byte voltWarnLow = 1;  // warn for volts low
-volatile bool voltColonOn = false;
 volatile int oilLower = 0;
 volatile int oilUpper = 1023;
 volatile int oilMin = 0;       // 0 psi
 volatile int oilMax = 200;		 // 200 psi
 volatile int oilWarn = 20;		 // 20 psi warn when below this
 volatile byte oilWarnLow = 1;   // warn for oil pressure low
-volatile bool oilColonOn = false;
 volatile int tempLower = 0;
 volatile int tempUpper = 1023;
 volatile int tempMin = 0;      // 0deg C
 volatile int tempMax = 150;		 // 150deg C
 volatile int tempWarn = 100;	 // 100deg C warn when above this
 volatile byte tempWarnLow = 0;  // warn for temp high
-volatile bool tempColonOn = false;
 volatile int fuelLower = 0;
 volatile int fuelUpper = 1023;
 volatile int fuelMin = 0;      // 0%
 volatile int fuelMax = 100;    // 100%
 volatile int fuelWarn = 5;     // warn when below this
 volatile byte fuelWarnLow = 1; // warn for fuel low
-volatile bool fuelColonOn = false;
 
 
 

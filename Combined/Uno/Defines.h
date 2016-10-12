@@ -45,9 +45,9 @@ D3   pinTachoInterrupt    tachoInterrupt =  1  Tacho input
 D4
 D5
 D6   pinBacklight         1602 lcd backlightbrightness control
-D7   pinIgnOn            Ignition on
-D8   pinBrigthnessSw     Brightness switch
-D9   pinLightsOn         Lights on input
+D7   pinLightsOn         Lights on input         
+D8   pinBrigthnessSw     Brightness switch       
+D9   pinIgnOn            Ignition on             
 D10  pinSpeedoModeButton Speedo Mode Button
 D11  pinTripButton       Trip Button
 D12  pinTachoModeButton  Tacho Mode Button
@@ -101,9 +101,9 @@ A15     pinFuelInput    fuel sender input
 #define pinTachoModeButton 12           //  Tacho Mode Button
 
 // digital inputs from 12V
-#define pinLightsOn 9                   //  Lights on input
+#define pinLightsOn 7                   //  Lights on input
 #define pinBrightnessSw 8               //  Brightness switch
-#define pinIgnOn 7                      //  Ignition on
+#define pinIgnOn 9                      //  Ignition on
 
 // digital output to control lcd backlight brightness
 #define pinBacklight 6
@@ -158,7 +158,7 @@ A15     pinFuelInput    fuel sender input
 // The tacho led screen has 4 digits
 #define numTachoDigits 4
 // The tacho led arc has 16 leds
-#define numTachoLeds 16
+#define numTachoLeds 18
 // start the pixel display further around the ring
 #define tachoPixelOffset 5
 
