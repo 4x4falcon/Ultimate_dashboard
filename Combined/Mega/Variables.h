@@ -92,12 +92,6 @@ volatile int tachoCalibrate;
 
 
 // ODOMETER variables
-union
- {
-  unsigned long totalOdometer = 0;
-  byte extEepromTotalOdometer[4];
- } extEepromOdometer;
-
 volatile unsigned long odometerCounter = 0;
 
 // TripMeter 1 value
@@ -149,11 +143,6 @@ Adafruit_NeoPixel speedoPixels = Adafruit_NeoPixel(numSpeedoLeds, pinSpeedoNeopi
 // The neopixel for the tacho display
 // When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
 Adafruit_NeoPixel tachoPixels = Adafruit_NeoPixel(numTachoLeds + tachoPixelOffset, pinTachoNeopixel, NEO_GRB + NEO_KHZ800);
-
-// external i2c linked eeprom
-extEEPROM speedoEeprom(kbits_256, 2, 64, I2C_ADDRESS_EXT_EEPROM);
-
-bool extEepromAvailable = true;
 
 
 // the state of the arduino led on pin 13
@@ -210,6 +199,31 @@ bool bluetoothAvailable = false;
 #endif
 
 #endif                                     // ifdef MEGA
+
+
+// external i2c linked eeprom
+extEEPROM speedoEeprom(kbits_256, 2, 64, I2C_ADDRESS_EXT_EEPROM);
+
+bool extEepromAvailable = true;
+
+// ext eeprom validation (not yet used but initialized in Initialize_Combined_Eeprom)
+union
+ {
+  unsigned long extEepromValid = 0;
+  byte extEepromValidByte[4];
+ } extEepromValidate;
+
+
+// ODO variables
+union
+ {
+  unsigned long totalOdometer = 0;
+  byte extEepromTotalOdometer[4];
+ } extEepromOdometer;
+
+
+
+
 
 
 // EEPROM storage addresses

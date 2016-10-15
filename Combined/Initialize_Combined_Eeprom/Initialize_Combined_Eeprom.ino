@@ -8,89 +8,19 @@
 
 #define INITIALIZE_COMBINED_EEPROM
 
-//#include <SoftwareSerial.h>
+#include <Wire.h>
 #include <EEPROMex.h>
-//#include <Adafruit_NeoPixel.h>
+#include <extEEPROM.h>
 
-//#include "Button.h"
-//#include "Timer.h"
 #include "Constants.h"
+#include "Defines.h"
 #include "Version.h"
 #include "Variables.h"
 #include "Eeprom.h"
-#include "Defines.h"
 
 void setup () {
 
   Serial.begin(9600);
-
-/*  
- *
- // Get eeprom storage addresses MUST be before anything else and in the same order
-  eepromTitleAddress = EEPROM.getAddress(sizeof(char)*sizeof(title));
-  eepromVersionHigh = EEPROM.getAddress(sizeof(byte));
-  eepromVersionLow = EEPROM.getAddress(sizeof(byte));
-
-  eepromOdoAddress = EEPROM.getAddress(sizeof(long));
-  eepromTrip1Address = EEPROM.getAddress(sizeof(long));
-  eepromTrip2Address = EEPROM.getAddress(sizeof(long));
-
-//  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(float));
-  eepromSpeedoCalibrateAddress = EEPROM.getAddress(sizeof(long));
-
-  eepromSpeedoModeFuncAddress = EEPROM.getAddress(sizeof(byte));
-
-  eepromTachoPPRAddress = EEPROM.getAddress(sizeof(byte));
-  eepromTachoTypeAddress = EEPROM.getAddress(sizeof(byte));
-  eepromTachoRedlineAddress = EEPROM.getAddress(sizeof(int));
-  eepromTachoShiftAddress = EEPROM.getAddress(sizeof(int));
-  eepromTachoMaximumAddress = EEPROM.getAddress(sizeof(int));
-  eepromTachoCalibrateAddress = EEPROM.getAddress(sizeof(int));
-
-// VOLTMETER
-  eepromVoltLowerAddress = EEPROM.getAddress(sizeof(int));
-  eepromVoltUpperAddress =  EEPROM.getAddress(sizeof(int));
-  eepromVoltMinAddress =  EEPROM.getAddress(sizeof(int));
-  eepromVoltMaxAddress =  EEPROM.getAddress(sizeof(int));
-  eepromVoltWarnAddress =  EEPROM.getAddress(sizeof(int));
-  eepromVoltWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
-
-// OIL PRESSURE METER
-  eepromOilLowerAddress =  EEPROM.getAddress(sizeof(int));
-  eepromOilUpperAddress =  EEPROM.getAddress(sizeof(int));
-  eepromOilMinAddress =  EEPROM.getAddress(sizeof(int));
-  eepromOilMaxAddress =  EEPROM.getAddress(sizeof(int));
-  eepromOilWarnAddress =  EEPROM.getAddress(sizeof(int));
-  eepromOilWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
-
-// WATER TEMPERATURE METER
-  eepromTempLowerAddress =  EEPROM.getAddress(sizeof(int));
-  eepromTempUpperAddress =  EEPROM.getAddress(sizeof(int));
-  eepromTempMinAddress =  EEPROM.getAddress(sizeof(int));
-  eepromTempMaxAddress =  EEPROM.getAddress(sizeof(int));
-  eepromTempWarnAddress =  EEPROM.getAddress(sizeof(int));
-  eepromTempWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
-
-// FUEL LEVEL METER  
-  eepromFuelLowerAddress =  EEPROM.getAddress(sizeof(int));
-  eepromFuelUpperAddress =  EEPROM.getAddress(sizeof(int));
-  eepromFuelMinAddress =  EEPROM.getAddress(sizeof(int));
-  eepromFuelMaxAddress =  EEPROM.getAddress(sizeof(int));
-  eepromFuelWarnAddress =  EEPROM.getAddress(sizeof(int));
-  eepromFuelWarnLowAddress =  EEPROM.getAddress(sizeof(byte));
-
-// debug addresses
-  eepromDebugSpeedoAddress = EEPROM.getAddress(sizeof(byte));
-  eepromDebugTachoAddress = EEPROM.getAddress(sizeof(byte));
-  eepromDebugGaugesAddress = EEPROM.getAddress(sizeof(byte));
-  eepromDebugAllAddress = EEPROM.getAddress(sizeof(byte));
-
-// demo addresses
-  eepromDemoSpeedoAddress = EEPROM.getAddress(sizeof(byte));
-  eepromDemoTachoAddress = EEPROM.getAddress(sizeof(byte));
-  eepromDemoGaugesAddress = EEPROM.getAddress(sizeof(byte));
-  eepromDemoAllAddress = EEPROM.getAddress(sizeof(byte));
-*/
 
   getEepromAddresses();
 
@@ -101,9 +31,6 @@ void setup () {
   EEPROM.writeLong(eepromOdoAddress, 0UL);
   EEPROM.writeLong(eepromTrip1Address, 0UL);
   EEPROM.writeLong(eepromTrip2Address, 0UL);
-
-
-
 
   // This is the distance per pulse in km
   // the value here is calculated from the following
@@ -441,6 +368,34 @@ void setup () {
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
   Serial.println(EEPROM.readByte(eepromDemoAllAddress));
+
+  if ( speedoEeprom.begin(twiClock400kHz) != 0 )
+   {
+    //there was a problem
+    Serial.println("No external Eeprom");
+
+    extEepromAvailable = false;
+   }
+
+  if (extEepromAvailable)
+   {
+    extEepromOdometer.totalOdometer = 180114;
+    speedoEeprom.write(EXT_EEPROM_ADDRESS_ODOMETER, (byte *)&extEepromOdometer.extEepromTotalOdometer, 4);
+
+    speedoEeprom.read(EXT_EEPROM_ADDRESS_ODOMETER, (byte *)&extEepromOdometer.extEepromTotalOdometer, 4);
+    Serial.print("external eeprom odometer = ");
+    Serial.println(extEepromOdometer.totalOdometer);
+
+    extEepromValidate.extEepromValid = EXT_EEPROM_VALIDATE;
+    speedoEeprom.write(EXT_EEPROM_ADDRESS_VALIDATE, (byte *)&extEepromValidate.extEepromValidByte, 4);    
+
+    speedoEeprom.read(EXT_EEPROM_ADDRESS_VALIDATE, (byte *)&extEepromValidate.extEepromValidByte, 4);
+    Serial.print("external eeprom odometer = ");
+    Serial.println(extEepromValidate.extEepromValid);
+    
+   
+   }
+
 
 }
 

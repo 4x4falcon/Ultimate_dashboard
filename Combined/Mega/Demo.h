@@ -116,13 +116,13 @@ void gaugesDemo(byte d)
   i2c_s7s_SendDecimalControl(I2C_ADDRESS_VOLT, S7S_DIGIT_3_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_OIL);
-  i2c_s7s_SendDecimalControl(I2C_ADDRESS_OIL, S7S_DIGIT_3_POINT);
+//  i2c_s7s_SendDecimalControl(I2C_ADDRESS_OIL, S7S_DIGIT_3_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_TEMP);
-  i2c_s7s_SendDecimalControl(I2C_ADDRESS_TEMP, S7S_DIGIT_3_POINT);
+//  i2c_s7s_SendDecimalControl(I2C_ADDRESS_TEMP, S7S_DIGIT_3_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_FUEL);
-  i2c_s7s_SendDecimalControl(I2C_ADDRESS_FUEL, S7S_DIGIT_3_POINT);
+//  i2c_s7s_SendDecimalControl(I2C_ADDRESS_FUEL, S7S_DIGIT_3_POINT);
 
 }
 
@@ -237,6 +237,7 @@ void odometerDemo(byte d)
  {
 
   unsigned long r = 0;
+  unsigned long t = 0;
 
   unsigned long tempOdoEeprom = extEepromOdometer.totalOdometer;
   unsigned long tempOdo = odometerCounter;
@@ -255,10 +256,12 @@ void odometerDemo(byte d)
 
     displayOdometer();
 
-    totalTrip_1 = totalTrip_2 = r / 100;
+    totalTrip_1 = 100;
+    totalTrip_2 = 120;
 
     displayTripmeter();
-    
+
+    t++;
     r += 10000000;
    }
 

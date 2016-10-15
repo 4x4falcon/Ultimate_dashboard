@@ -155,16 +155,6 @@ void setup() {
   // Initialize the i2c communications
   Wire.begin();
 
-#ifdef ODOMETER_OLED_128x64
-  // Initialize the oled odometer if used
-  oledOdometer.begin();
-
-  oledOdometer.clear();
-  oledOdometer.setFontSize(FONT_SIZE_SMALL);
-  oledOdometer.println(title);
-  delay(500);
-  oledOdometer.clear();
-#endif
 #ifdef ODOMETER_1602
   // Initialize the 1602 lcd odometer
   odo1602.begin(16,2);
@@ -177,6 +167,17 @@ void setup() {
   delay(500);
   odo1602.clear();
 //  Serial.println("Writing to odo1602");
+#endif
+
+#ifdef ODOMETER_OLED_128x64
+  // Initialize the oled odometer if used
+  oledOdometer.begin();
+
+  oledOdometer.clear();
+  oledOdometer.setFontSize(FONT_SIZE_SMALL);
+  oledOdometer.println(title);
+  delay(500);
+  oledOdometer.clear();
 #endif
 
   // Initialize the neo pixels
@@ -365,6 +366,7 @@ void loop() {
     gaugesDemo(10);
     tachoDemo(10);
     speedoDemo(10);
+    odometerDemo(10);
 
     if (demoAll != 2)
      {

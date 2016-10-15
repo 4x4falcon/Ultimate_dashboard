@@ -315,9 +315,16 @@ void doCalibrate() {
    }
 #endif
 #ifdef ODOMETER_OLED_128X64
-
-//TODO
-
+  oledOdometer.clear();
+  oledOdometer.println(F("press mode"));
+  if (tempMode == FUNC_KPH)
+   {
+    oledOdometer.print(F("drive 2 km"));
+   }
+  else
+   {
+    oledOdometer.print(F("drive 2 miles"));
+   }
 #endif  
 
   delay(5000);
@@ -340,9 +347,10 @@ void doCalibrate() {
 
 
 #ifdef ODOMETER_OLED_128X64
-
-//TODO
-
+// show message start driving and press button at end
+  oledOdometer.clear();
+  oledOdometer.println(F("start driving"));
+  oledOdometer.println(F("press mode @ end"));
 #endif
 
   delay(1000);
@@ -352,16 +360,15 @@ void doCalibrate() {
 
     sprintf(buffer, "%16d", calibrateCounter);
 
-//    i2c_serlcd_ClearDisplay(odoAddress);
 #ifdef ODOMETER_1602
     odo1602.clear();
     odo1602.print(buffer);
 #endif
 #ifdef ODOMETER_OLED_128X64
-
-//TODO
-
+    oledOdometer.clear();
+    oledOdometer.print(buffer);
 #endif  
+
     delay(100);
    }
   while (digitalRead(pinSpeedoModeButton));

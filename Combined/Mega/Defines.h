@@ -235,8 +235,10 @@ A15     pinFuelInput    fuel sender input
  * external i2c eeprom
  */
 
-#define I2C_ADDRESS_EXT_EEPROM 0x50
+#define I2C_ADDRESS_EXT_EEPROM 0x53
 #define EXT_EEPROM_ADDRESS_VALIDATE 0x00
 #define EXT_EEPROM_ADDRESS_ODOMETER 0x10
+
+#define EXT_EEPROM_VALIDATE 99991111UL
 
 

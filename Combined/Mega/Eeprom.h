@@ -168,7 +168,6 @@ void getEepromValues ()
   demoGauges = EEPROM.readByte(eepromDemoGaugesAddress);
 
  }
-#endif
 
 
 /*
@@ -198,4 +197,5 @@ bool getExtEepromValues()
 #endif
 
  }
+#endif    // MEGA
 
