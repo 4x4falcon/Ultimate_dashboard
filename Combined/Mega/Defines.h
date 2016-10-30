@@ -42,9 +42,9 @@ Digital pins
 
 D2   pinSpeedoInterrupt   speedoInterrupt = 0  Vehicle Speed sensor
 D3   pinTachoInterrupt    tachoInterrupt =  1  Tacho input
-D4
+D4   PIN_BLUETOOTH_STATE  bluetooth state pin  low when bluetooth connected
 D5
-D6   pinBacklight         1602 lcd backlightbrightness control
+D6   pinBacklight        pwm control of 1602 lcd backlightbrightness
 D7   pinIgnOn            Ignition on
 D8   pinBrigthnessSw     Brightness switch
 D9   pinLightsOn         Lights on input
@@ -99,6 +99,7 @@ A15     pinFuelInput    fuel sender input
 #define pinTripButton 11                //  trip button
 #define pinSpeedoModeButton 10          //  Speedo Mode Button
 #define pinTachoModeButton 12           //  Tacho Mode Button
+#define pinGaugesModeButton 13          //  Gauges Mode Button
 
 // digital inputs from 12V
 #define pinLightsOn 9                   //  Lights on input
@@ -106,7 +107,7 @@ A15     pinFuelInput    fuel sender input
 #define pinIgnOn 7                      //  Ignition on
 
 // digital output to control lcd backlight brightness
-#define pinBacklight 6
+#define pinBacklight 7
 
 // Voltmeter
 
@@ -121,6 +122,9 @@ A15     pinFuelInput    fuel sender input
 
 #define tempAnalogPin 14
 
+// Fan control pins
+#define pinFanOne 38
+#define pinFanTwo 40
 
 // Fuel Level meter
 
@@ -176,6 +180,14 @@ A15     pinFuelInput    fuel sender input
 #define I2C_ADDRESS_OIL  0x61
 #define I2C_ADDRESS_TEMP 0x62
 #define I2C_ADDRESS_FUEL 0x60
+
+#ifdef INCLUDE_EGT
+#define I2C_ADDRESS_EGT 0x64
+#endif
+
+#ifdef INCLUDE_BOOST
+#define I2C_ADDRESS_BOOST 0x65
+#endif
 
 #define I2C_ADDRESS_TACHO 0x40
 
@@ -240,5 +252,26 @@ A15     pinFuelInput    fuel sender input
 #define EXT_EEPROM_ADDRESS_ODOMETER 0x10
 
 #define EXT_EEPROM_VALIDATE 99991111UL
+
+
+/*
+ * bluetooth
+ */
+
+#define BLUETOOTH_STATE_PIN 4
+
+
+
+/*
+ * spi for egt thermocouple
+ */
+
+#ifdef INCLUDE_BOOST
+#define EGT_CS_PIN 48
+#define EGT_MISO_PIN 50
+#define EGT_SCK_PIN 52
+#endif
+
+
 
 

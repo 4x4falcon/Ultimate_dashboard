@@ -15,8 +15,8 @@ static const unsigned long odoTimeout = odometerWriteFrequency * 10;
 
 // values of resistors in divider network on voltAnalogPin
 
-static const float r1 = 15000.0;
-static const float r2 = 10000.0;
+static const float r1 = 14880.0;
+static const float r2 = 9830.0;
 
 
 // SPEEDO constants
@@ -27,6 +27,10 @@ static const float r2 = 10000.0;
 // this is a small square in the centre of the lcd character
 // from datasheet
 static const char tripActive = B10100101;
+
+static const char * gaugesFormat = "%3d ";
+static const char * tachoFormat = "%4d";
+static const char * speedoFormat = "%4d";
 
 
 

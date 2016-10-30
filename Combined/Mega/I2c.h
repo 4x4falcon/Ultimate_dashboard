@@ -7,7 +7,7 @@
 
 //Given a string, i2cSendString chops up the string and sends out the first four characters over i2c
 
-void  i2c_SendString_4(byte address, char *toSend)
+void  i2c_SendString_4(byte address, const char *toSend)
  {
   Wire.beginTransmission(address);
   for(byte x = 0 ; x < 4 ; x++)
@@ -17,7 +17,7 @@ void  i2c_SendString_4(byte address, char *toSend)
 
 //Given a string, i2cSendString chops up the string and sends out the first sixteen characters over i2c
 
-void  i2c_SendString_16(byte address, char *toSend)
+void  i2c_SendString_16(byte address, const char *toSend)
  {
   Wire.beginTransmission(address);
   for(byte x = 0 ; x < 16 ; x++)
@@ -27,7 +27,7 @@ void  i2c_SendString_16(byte address, char *toSend)
 
 //Given a string, i2cSendString chops up the string and sends out the string length characters over i2c
 
-void  i2c_SendString(byte address, char *toSend)
+void  i2c_SendString(byte address, const char *toSend)
  {
   Wire.beginTransmission(address);
   Wire.write(toSend);                     //Send a character from the array out over I2C
@@ -85,7 +85,7 @@ void  i2c_s7s_SendCursorControl(byte address, byte b)
  }
 
 
-// TODO may need separate funcitions for serial lcd (1602, 2004, etc) display
+// may need separate funcitions for serial lcd (1602, 2004, etc) display
 
 
 void  i2c_serlcd_SetDisplayBrightness(byte address, byte b)

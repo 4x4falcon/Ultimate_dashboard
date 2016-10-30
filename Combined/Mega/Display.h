@@ -76,7 +76,7 @@ void displaySpeed (int speed)
    {
 // TODO convert to mph if mode is FUNC_MPH  this is probably not necessary once calibrated have to confirm
 
-    sprintf(buffer, "%4d", speed);
+    sprintf(buffer, speedoFormat, speed);
 
     i2c_SendString_4(I2C_ADDRESS_SPEEDO, buffer);
 
@@ -256,7 +256,7 @@ void updateTachoDisplay() {
      }
     else
      {
-      sprintf(buffer, "%4d", int(rpm/10)*10);		  // always display last digit as 0 stops jitter
+      sprintf(buffer, tachoFormat, int(rpm/10)*10);		  // always display last digit as 0 stops jitter
      }
 
     i2c_SendString_4(I2C_ADDRESS_TACHO, buffer);
@@ -616,7 +616,7 @@ void setupMetersDisplay() {
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_VOLT);
   i2c_SendString_4(I2C_ADDRESS_VOLT, "UOLT");
-  i2c_s7s_SendDecimalControl(I2C_ADDRESS_VOLT, S7S_DIGIT_3_POINT);
+  i2c_s7s_SendDecimalControl(I2C_ADDRESS_VOLT, S7S_DIGIT_2_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_OIL);
   i2c_SendString_4(I2C_ADDRESS_OIL, "OIL ");
@@ -652,91 +652,124 @@ void updateMetersDisplay() {
 // voltmeter
 // does not need maximum/minimum values as is based on voltage divider
   val = 0.0;
-  for (int i=0; i< SAMPLES ; i++) val += analogRead(voltAnalogPin);
+  for (int i=0; i< SAMPLES ; i++)
+   {
+    val += (float)analogRead(voltAnalogPin);
+    if (debugGauges == 1)
+     {
+     }
+   }
   val /= SAMPLES;
 
   v = (val * 5.0) / (voltUpper - voltLower);
-//  v2 = v / (r2 / (r1 + r2));        // TODO uncomment this and change below to v2 when hardware complete
+  v2 = v / (r2 / (r1 + r2));
 
-  voltVal = int(v * 10);
+  voltVal = int(v2 * 10);
 
-  sprintf(buffer, "%4d", voltVal);  // setup as integer
-
-#ifdef SERIAL_DEBUG
-  if (debugGauges > 0)
-   {
-    Serial.println(buffer);
-   }
-#endif
+  sprintf(buffer, gaugesFormat, voltVal);  // setup as integer
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_VOLT, buffer);
 
+#ifdef SERIAL_DEBUG
+  if (debugGauges == 1)
+   {
+    Serial.print("voltVal = ");
+    Serial.println(buffer);
+    dtostrf(val, 4, 1, buffer);
+    Serial.print("val = ");
+    Serial.println(buffer);
+   }
+#endif
+
+
 // check for voltage warning
   if (voltWarnLow)
    {
-    if (v <= voltWarn)
+    if (v2 <= voltWarn)
      {
       if (voltColonOn)
        {
         voltColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_2_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
        }
       else
        {
         voltColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, (byte) S7S_DIGIT_COLON | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
+        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, (byte) S7S_DIGIT_COLON | S7S_DIGIT_2_POINT);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
        }
      }
     else
      {
       voltColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+      i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_2_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
      }
    }
   else
    {
-    if (v > voltWarn)
+    if (v2 > voltWarn)
      {
       if (voltColonOn)
        {
         voltColonOn = false;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_2_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
        }
       else
        {
         voltColonOn = true;
-        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, (byte) S7S_DIGIT_COLON | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
+        i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, (byte) S7S_DIGIT_COLON | S7S_DIGIT_2_POINT);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
        }
      }
     else
      {
       voltColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_3_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+      i2c_Send2Bytes(I2C_ADDRESS_VOLT, 0x77, 0x00 | S7S_DIGIT_2_POINT);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
      }
    }
+
+
 
 // oil pressure meter
   val = 0.0;
   for (int i=0; i< SAMPLES ; i++) val += analogRead(oilAnalogPin);
   val /= SAMPLES;
 
-  v = (val * 5.0) / 1024;
-//  v2 = v / (r2 / (r1 + r2));
+  
+  if (oilInverted)
+   {
+    v = map((int)val, oilLower, oilUpper, oilMax, oilMin);
+   }
+  else
+   {
+    v = map(val, oilLower, oilUpper, oilMin, oilMax);
+   }
+
+  if (v < oilMin)
+   {
+    v = oilMin;
+   }
 
 #ifdef SERIAL_DEBUG
-  if (debugGauges > 0)
+  if (debugGauges == 2)
    {
-    dtostrf(v2, 4, 1, buffer);
+    Serial.print("v = ");
+    dtostrf(v, 4, 1, buffer);
+    Serial.println(buffer);
+    Serial.print("val = ");
+    dtostrf(val, 4, 1, buffer);
+    Serial.println(buffer);
+    Serial.print("oilLower = ");
+    sprintf(buffer, "%4d", oilLower);
+    Serial.println(buffer);
+    Serial.print("oilUpper = ");
+    sprintf(buffer, "%4d", oilUpper);
     Serial.println(buffer);
    }
 #endif
 
-//  oilVal = int(v * 10);        // setup as integer
-
   oilVal = v;
 
-  sprintf(buffer, "%4d", oilVal);
+  sprintf(buffer, gaugesFormat, oilVal);
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_OIL, buffer);
@@ -781,7 +814,7 @@ void updateMetersDisplay() {
     else
      {
       oilColonOn = false;
-      i2c_Send2Bytes(I2C_ADDRESS_TEMP, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+      i2c_Send2Bytes(I2C_ADDRESS_OIL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
      }
    }
 
@@ -794,24 +827,54 @@ void updateMetersDisplay() {
   for (int i=0; i< SAMPLES ; i++) val += analogRead(tempAnalogPin);
   val /= SAMPLES;
 
-  v = (val * 5.0) / 1024;
-//  v2 = v / (r2 / (r1 + r2));
-  if (debugGauges > 0)
+  if (tempInverted)
    {
-    dtostrf(v2, 4, 1, buffer);
+    v = map((int)val, tempLower, tempUpper, tempMax, tempMin);
+   }
+  else
+   {
+    v = map(val, tempLower, tempUpper, tempMin, tempMax);
+   }
+
+  if (debugGauges == 3)
+   {
+    Serial.print("v = ");
+    dtostrf(v, 4, 1, buffer);
+    Serial.println(buffer);
+    Serial.print("val = ");
+    dtostrf(val, 4, 1, buffer);
+    Serial.println(buffer);
+    Serial.print("tempLower = ");
+    sprintf(buffer, "%4d", tempLower);
+    Serial.println(buffer);
+    Serial.print("tempUpper = ");
+    sprintf(buffer, "%4d", tempUpper);
     Serial.println(buffer);
    }
 
-  if (v < 40)
+  if (v < tempMin)
    {
-    v = 40;
+    v = tempMin;
    }
 
-//  tempVal = int(v * 10);            // setup as integer
+  if (!tempCelcius)
+   {
+    v =  v * 1.8 + 32;
+    tempWarn = tempWarn * 1.8 + 32;
+   }
+  else
+   {
+    tempWarn = EEPROM.readByte(eepromTempWarnAddress);
+   }
 
   tempVal = v;
 
-  sprintf(buffer, "%4d", tempVal);
+  if (v < 40.0)
+   {
+    v = 40.0;
+   }
+
+  sprintf(buffer, gaugesFormat, (int)v);
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_TEMP, buffer);
@@ -860,30 +923,87 @@ void updateMetersDisplay() {
      }
    }
 
+
+// check for fan on/off
+
+  if (tempFanOneOn > tempFanOneOff)
+   {
+    if (v >= tempFanOneOn)
+     {
+      digitalWrite(pinFanOne, HIGH);
+     }
+    else
+     {
+      if (v <= tempFanOneOff)
+       {
+        digitalWrite(pinFanOne, LOW);
+       }
+     }
+   }
+  if (tempFanTwoOn > tempFanTwoOff)
+   {
+    if (v >= tempFanTwoOn)
+     {
+      digitalWrite(pinFanTwo, HIGH);
+     }
+    else
+     {
+      if (v <= tempFanTwoOff)
+       {
+        digitalWrite(pinFanTwo, LOW);
+       }
+     }
+   }
+
+
 /* 
- * fuel level meter display
+ *  level meter display
  */
 
   val = 0.0;
   for (int i=0; i< SAMPLES ; i++) val += analogRead(fuelAnalogPin);
   val /= SAMPLES;
 
-  v = (val * 5.0) / 1024;
-//  v2 = v / (r2 / (r1 + r2));
+  if (fuelInverted)
+   {
+    v = map(val, fuelLower, fuelUpper, fuelMax, fuelMin);
+   }
+  else
+   {
+    v = ((val - (float)fuelLower) / (float)(fuelUpper - fuelLower)) * 100.0;
+   }
+
+  if (v < fuelMin)
+   {
+    v = fuelMin;
+   }
+  if (v > fuelMax)
+   {
+    v = fuelMax;
+   }
 
 #ifdef SERIAL_DEBUG
-  if (debugGauges > 0)
+  if (debugGauges == 4)
    {
-    dtostrf(v2, 4, 1, buffer);
+    Serial.print("v = ");
+    dtostrf(v, 4, 1, buffer);
+    Serial.println(buffer);
+    Serial.print("val = ");
+    dtostrf(val, 4, 1, buffer);
+    Serial.println(buffer);
+    Serial.print("fuelLower = ");
+    sprintf(buffer, "%4d", fuelLower);
+    Serial.println(buffer);
+    Serial.print("fuelUpper = ");
+    sprintf(buffer, "%4d", fuelUpper);
     Serial.println(buffer);
    }
 #endif
 
-//  fuelVal = int(v * 10);             // setup as integer
 
   fuelVal = v;
 
-  sprintf(buffer, "%4d", fuelVal);
+  sprintf(buffer, gaugesFormat, fuelVal);
 
 // write the value to the display
   i2c_SendString_4(I2C_ADDRESS_FUEL, buffer);
@@ -931,8 +1051,157 @@ void updateMetersDisplay() {
       i2c_Send2Bytes(I2C_ADDRESS_FUEL, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
      }
    }
-  
+
+#ifdef INCLUDE_EGT
+
+  // should be no need for calibration as thermocouple sensor returns values as deg c or f
+
+  if (egtCelcius)
+   {
+    egtVal = egtThermocouple.readCelsius();                  // read celcius
+   }
+  else
+   {
+    egtVal = egtThermocouple.readFarenheit();                              // read farenheit
+   }
+
+//  egtVal = v;
+
+  sprintf(buffer, gaugesFormat, egtVal);
+
+// write the value to the display
+  i2c_SendString_4(I2C_ADDRESS_FUEL, buffer);
+
+// check for egt warning
+  if (egtWarnLow)
+   {
+    if (v <= egtWarn)
+     {
+      if (egtColonOn)
+       {
+        egtColonOn = false;
+        i2c_Send2Bytes(I2C_ADDRESS_EGT, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+       }
+      else
+       {
+        egtColonOn = true;
+        i2c_Send2Bytes(I2C_ADDRESS_EGT, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
+       }
+     }
+    else
+     {
+      egtColonOn = false;
+      i2c_Send2Bytes(I2C_ADDRESS_EGT, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+     }
+   }
+  else
+   {
+    if (v > egtWarn)
+     {
+      if (egtColonOn)
+       {
+        egtColonOn = false;
+        i2c_Send2Bytes(I2C_ADDRESS_EGT, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+       }
+      else
+       {
+        egtColonOn = true;
+        i2c_Send2Bytes(I2C_ADDRESS_EGT, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
+       }
+     }
+    else
+     {
+      egtColonOn = false;
+      i2c_Send2Bytes(I2C_ADDRESS_EGT, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+     }
+   }
+
+#endif
+
+
+
+#ifdef INCLUDE_BOOST
+
+  val = 0.0;
+  for (int i=0; i< SAMPLES ; i++) val += analogRead(fuelAnalogPin);
+  val /= SAMPLES;
+
+  if (boostInverted)
+   {
+    v = map(val, boostLower, boostUpper, boostMax, boostMin);
+   }
+  else
+   {
+    v = ((val - (float)boostLower) / (float)(boostUpper - boostLower)) * 100.0;
+   }
+
+  if (v < boostMin)
+   {
+    v = boostMin;
+   }
+  if (v > boostMax)
+   {
+    v = boostMax;
+   }
+
+  boostVal = v;
+
+  sprintf(buffer, gaugesFormat, boostVal);
+
+// write the value to the display
+  i2c_SendString_4(I2C_ADDRESS_BOOST, buffer);
+
+// check for egt warning
+  if (boostWarnLow)
+   {
+    if (v <= boostWarn)
+     {
+      if (boostColonOn)
+       {
+        boostColonOn = false;
+        i2c_Send2Bytes(I2C_ADDRESS_BOOST, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+       }
+      else
+       {
+        boostColonOn = true;
+        i2c_Send2Bytes(I2C_ADDRESS_BOOST, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
+       }
+     }
+    else
+     {
+      boostColonOn = false;
+      i2c_Send2Bytes(I2C_ADDRESS_BOOST, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+     }
+   }
+  else
+   {
+    if (v > boostWarn)
+     {
+      if (boostColonOn)
+       {
+        boostColonOn = false;
+        i2c_Send2Bytes(I2C_ADDRESS_BOOST, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+       }
+      else
+       {
+        boostColonOn = true;
+        i2c_Send2Bytes(I2C_ADDRESS_BOOST, 0x77, (byte) S7S_DIGIT_COLON);  // Decimal, colon, apostrophe control command turn on colon keeps third decimal point on
+       }
+     }
+    else
+     {
+      boostColonOn = false;
+      i2c_Send2Bytes(I2C_ADDRESS_BOOST, 0x77, 0x00);  // Decimal, colon, apostrophe control command turn of colon, apostrophe, decimal keeps third decimal point on
+     }
+   }
+
+#endif
+
 }
+
+
+
+
 
 #define POSITION_01 0
 #define POSITION_02 100

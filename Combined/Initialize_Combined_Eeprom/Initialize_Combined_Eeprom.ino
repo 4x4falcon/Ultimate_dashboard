@@ -8,6 +8,9 @@
 
 #define INITIALIZE_COMBINED_EEPROM
 
+// include egt gauge
+#define INCLUDE_EGT
+
 #include <Wire.h>
 #include <EEPROMex.h>
 #include <extEEPROM.h>
@@ -28,9 +31,9 @@ void setup () {
   EEPROM.writeByte(eepromVersionHigh, versionHigh);
   EEPROM.writeByte(eepromVersionLow, versionLow);
 
-  EEPROM.writeLong(eepromOdoAddress, 0UL);
-  EEPROM.writeLong(eepromTrip1Address, 0UL);
-  EEPROM.writeLong(eepromTrip2Address, 0UL);
+  EEPROM.writeLong(eepromOdoAddress, extEepromOdometer.totalOdometer);
+  EEPROM.writeLong(eepromTrip1Address, totalTrip_1);
+  EEPROM.writeLong(eepromTrip2Address, totalTrip_1);
 
   // This is the distance per pulse in km
   // the value here is calculated from the following
@@ -64,15 +67,15 @@ void setup () {
   Serial.print("calibrate = ");
   Serial.println(speedoCalibrate);
 
-  EEPROM.writeByte(eepromSpeedoModeFuncAddress, 0);
+  EEPROM.writeByte(eepromSpeedoModeFuncAddress, modeSpeedoFunc);
 
 
-  EEPROM.writeByte(eepromTachoPPRAddress, 4);
-  EEPROM.writeByte(eepromTachoTypeAddress, TACHO_PETROL);
-  EEPROM.writeInt(eepromTachoRedlineAddress, 3300);
-  EEPROM.writeInt(eepromTachoShiftAddress, 2800);
-  EEPROM.writeInt(eepromTachoMaximumAddress, 4500);
-  EEPROM.writeInt(eepromTachoCalibrateAddress, 0);
+  EEPROM.writeByte(eepromTachoPPRAddress, tachoPPR);
+  EEPROM.writeByte(eepromTachoTypeAddress, tachoType);
+  EEPROM.writeInt(eepromTachoRedlineAddress, tachoRedline);
+  EEPROM.writeInt(eepromTachoShiftAddress, tachoShift);
+  EEPROM.writeInt(eepromTachoMaximumAddress, tachoMaximum);
+  EEPROM.writeInt(eepromTachoCalibrateAddress, tachoCalibrate);
 
 
   // Setup voltmeter
@@ -91,6 +94,7 @@ void setup () {
   EEPROM.writeInt(eepromOilMaxAddress, oilMax);
   EEPROM.writeInt(eepromOilWarnAddress, oilWarn);
   EEPROM.writeByte(eepromOilWarnLowAddress, oilWarnLow);
+  EEPROM.writeByte(eepromOilInvertedAddress, oilInverted);
 
   // Setup water temperature meter
   EEPROM.writeInt(eepromTempLowerAddress, tempLower);
@@ -98,7 +102,13 @@ void setup () {
   EEPROM.writeInt(eepromTempMinAddress, tempMin);
   EEPROM.writeInt(eepromTempMaxAddress, tempMax);
   EEPROM.writeInt(eepromTempWarnAddress, tempWarn);
+  EEPROM.writeInt(eepromTempFanOneOnAddress, tempFanOneOn);
+  EEPROM.writeInt(eepromTempFanOneOffAddress, tempFanOneOff);
+  EEPROM.writeInt(eepromTempFanTwoOnAddress, tempFanTwoOn);
+  EEPROM.writeInt(eepromTempFanTwoOffAddress, tempFanTwoOff);
   EEPROM.writeByte(eepromTempWarnLowAddress, tempWarnLow);
+  EEPROM.writeByte(eepromTempCelciusAddress, tempCelcius);
+  EEPROM.writeByte(eepromTempInvertedAddress, tempInverted);
 
   // Setup fuel level meter
   EEPROM.writeInt(eepromFuelLowerAddress, fuelLower);
@@ -107,18 +117,31 @@ void setup () {
   EEPROM.writeInt(eepromFuelMaxAddress, fuelMax);
   EEPROM.writeInt(eepromFuelWarnAddress, fuelWarn);
   EEPROM.writeByte(eepromFuelWarnLowAddress, fuelWarnLow);
+  EEPROM.writeByte(eepromFuelInvertedAddress, fuelInverted);
+
+#ifdef INCLUDE_EGT
+  // Setup egt meter
+  EEPROM.writeInt(eepromEgtLowerAddress, egtLower);
+  EEPROM.writeInt(eepromEgtUpperAddress, egtUpper);
+  EEPROM.writeInt(eepromEgtMinAddress, egtMin);
+  EEPROM.writeInt(eepromEgtMaxAddress, egtMax);
+  EEPROM.writeInt(eepromEgtWarnAddress, egtWarn);
+  EEPROM.writeByte(eepromEgtWarnLowAddress, egtWarnLow);
+  EEPROM.writeByte(eepromEgtInvertedAddress, egtInverted);
+  EEPROM.writeByte(eepromEgtCelciusAddress, egtCelcius);
+#endif
 
   // debug values
-  EEPROM.writeByte(eepromDebugSpeedoAddress, 0);
-  EEPROM.writeByte(eepromDebugTachoAddress, 0);
-  EEPROM.writeByte(eepromDebugGaugesAddress, 0);
-  EEPROM.writeByte(eepromDebugAllAddress, 0);
+  EEPROM.writeByte(eepromDebugSpeedoAddress, debugSpeedo);
+  EEPROM.writeByte(eepromDebugTachoAddress, debugTacho);
+  EEPROM.writeByte(eepromDebugGaugesAddress, debugGauges);
+  EEPROM.writeByte(eepromDebugAllAddress, debugAll);
 
   // demo values
-  EEPROM.writeByte(eepromDemoSpeedoAddress, 0);
-  EEPROM.writeByte(eepromDemoTachoAddress, 0);
-  EEPROM.writeByte(eepromDemoGaugesAddress, 0);
-  EEPROM.writeByte(eepromDemoAllAddress, 0);
+  EEPROM.writeByte(eepromDemoSpeedoAddress, demoSpeedo);
+  EEPROM.writeByte(eepromDemoTachoAddress, demoTacho);
+  EEPROM.writeByte(eepromDemoGaugesAddress, demoGauges);
+  EEPROM.writeByte(eepromDemoAllAddress, demoAll);
 
 
   // confirm eeprom has been written to
@@ -230,7 +253,7 @@ void setup () {
   Serial.print(eepromVoltWarnLowAddress);
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
-  Serial.println(EEPROM.readInt(eepromVoltWarnLowAddress));
+  Serial.println(EEPROM.readByte(eepromVoltWarnLowAddress));
 
   Serial.print(F("Oil lower address = "));
   Serial.print(eepromOilLowerAddress);
@@ -261,8 +284,13 @@ void setup () {
   Serial.print(eepromOilWarnLowAddress);
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
-  Serial.println(EEPROM.readInt(eepromOilWarnLowAddress));
-  
+  Serial.println(EEPROM.readByte(eepromOilWarnLowAddress));
+  Serial.print(F("Oil Inverted address = "));
+  Serial.print(eepromOilInvertedAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readByte(eepromOilInvertedAddress));
+
   Serial.print(F("Temp lower address = "));
   Serial.print(eepromTempLowerAddress);
   Serial.print(F(" \t\t "));
@@ -292,7 +320,42 @@ void setup () {
   Serial.print(eepromTempWarnLowAddress);
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
-  Serial.println(EEPROM.readInt(eepromTempWarnLowAddress));
+  Serial.println(EEPROM.readByte(eepromTempWarnLowAddress));
+
+  Serial.print(F("Temp Celcius address = "));
+  Serial.print(eepromTempCelciusAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readByte(eepromTempCelciusAddress));
+
+  Serial.print(F("Temp Inverted address = "));
+  Serial.print(eepromTempInvertedAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readByte(eepromTempInvertedAddress));
+
+  Serial.print(F("Temp Fan One on address = "));
+  Serial.print(eepromTempFanOneOnAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromTempFanOneOnAddress));
+  Serial.print(F("Temp Fan One off address = "));
+  Serial.print(eepromTempFanOneOffAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromTempFanOneOffAddress));
+
+  Serial.print(F("Temp Fan Two on address = "));
+  Serial.print(eepromTempFanTwoOnAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromTempFanTwoOnAddress));
+  Serial.print(F("Temp Fan Two off address = "));
+  Serial.print(eepromTempFanTwoOffAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromTempFanTwoOffAddress));
+
 
   Serial.print(F("Fuel lower address = "));
   Serial.print(eepromFuelLowerAddress);
@@ -323,7 +386,51 @@ void setup () {
   Serial.print(eepromFuelWarnLowAddress);
   Serial.print(F(" \t\t "));
   Serial.print(F("value = "));
-  Serial.println(EEPROM.readInt(eepromFuelWarnLowAddress));
+  Serial.println(EEPROM.readByte(eepromFuelWarnLowAddress));
+  Serial.print(F("Fuel Inverted address = "));
+  Serial.print(eepromFuelInvertedAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readByte(eepromFuelInvertedAddress));
+
+
+#ifdef INCLUDE_EGT
+  Serial.print(F("Egt lower address = "));
+  Serial.print(eepromEgtLowerAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromEgtLowerAddress));
+  Serial.print(F("Egt upper address = "));
+  Serial.print(eepromEgtUpperAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromEgtUpperAddress));
+  Serial.print(F("Egt Min address = "));
+  Serial.print(eepromEgtMinAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromEgtMinAddress));
+  Serial.print(F("Egt Max address = "));
+  Serial.print(eepromEgtMaxAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromEgtMaxAddress));
+  Serial.print(F("Egt Warn address = "));
+  Serial.print(eepromEgtWarnAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readInt(eepromEgtWarnAddress));
+  Serial.print(F("Egt Warn Low address = "));
+  Serial.print(eepromEgtWarnLowAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readByte(eepromEgtWarnLowAddress));
+  Serial.print(F("Egt Inverted address = "));
+  Serial.print(eepromEgtInvertedAddress);
+  Serial.print(F(" \t\t "));
+  Serial.print(F("value = "));
+  Serial.println(EEPROM.readByte(eepromEgtInvertedAddress));
+#endif
 
   // debug values
   Serial.print(F("Debug Speedo address = "));

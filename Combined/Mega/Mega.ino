@@ -48,6 +48,26 @@
 // if using 0.96 128x64 oled for odometer
 //#define ODOMETER_OLED_128x64
 
+/*
+ * include egt gauge using thermocouple connected via spi
+ */
+
+//#define INCLUDE_EGT
+
+/*
+ * include boost gauge using 5V absolute map sensor
+ */
+
+//#define INCLUDE_BOOST
+
+/*
+ * include clock if not boost gauge
+ */
+
+//#ifndef INCLUDE_BOOST
+//#define INCLUDE_CLOCK
+//#endif
+
 #include "Arduino.h"
 
 //generic include files
@@ -59,9 +79,6 @@
 #include <extEEPROM.h>
 
 
-#ifdef INCLUDE_BLUETOOTH
-#include "Bluetooth.h"
-#endif
 
 #ifdef INCLUDE_AHRS
 #include <Adafruit_Sensor.h>
@@ -81,6 +98,12 @@
 #include "Ahrs.h"
 #endif
 
+#ifdef INCLUDE_EGT
+
+#include <SPI.h>
+#include "Adafruit_MAX31855.h"
+
+#endif
 
 //program specific include files
 
@@ -91,19 +114,26 @@
 #include "Timer.h"
 #include "Constants.h"
 #include "Variables.h"
+
+#ifdef INCLUDE_BLUETOOTH
+#include "Bluetooth.h"
+#endif
+
 #include "Display.h"
 #include "Speedo_Functions.h"
 #include "Tacho_Functions.h"
+#include "Gauges_Functions.h"
 #include "Eeprom.h"
 #include "Functions.h"
 #include "Demo.h"
+
 
 
 /*
 * Initialization
 */
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   getEepromAddresses();
 
@@ -151,6 +181,10 @@ void setup() {
 
   // set the tacho input to INPUT_PULLUP
   pinMode(pinTachoInterrupt, INPUT_PULLUP);
+
+  // set the fan control pins to output
+  pinMode(pinFanOne, OUTPUT);
+  pinMode(pinFanTwo, OUTPUT);
 
   // Initialize the i2c communications
   Wire.begin();
@@ -200,10 +234,15 @@ void setup() {
   buttonSpeedoMode.releaseHandler(buttonSpeedoModeReleased);
   buttonSpeedoMode.holdHandler(buttonSpeedoModeLongPressed, 1000); // must be held for at least 1000 ms to trigger
 
-  // Set up speedo mode button handlers
+  // Set up tacho mode button handlers
   buttonTachoMode.pressHandler(buttonTachoModePressed);
   buttonTachoMode.releaseHandler(buttonTachoModeReleased);
   buttonTachoMode.holdHandler(buttonTachoModeLongPressed, 1000); // must be held for at least 1000 ms to trigger
+
+  // Set up gauges mode button handlers
+  buttonGaugesMode.pressHandler(buttonGaugesModePressed);
+  buttonGaugesMode.releaseHandler(buttonGaugesModeReleased);
+  buttonGaugesMode.holdHandler(buttonGaugesModeLongPressed, 1000); // must be held for at least 1000 ms to trigger
 
   setBrightness();
 
@@ -235,20 +274,12 @@ void setup() {
 // Setup bluetooth
 #ifdef INCLUDE_BLUETOOTH
 
-  Serial1.begin(9600);
-  Serial1.print("AT");
-  if (Serial1.available() > 0)
-   {
-    Serial.println("bluetooth connected");
+// set bluetooth status pin to input
+  pinMode(BLUETOOTH_STATE_PIN, INPUT_PULLUP);
 
-    bluetoothAvailable = true;
-   }
-  else
-   {
-    bluetoothAvailable = false;
-   }
+// check pin to see if already connected to bluetooth low is connected
 
-
+  bluetoothAvailable = !digitalRead(BLUETOOTH_STATE_PIN);
 
 #endif
 
@@ -306,15 +337,36 @@ byte error = 0;
 void loop() {
 
 // TODO look for serial commands from bluetooth
-
   // see if there are serial commands
-  while ((Serial.available() >0) && (speed == 0))
-   {
-    char c = Serial.read();     //gets one byte from serial buffer
-    readString += c;            //makes the string readString
-    delay(2);                   //slow looping to allow buffer to fill with next character
-   }
 
+#ifdef INCLUDE_BLUETOOTH
+
+  bluetoothAvailable = !digitalRead(BLUETOOTH_STATE_PIN);
+
+/*  
+
+  while ((Serial1.available() >0) && (speed == 0))
+   {
+    char c = Serial1.read();     //gets one byte from serial buffer
+    readString += c;            //makes the string readString
+    delay(5);                   //slow looping to allow buffer to fill with next character
+    sendBluetooth = true;       // send output to bluetooth rather than serial
+   }
+*/
+
+#endif
+
+  if (readString.length() == 0)
+   {
+  // see if there are serial commands
+    while ((Serial.available() >0) && (speed == 0))
+     {
+      char c = Serial.read();     //gets one byte from serial buffer
+      readString += c;            //makes the string readString
+      delay(5);                   //slow looping to allow buffer to fill with next character
+     }
+//    sendBluetooth = false;       // send output to serial rather than bluetooth
+   }
 
   // act on serial commands
   if (readString.length() >0)

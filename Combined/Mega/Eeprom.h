@@ -45,6 +45,7 @@ void getEepromAddresses()
   eepromOilMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromOilWarnAddress = EEPROM.getAddress(sizeof(int));
   eepromOilWarnLowAddress = EEPROM.getAddress(sizeof(byte));
+  eepromOilInvertedAddress = EEPROM.getAddress(sizeof(byte));
   
   eepromTempLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromTempUpperAddress = EEPROM.getAddress(sizeof(int));
@@ -52,14 +53,31 @@ void getEepromAddresses()
   eepromTempMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromTempWarnAddress = EEPROM.getAddress(sizeof(int));
   eepromTempWarnLowAddress = EEPROM.getAddress(sizeof(byte));
-  
+  eepromTempInvertedAddress = EEPROM.getAddress(sizeof(byte));
+  eepromTempCelciusAddress = EEPROM.getAddress(sizeof(byte));
+  eepromTempFanOneOnAddress = EEPROM.getAddress(sizeof(int));
+  eepromTempFanOneOffAddress = EEPROM.getAddress(sizeof(int));
+  eepromTempFanTwoOnAddress = EEPROM.getAddress(sizeof(int));
+  eepromTempFanTwoOffAddress = EEPROM.getAddress(sizeof(int));
+
   eepromFuelLowerAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelUpperAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelMinAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelMaxAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelWarnAddress = EEPROM.getAddress(sizeof(int));
   eepromFuelWarnLowAddress = EEPROM.getAddress(sizeof(byte));
+  eepromFuelInvertedAddress = EEPROM.getAddress(sizeof(byte));
 
+#ifdef INCLUDE_EGT
+  eepromEgtLowerAddress = EEPROM.getAddress(sizeof(int));
+  eepromEgtUpperAddress = EEPROM.getAddress(sizeof(int));
+  eepromEgtMinAddress = EEPROM.getAddress(sizeof(int));
+  eepromEgtMaxAddress = EEPROM.getAddress(sizeof(int));
+  eepromEgtWarnAddress = EEPROM.getAddress(sizeof(int));
+  eepromEgtWarnLowAddress = EEPROM.getAddress(sizeof(byte));
+  eepromEgtInvertedAddress = EEPROM.getAddress(sizeof(byte));
+  eepromEgtCelciusAddress = EEPROM.getAddress(sizeof(byte));
+#endif
 
 // debug addresses
   eepromDebugSpeedoAddress = EEPROM.getAddress(sizeof(byte));
@@ -133,29 +151,47 @@ void getEepromValues ()
   voltUpper = EEPROM.readInt(eepromVoltUpperAddress);
   voltMin = EEPROM.readInt(eepromVoltMinAddress);
   voltMax = EEPROM.readInt(eepromVoltMaxAddress);
-  voltWarn = EEPROM.readInt(eepromVoltWarnAddress);
-  voltWarnLow = EEPROM.readInt(eepromVoltWarnLowAddress);
+  voltWarn = EEPROM.readByte(eepromVoltWarnAddress);
+  voltWarnLow = EEPROM.readByte(eepromVoltWarnLowAddress);
 
   oilLower = EEPROM.readInt(eepromOilLowerAddress);
   oilUpper = EEPROM.readInt(eepromOilUpperAddress);
   oilMin = EEPROM.readInt(eepromOilMinAddress);
   oilMax = EEPROM.readInt(eepromOilMaxAddress);
-  oilWarn = EEPROM.readInt(eepromOilWarnAddress);
-  oilWarnLow = EEPROM.readInt(eepromOilWarnLowAddress);
+  oilWarn = EEPROM.readByte(eepromOilWarnAddress);
+  oilWarnLow = EEPROM.readByte(eepromOilWarnLowAddress);
+  oilInverted = EEPROM.readByte(eepromOilInvertedAddress);
 
   tempLower = EEPROM.readInt(eepromTempLowerAddress);
   tempUpper = EEPROM.readInt(eepromTempUpperAddress);
   tempMin = EEPROM.readInt(eepromTempMinAddress);
   tempMax = EEPROM.readInt(eepromTempMaxAddress);
-  tempWarn = EEPROM.readInt(eepromTempWarnAddress);
-  tempWarnLow = EEPROM.readInt(eepromTempWarnLowAddress);
+  tempWarn = EEPROM.readByte(eepromTempWarnAddress);
+  tempFanOneOn = EEPROM.readInt(eepromTempFanOneOnAddress);
+  tempFanOneOff = EEPROM.readInt(eepromTempFanOneOffAddress);
+  tempFanTwoOn = EEPROM.readInt(eepromTempFanTwoOnAddress);
+  tempFanTwoOff = EEPROM.readInt(eepromTempFanTwoOffAddress);
+  tempWarnLow = EEPROM.readByte(eepromTempWarnLowAddress);
+  tempCelcius = EEPROM.readByte(eepromTempCelciusAddress);
+  tempInverted = EEPROM.readByte(eepromTempInvertedAddress);
 
   fuelLower = EEPROM.readInt(eepromFuelLowerAddress);
   fuelUpper = EEPROM.readInt(eepromFuelUpperAddress);
   fuelMin = EEPROM.readInt(eepromFuelMinAddress);
   fuelMax = EEPROM.readInt(eepromFuelMaxAddress);
-  fuelWarn = EEPROM.readInt(eepromFuelWarnAddress);
-  fuelWarnLow = EEPROM.readInt(eepromFuelWarnLowAddress);
+  fuelWarn = EEPROM.readByte(eepromFuelWarnAddress);
+  fuelWarnLow = EEPROM.readByte(eepromFuelWarnLowAddress);
+  fuelInverted = EEPROM.readByte(eepromFuelInvertedAddress);
+
+#ifdef INCLUDE_EGT
+  egtLower = EEPROM.readInt(eepromEgtLowerAddress);
+  egtUpper = EEPROM.readInt(eepromEgtUpperAddress);
+  egtMin = EEPROM.readInt(eepromEgtMinAddress);
+  egtMax = EEPROM.readInt(eepromEgtMaxAddress);
+  egtWarn = EEPROM.readByte(eepromEgtWarnAddress);
+  egtWarnLow = EEPROM.readByte(eepromEgtWarnLowAddress);
+  egtInverted = EEPROM.readByte(eepromEgtInvertedAddress);
+#endif
 
   debugAll = EEPROM.readByte(eepromDebugAllAddress);
   debugSpeedo = EEPROM.readByte(eepromDebugSpeedoAddress);
@@ -179,7 +215,6 @@ bool getExtEepromValues()
   if (extEepromAvailable)
    {
     speedoEeprom.read(EXT_EEPROM_ADDRESS_ODOMETER, (byte *)&extEepromOdometer.extEepromTotalOdometer, 4); 
-
    
    }
 

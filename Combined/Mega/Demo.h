@@ -113,7 +113,7 @@ void gaugesDemo(byte d)
   delay(1000);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_VOLT);
-  i2c_s7s_SendDecimalControl(I2C_ADDRESS_VOLT, S7S_DIGIT_3_POINT);
+  i2c_s7s_SendDecimalControl(I2C_ADDRESS_VOLT, S7S_DIGIT_2_POINT);
 
   i2c_s7s_ClearDisplay(I2C_ADDRESS_OIL);
 //  i2c_s7s_SendDecimalControl(I2C_ADDRESS_OIL, S7S_DIGIT_3_POINT);

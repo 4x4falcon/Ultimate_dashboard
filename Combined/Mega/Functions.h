@@ -103,6 +103,15 @@ void doVariables(String readString)
  {
   unsigned long p = 0;
 
+  if (sendBluetooth)
+   {
+    unsigned long sp = &Serial1;
+   }
+  else
+   {
+    unsigned long sp = &Serial;
+   }
+
   int pos = readString.indexOf("=");
   if (pos > 0)
   {
@@ -117,20 +126,11 @@ void doVariables(String readString)
       case 100:
         if (parameter == "")
         {
-          /*
-
-            #ifdef DEBUGGING
-                            sprintf(buffer, "%4d", eepromSpeedoCalibrateAddress);
-                            Serial.print(F("eepromSpeedoCalibrateAddress = "));
-                            Serial.println(buffer);
-            #endif
-                  */
-
-          Serial.print(F("($100)Speedo calibration = "));
-          Serial.println(EEPROM.readLong(eepromSpeedoCalibrateAddress));
-          Serial.print(F("($100)Speedo calibration as float = "));
           float c = (float)EEPROM.readLong(eepromSpeedoCalibrateAddress) / (float)SPEEDO_CALIBRATE_DIVIDER;
           dtostrf(c, 10, 8, buffer);
+          Serial.print((char *)F("($100)Speedo calibration = "));
+          Serial.println(EEPROM.readLong(eepromSpeedoCalibrateAddress));
+          Serial.print((char *)F("($100)Speedo calibration as float = "));
           Serial.println(buffer);
         }
         else
@@ -139,7 +139,7 @@ void doVariables(String readString)
           Serial.println(parameter);
 
           EEPROM.writeLong(eepromSpeedoCalibrateAddress, p);
-          getEepromValues();
+//          getEepromValues();
         }
         break;
       case 102:
@@ -153,7 +153,6 @@ void doVariables(String readString)
           Serial.print(F("Setting ($102) Tripmeter 1 value = "));
           Serial.println(parameter);
           EEPROM.writeLong(eepromTrip1Address, p);
-          getEepromValues();
         }
         break;
       case 103:
@@ -167,7 +166,6 @@ void doVariables(String readString)
           Serial.print(F("Setting ($103) Tripmeter 2 value = "));
           Serial.println(parameter);
           EEPROM.writeLong(eepromTrip2Address, p);
-          getEepromValues();
         }
         break;
 
@@ -292,8 +290,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($300) Voltmeter Lower value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromVoltLowerAddress, p);
+          EEPROM.writeInt(eepromVoltLowerAddress, p);
         }
         break;
       case 301:
@@ -306,8 +303,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($301) Voltmeter Upper value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromVoltUpperAddress, p);
+          EEPROM.writeInt(eepromVoltUpperAddress, p);
         }
         break;
       case 302:
@@ -320,8 +316,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($302) Voltmeter min value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromVoltMinAddress, p);
+          EEPROM.writeInt(eepromVoltMinAddress, p);
         }
         break;
       case 303:
@@ -334,8 +329,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($303) Voltmeter max value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromVoltMaxAddress, p);
+          EEPROM.writeInt(eepromVoltMaxAddress, p);
         }
         break;
       case 304:
@@ -348,8 +342,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($304) Voltmeter warn value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromVoltWarnAddress, p);
+          EEPROM.writeInt(eepromVoltWarnAddress, p);
         }
         break;
       case 305:
@@ -362,10 +355,10 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($305) Voltmeter warn low value = "));
           Serial.println(parameter);
-          byte p = parameter.toInt();
-          // EEPROM.writeByte(eepromVoltWarnLowAddress, p);
+          EEPROM.writeByte(eepromVoltWarnLowAddress, p);
         }
         break;
+
 
       // Oil pressure meter
       case 400:
@@ -378,8 +371,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($400) Oil Pressure Lower value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromOilLowerAddress, p);
+          EEPROM.writeInt(eepromOilLowerAddress, p);
         }
         break;
       case 401:
@@ -392,8 +384,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($401) Oil Pressure Upper value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromOilUpperAddress, p);
+          EEPROM.writeInt(eepromOilUpperAddress, p);
         }
         break;
       case 402:
@@ -406,8 +397,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($402) Oil Pressure min value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromOilMinAddress, p);
+          EEPROM.writeInt(eepromOilMinAddress, p);
         }
         break;
       case 403:
@@ -420,8 +410,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($403) Oil Pressure max value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromOilMaxAddress, p);
+          EEPROM.writeInt(eepromOilMaxAddress, p);
         }
         break;
       case 404:
@@ -434,8 +423,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($404) Oil Pressure warn value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromOilWarnAddress, p);
+          EEPROM.writeInt(eepromOilWarnAddress, p);
         }
         break;
       case 405:
@@ -448,10 +436,23 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($404) Oil Pressure warn low value = "));
           Serial.println(parameter);
-          byte p = parameter.toInt();
-          // EEPROM.writeByte(eepromOilWarnLowAddress, p);
+          EEPROM.writeByte(eepromOilWarnLowAddress, p);
         }
         break;
+      case 406:
+        if (parameter == "")
+        {
+          Serial.print(F("($406) Oil Pressure inverted value = "));
+          Serial.println(EEPROM.readInt(eepromOilInvertedAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($406) Oil Pressure inverted value = "));
+          Serial.println(parameter);
+          EEPROM.writeByte(eepromOilInvertedAddress, p);
+        }
+        break;
+
 
       // Water Temperature meter
       case 500:
@@ -464,8 +465,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($500) Water Temperature Lower value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromTempLowerAddress, p);
+          EEPROM.writeInt(eepromTempLowerAddress, p);
         }
         break;
       case 501:
@@ -478,8 +478,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($501) Water Temperature Upper value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromTempUpperAddress, p);
+          EEPROM.writeInt(eepromTempUpperAddress, p);
         }
         break;
       case 502:
@@ -492,8 +491,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($502) Water Temperature min value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeByte(eepromTempMinAddress, p);
+          EEPROM.writeInt(eepromTempMinAddress, p);
         }
         break;
       case 503:
@@ -506,8 +504,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($503) Water Temperature max value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromTempMaxAddress, p);
+          EEPROM.writeInt(eepromTempMaxAddress, p);
         }
         break;
       case 504:
@@ -520,8 +517,7 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($504) Water Temperature warn value = "));
           Serial.println(parameter);
-          int p = parameter.toInt();
-          // EEPROM.writeInt(eepromTempWarnAddress, p);
+          EEPROM.writeInt(eepromTempWarnAddress, p);
         }
         break;
       case 505:
@@ -534,10 +530,100 @@ void doVariables(String readString)
         {
           Serial.print(F("Setting ($505) Water Temperature warn low value = "));
           Serial.println(parameter);
-          byte p = parameter.toInt();
-          // EEPROM.writeByte(eepromTempWarnAddress, p);
+          EEPROM.writeByte(eepromTempWarnAddress, p);
         }
         break;
+      case 506:
+        if (parameter == "")
+        {
+          Serial.print(F("($506) Water Temperature inverted value = "));
+          Serial.println(EEPROM.readByte(eepromTempInvertedAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($506) Water Temperature inverted value = "));
+//          Serial.println(parameter);
+          EEPROM.writeByte(eepromTempInvertedAddress, p);
+          Serial.println(EEPROM.readByte(eepromTempInvertedAddress));
+
+Serial.print(" p = ");
+sprintf(buffer, "%4d", p);
+Serial.println(buffer);
+        
+        }
+        break;
+
+      case 507:
+        if (parameter == "")
+        {
+          Serial.print(F("($507) Water Temperature celcius value = "));
+          Serial.println(EEPROM.readInt(eepromTempCelciusAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($507) Water Temperature celcius value = "));
+          Serial.println(parameter);
+          EEPROM.writeByte(eepromTempCelciusAddress, p);
+        }
+        break;
+
+      case 510:
+        if (parameter == "")
+        {
+          Serial.print(F("($510) Water Temperature Fan One on value = "));
+          Serial.println(EEPROM.readInt(eepromTempFanOneOnAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($510) Water Temperature Fan One on value = "));
+          Serial.println(parameter);
+          EEPROM.writeInt(eepromTempFanOneOnAddress, p);
+        }
+        break;
+
+      case 511:
+        if (parameter == "")
+        {
+          Serial.print(F("($511) Water Temperature Fan One off value = "));
+          Serial.println(EEPROM.readInt(eepromTempFanOneOffAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($511) Water Temperature Fan One off value = "));
+          Serial.println(parameter);
+          EEPROM.writeInt(eepromTempFanOneOffAddress, p);
+        }
+        break;
+
+      case 512:
+        if (parameter == "")
+        {
+          Serial.print(F("($512) Water Temperature Fan Two on value = "));
+          Serial.println(EEPROM.readInt(eepromTempFanTwoOnAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($512) Water Temperature Fan Two on value = "));
+          Serial.println(parameter);
+          EEPROM.writeInt(eepromTempFanTwoOnAddress, p);
+        }
+        break;
+
+      case 513:
+        if (parameter == "")
+        {
+          Serial.print(F("($513) Water Temperature Fan Two off value = "));
+          Serial.println(EEPROM.readInt(eepromTempFanTwoOffAddress));
+        }
+        else
+        {
+          Serial.print(F("Setting ($513) Water Temperature Fan Two off value = "));
+          Serial.println(parameter);
+          EEPROM.writeInt(eepromTempFanTwoOffAddress, p);
+        }
+        break;
+
+
 
       // Fuel Level meter
       case 600:
@@ -551,7 +637,7 @@ void doVariables(String readString)
           Serial.print(F("Setting ($500) Fuel Level Lower value = "));
           Serial.println(parameter);
           int p = parameter.toInt();
-          // EEPROM.writeInt(eepromFuelLowerAddress, p);
+          EEPROM.writeInt(eepromFuelLowerAddress, p);
         }
         break;
       case 601:
@@ -565,7 +651,7 @@ void doVariables(String readString)
           Serial.print(F("Setting ($501) Fuel Level Upper value = "));
           Serial.println(parameter);
           int p = parameter.toInt();
-          // EEPROM.writeInt(eepromFuelUpperAddress, p);
+          EEPROM.writeInt(eepromFuelUpperAddress, p);
         }
         break;
       case 602:
@@ -579,7 +665,7 @@ void doVariables(String readString)
           Serial.print(F("Setting ($502) Fuel Level min value = "));
           Serial.println(parameter);
           int p = parameter.toInt();
-          // EEPROM.writeInt(eepromFuelMinAddress, p);
+          EEPROM.writeInt(eepromFuelMinAddress, p);
         }
         break;
       case 603:
@@ -593,7 +679,7 @@ void doVariables(String readString)
           Serial.print(F("Setting ($503) Fuel Level max value = "));
           Serial.println(parameter);
           int p = parameter.toInt();
-          // EEPROM.writeInt(eepromFuelMaxAddress, p);
+          EEPROM.writeInt(eepromFuelMaxAddress, p);
         }
         break;
       case 604:
@@ -607,7 +693,7 @@ void doVariables(String readString)
           Serial.print(F("Setting ($604) Fuel Level warn value = "));
           Serial.println(parameter);
           int p = parameter.toInt();
-          // EEPROM.writeInt(eepromFuelWarnAddress, p);
+          EEPROM.writeInt(eepromFuelWarnAddress, p);
         }
         break;
       case 605:
@@ -621,7 +707,7 @@ void doVariables(String readString)
           Serial.print(F("Setting ($605) Fuel Level warn low value = "));
           Serial.println(parameter);
           byte p = parameter.toInt();
-          // EEPROM.writeByte(eepromFuelWarnAddress, p);
+          EEPROM.writeByte(eepromFuelWarnAddress, p);
         }
         break;
 
@@ -635,8 +721,6 @@ void doVariables(String readString)
         }
         else
         {
-
-          p = parameter.toInt();
           if (p < 12)
            {
             Serial.print(F("Setting ($910) debug speedo value = "));
@@ -660,8 +744,6 @@ void doVariables(String readString)
         }
         else
         {
-
-          p = parameter.toInt();
           if (p < 4)
           {
             Serial.print(F("Setting ($930) debug tacho value = "));
@@ -685,9 +767,7 @@ void doVariables(String readString)
         }
         else
         {
-
-          p = parameter.toInt();
-          if (p < 4)
+          if (p < 7)
           {
             Serial.print(F("Setting ($950) debug gauges value = "));
             Serial.println(parameter);
@@ -710,8 +790,6 @@ void doVariables(String readString)
         }
         else
         {
-
-          p = parameter.toInt();
           if (p < 4)
           {
             Serial.print(F("Setting ($970) debug all value = "));
@@ -737,7 +815,6 @@ void doVariables(String readString)
         }
         else
         {
-          p = parameter.toInt();
           if ((p < 11) || (p ==20))
           {
             Serial.print(F("Setting ($920) demo speedo value = "));
@@ -762,7 +839,6 @@ void doVariables(String readString)
         }
         else
         {
-          p = parameter.toInt();
           if (p < 6)
           {
             Serial.print(F("Setting ($940) demo tacho value = "));
@@ -787,7 +863,6 @@ void doVariables(String readString)
         }
         else
         {
-          p = parameter.toInt();
           if (p < 5)
           {
             Serial.print(F("Setting ($960) demo gauges value = "));
@@ -812,7 +887,6 @@ void doVariables(String readString)
         }
         else
         {
-          p = parameter.toInt();
           if (p < 3)
           {
             Serial.print(F("Setting ($980) demo all value = "));
@@ -838,14 +912,19 @@ void doVariables(String readString)
         }
         else
         {
-          String odo = parameter.substring(0, parameter.length() - 4);
+          String odo = parameter.substring(0, parameter.length() - 5);
           String pc = parameter.substring(parameter.length() - 4);
           if (pc.toInt() == passCode)
           {
             Serial.println(F("Resetting odometer"));
             Serial.print(F("Odometer = "));
-            Serial.println(odo);
-            //
+            Serial.println(odo.toInt());
+            EEPROM.writeLong(eepromOdoAddress, odo.toInt());
+            if (extEepromAvailable)
+             {
+              extEepromOdometer.totalOdometer=odo.toInt();
+              speedoEeprom.write(EXT_EEPROM_ADDRESS_ODOMETER, (byte *)&extEepromOdometer.extEepromTotalOdometer, 4);
+             }
           }
           else
           {
@@ -948,6 +1027,8 @@ void showVariables()
   Serial.println(EEPROM.readInt(eepromOilWarnAddress));
   Serial.print(F("($405)Oil pressure meter warning low = "));
   Serial.println(EEPROM.readByte(eepromOilWarnLowAddress));
+  Serial.print(F("($406)Oil pressure meter inverted = "));
+  Serial.println(EEPROM.readByte(eepromOilInvertedAddress));
 
         // Water temperature meter
 
@@ -963,6 +1044,20 @@ void showVariables()
   Serial.println(EEPROM.readInt(eepromTempWarnAddress));
   Serial.print(F("($505)Water temperature meter warning low = "));
   Serial.println(EEPROM.readByte(eepromTempWarnLowAddress));
+  Serial.print(F("($506)Water temperature meter inverted = "));
+  Serial.println(EEPROM.readByte(eepromTempInvertedAddress));
+  Serial.print(F("($507)Water temperature celcius = "));
+  Serial.println(EEPROM.readByte(eepromTempCelciusAddress));
+
+
+  Serial.print(F("($510)Water temperature meter fan one on reading = "));
+  Serial.println(EEPROM.readInt(eepromTempFanOneOnAddress));
+  Serial.print(F("($511)Water temperature meter fan one off reading = "));
+  Serial.println(EEPROM.readInt(eepromTempFanOneOffAddress));
+  Serial.print(F("($512)Water temperature meter fan two on reading = "));
+  Serial.println(EEPROM.readInt(eepromTempFanTwoOnAddress));
+  Serial.print(F("($513)Water temperature meter fan two off reading = "));
+  Serial.println(EEPROM.readInt(eepromTempFanTwoOffAddress));
 
         // Fuel level meter
 
@@ -978,6 +1073,8 @@ void showVariables()
   Serial.println(EEPROM.readInt(eepromFuelWarnAddress));
   Serial.print(F("($605)Fuel level meter warning low = "));
   Serial.println(EEPROM.readByte(eepromFuelWarnLowAddress));
+  Serial.print(F("($606)Fuel level meter inverted = "));
+  Serial.println(EEPROM.readByte(eepromFuelInvertedAddress));
 
         /*
           // a meter meter
@@ -1107,6 +1204,7 @@ void doSerialCommand(String readString)
           else
            {
             doVariables(readString);
+            getEepromValues();
            }
          }
        }

@@ -41,9 +41,6 @@ volatile byte doSpeed = 0;
 // The last time the vss sensor was triggered
 volatile unsigned long lastVssTrigger = 0;
 
-// Current speedo function mode
-volatile byte modeSpeedoFunc = FUNC_KPH;
-
 // Current calibrate function mode
 volatile byte modeSpeedoCalibrate = FUNC_CAL_SPD;
 
@@ -80,28 +77,8 @@ volatile unsigned long lastTachoTrigger = 0;
 // value of the tacho step per neopixel
 volatile unsigned int tachoStep = 1000;
 
-// PPR, redline and shift
-// PPR = pulses per revolution
-
-volatile byte tachoPPR;
-volatile byte tachoType;
-volatile int tachoRedline;
-volatile int tachoShift;
-volatile int tachoMaximum;
-volatile int tachoCalibrate;
-
-
 // ODOMETER variables
 volatile unsigned long odometerCounter = 0;
-
-// TripMeter 1 value
-volatile unsigned long totalTrip_1 = 0;
-
-// TripMeter 2 value
-volatile unsigned long totalTrip_2 = 0;
-
-// Current trip mode
-volatile byte modeTrip = MODE_TRIPMETER_1;
 
 // The last time the odometer value was written to memory
 volatile unsigned long lastOdometerWrite = 0;
@@ -121,10 +98,14 @@ Button buttonSpeedoMode = Button(pinSpeedoModeButton, BUTTON_PULLUP_INTERNAL, tr
 
 Button buttonTachoMode = Button(pinTachoModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
+// Helper class for handling GAUGES MODE button presses
+
+Button buttonGaugesMode = Button(pinGaugesModeButton, BUTTON_PULLUP_INTERNAL, true, 50);
 
 bool buttonTripLongPress = false;
 bool buttonSpeedoModeLongPress = false;
 bool buttonTachoModeLongPress = false;
+bool buttonGaugesModeLongPress = false;
 
 
 // Helper class for processing at intervals
@@ -151,23 +132,19 @@ volatile byte arduinoLed = 0;
 int passCode = 9009;
 String readString;
 
-volatile byte debugAll = 0;
-volatile byte debugSpeedo = 0;
-volatile byte debugTacho = 0;
-volatile byte debugGauges = 0;
-
-volatile byte demoAll = 0;
-volatile byte demoSpeedo = 0;
-volatile byte demoTacho = 0;
-volatile byte demoGauges = 0;
-
-
 // for future use to output to bluetooth
-int voltVal = 0;
-int oilVal = 0;
-int tempVal = 0;
-int fuelVal = 0;
+volatile int voltVal = 0;
+volatile int oilVal = 0;
+volatile int tempVal = 0;
+volatile int fuelVal = 0;
 
+#ifdef INCLUDE_EGT
+volatile int egtVal = 0;
+#endif
+
+#ifdef INCLUDE_BOOST
+volatile int boostVal = 0;
+#endif
 
 // oled diagnostics screen
 
@@ -196,13 +173,33 @@ bool magnetometerAvailable = false;
 
 #ifdef INCLUDE_BLUETOOTH
 bool bluetoothAvailable = false;
+bool sendBluetooth = false;
+#endif
+
+#ifdef INCLUDE_EGT
+
+Adafruit_MAX31855 egtThermocouple(EGT_CS_PIN);
+
 #endif
 
 #endif                                     // ifdef MEGA
 
 
+// Current speedo function mode
+volatile byte modeSpeedoFunc = FUNC_KPH;
+
+// TripMeter 1 value
+volatile unsigned long totalTrip_1 = 0;
+
+// TripMeter 2 value
+volatile unsigned long totalTrip_2 = 0;
+
+// Current trip mode
+volatile byte modeTrip = MODE_TRIPMETER_1;
+
+
 // external i2c linked eeprom
-extEEPROM speedoEeprom(kbits_256, 2, 64, I2C_ADDRESS_EXT_EEPROM);
+extEEPROM speedoEeprom(kbits_256, 1, 64, I2C_ADDRESS_EXT_EEPROM);
 
 bool extEepromAvailable = true;
 
@@ -222,8 +219,30 @@ union
  } extEepromOdometer;
 
 
+// TACHO
+  // This sets up the tacho
+  // default is petrol 8 cylinders
+  // for petrol engines set to number of cylinders/2 = Pulses per revolution
+  // for diesel engines
+  // -  if using a Dakota Digital converter then set to 8
+  // -  set to number of pulses per revoulution from W terminal of alternator
+  // can be calculated from
+  // number of altenator pole pairs multiplied by the crank to altenator pulley ratio
+  // eg 2 pole pairs
+  //    crank pulley 200mm dia
+  //    altenator pulley 50mm dia
+  //    PPR = pole pairs * (crank pulley/altenator pulley)
+  //    PPR = 2 * (200/50)
+  //    PPR = 8
+// PPR, redline and shift
+// PPR = pulses per revolution
 
-
+volatile byte tachoPPR = 4;
+volatile byte tachoType = TACHO_PETROL;
+volatile int tachoRedline = 3300;
+volatile int tachoShift = 2800;
+volatile int tachoMaximum = 4500;
+volatile int tachoCalibrate = 0;
 
 
 // EEPROM storage addresses
@@ -243,21 +262,6 @@ volatile int eepromTrip2Address = 0;
 volatile int eepromSpeedoCalibrateAddress = 0;
 volatile int eepromSpeedoModeFuncAddress = 0;
 
-// TACHO
-  // This sets up the tacho
-  // default is petrol 8 cylinders
-  // for petrol engines set to number of cylinders/2 = Pulses per revolution
-  // for diesel engines
-  // -  if using a Dakota Digital converter then set to 8
-  // -  set to number of pulses per revoulution from W terminal of alternator
-  // can be calculated from
-  // number of altenator pole pairs multiplied by the crank to altenator pulley ratio
-  // eg 2 pole pairs
-  //    crank pulley 200mm dia
-  //    altenator pulley 50mm dia
-  //    PPR = pole pairs * (crank pulley/altenator pulley)
-  //    PPR = 2 * (200/50)
-  //    PPR = 8
 
 volatile int eepromTachoPPRAddress = 0;
 volatile int eepromTachoTypeAddress = 0;
@@ -284,6 +288,7 @@ volatile int eepromOilMinAddress = 0;
 volatile int eepromOilMaxAddress = 0;
 volatile int eepromOilWarnAddress = 0;
 volatile int eepromOilWarnLowAddress = 0;
+volatile int eepromOilInvertedAddress = 0;
 
 // WATER TEMPERATURE METER
 volatile int eepromTempLowerAddress = 0;
@@ -292,6 +297,13 @@ volatile int eepromTempMinAddress = 0;
 volatile int eepromTempMaxAddress = 0;
 volatile int eepromTempWarnAddress = 0;
 volatile int eepromTempWarnLowAddress = 0;
+volatile int eepromTempInvertedAddress = 0;
+volatile int eepromTempCelciusAddress = 0;
+
+volatile int eepromTempFanOneOnAddress = 0;
+volatile int eepromTempFanOneOffAddress = 0;
+volatile int eepromTempFanTwoOnAddress = 0;
+volatile int eepromTempFanTwoOffAddress = 0;
 
 // FUEL LEVEL METER
 volatile int eepromFuelLowerAddress = 0;
@@ -300,6 +312,30 @@ volatile int eepromFuelMinAddress = 0;
 volatile int eepromFuelMaxAddress = 0;
 volatile int eepromFuelWarnAddress = 0;
 volatile int eepromFuelWarnLowAddress = 0;
+volatile int eepromFuelInvertedAddress = 0;
+
+#ifdef INCLUDE_EGT
+// EGT METER
+volatile int eepromEgtLowerAddress = 0;
+volatile int eepromEgtUpperAddress = 0;
+volatile int eepromEgtMinAddress = 0;
+volatile int eepromEgtMaxAddress = 0;
+volatile int eepromEgtWarnAddress = 0;
+volatile int eepromEgtWarnLowAddress = 0;
+volatile int eepromEgtInvertedAddress = 0;
+volatile int eepromEgtCelciusAddress = 0;
+#endif
+
+#ifdef INCLUDE_BOOST
+// EGT METER
+volatile int eepromBoostLowerAddress = 0;
+volatile int eepromBoostUpperAddress = 0;
+volatile int eepromBoostMinAddress = 0;
+volatile int eepromBoostMaxAddress = 0;
+volatile int eepromBoostWarnAddress = 0;
+volatile int eepromBoostWarnLowAddress = 0;
+volatile int eepromBoostInvertedAddress = 0;
+#endif
 
 // debug addresses
 volatile int eepromDebugSpeedoAddress = 0;
@@ -329,29 +365,77 @@ volatile int voltUpper = 1023;
 volatile int voltMin = 0;      // 0 volts
 volatile int voltMax = 16;		 // 16 volts
 volatile int voltWarn = 11;		 // 11 volts warn when below this
-volatile byte voltWarnLow = 1;  // warn for volts low
+volatile bool voltWarnLow = true;  // warn for volts low
 volatile bool voltColonOn = false;
-volatile int oilLower = 0;
-volatile int oilUpper = 1023;
+
+
+volatile int oilLower = 140;    // suits Ford 73-10R sender (max-min)
+volatile int oilUpper = 430;
 volatile int oilMin = 0;       // 0 psi
-volatile int oilMax = 200;		 // 200 psi
-volatile int oilWarn = 20;		 // 20 psi warn when below this
-volatile byte oilWarnLow = 1;   // warn for oil pressure low
+volatile int oilMax = 100;		 // 200 psi
+volatile int oilWarn = 50;		 // 20 psi warn when below this
+volatile bool oilWarnLow = true;   // warn for oil pressure low
 volatile bool oilColonOn = false;
+volatile bool oilInverted = true;    // true = sensor is high resistance at low pressure.
+
+
 volatile int tempLower = 0;
 volatile int tempUpper = 1023;
 volatile int tempMin = 0;      // 0deg C
 volatile int tempMax = 150;		 // 150deg C
 volatile int tempWarn = 100;	 // 100deg C warn when above this
-volatile byte tempWarnLow = 0;  // warn for temp high
+volatile int tempFanOneOn = 95;   // 95deg C turn fan on
+volatile int tempFanOneOff = 90;  // 90deg C turn fan off must be less than tempFanOn
+volatile int tempFanTwoOn = 95;   // 95deg C turn fan on
+volatile int tempFanTwoOff = 90;  // 90deg C turn fan off must be less than tempFanOn
+volatile bool tempWarnLow = false;  // warn for temp high
+volatile bool tempCelcius = true;
 volatile bool tempColonOn = false;
-volatile int fuelLower = 0;
-volatile int fuelUpper = 1023;
+volatile bool tempInverted = true;    // true = sensor is high resistance at low temperature.
+
+
+volatile int fuelLower = 110;   // suits 10R - 180R (empty - full) sender
+volatile int fuelUpper = 580;
 volatile int fuelMin = 0;      // 0%
 volatile int fuelMax = 100;    // 100%
 volatile int fuelWarn = 5;     // warn when below this
-volatile byte fuelWarnLow = 1; // warn for fuel low
+volatile bool fuelWarnLow = true; // warn for fuel low
 volatile bool fuelColonOn = false;
+volatile bool fuelInverted = true;    // true = sensor is high resistance at low level.
+
+#ifdef INCLUDE_EGT
+volatile int egtLower = 0;
+volatile int egtUpper = 1023;
+volatile int egtMin = 0;
+volatile int egtMax = 1200;
+volatile int egtWarn = 600;       // warn when above this
+volatile bool egtWarnLow = false; // warn for egt high
+volatile bool egtCelcius = true;
+volatile bool egtColonOn = false;
+volatile bool egtInverted = false;    // true = sensor is high resistance at low level.
+#endif
+
+#ifdef INCLUDE_BOOST
+volatile int boostLower = 0;
+volatile int boostUpper = 1023;
+volatile int boostMin = -10;
+volatile int boostMax = 45;
+volatile int boostWarn = 40;       // warn when above this
+volatile bool boostWarnLow = false; // warn for egt high
+volatile bool boostColonOn = false;
+volatile bool boostInverted = false;    // true = sensor is high resistance at low level.
+#endif
+
+
+volatile byte debugAll = 0;
+volatile byte debugSpeedo = 0;
+volatile byte debugTacho = 0;
+volatile byte debugGauges = 0;
+
+volatile byte demoAll = 0;
+volatile byte demoSpeedo = 0;
+volatile byte demoTacho = 0;
+volatile byte demoGauges = 0;
 
 
 
